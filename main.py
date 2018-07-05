@@ -4,8 +4,12 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token, verify_jwt_in_request,
     get_jwt_identity, get_jwt_claims
 )
+from nmoscommon.webapi import *
 
-app = Flask(__name__)
+#app = Flask(__name__)
+
+web_api = WebAPI()
+app = web_api.app
 
 # Setup the Flask-JWT-Extended extension
 #app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
@@ -85,7 +89,7 @@ def login():
 
     # Identity can be any data that is json serializable
     access_token = create_access_token(identity=user)
-    return jsonify(access_token=access_token), 200
+    return jsonify({"access_token": access_token}), 200
 
 # Protect a view with jwt_required, which requires a valid access token
 # in the request to access.
@@ -119,7 +123,7 @@ def role_required(roles):
 @role_required(['dev', 'admin'])
 def protected2():
     current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+    return jsonify({"logged_in_as": current_user}), 200
 
 
 if __name__ == '__main__':
