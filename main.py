@@ -13,6 +13,8 @@ app = web_api.app
 
 # Setup the Flask-JWT-Extended extension
 #app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this!
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
+app.config['JWT_IDENTITY_CLAIM'] = 'role'
 app.config['JWT_ALGORITHM'] = 'RS256'
 app.config['JWT_PRIVATE_KEY'] = '''
 -----BEGIN RSA PRIVATE KEY-----
@@ -47,12 +49,12 @@ class UserObject:
         self.roles = roles
 
 @jwt.user_claims_loader
-def add_claims_to_access_token(user):
-    return {'roles': user.roles}
+def add_claims_to_access_token(role):
+    return {'roles': role}
 
-@jwt.user_identity_loader
-def user_identity_lookup(user):
-    return user.username
+# @jwt.user_identity_loader
+# def user_identity_lookup(user):
+#     return user.username
 
 # @jwt.claims_verification_loader
 # def verify_claims(custom_claims):
@@ -88,7 +90,7 @@ def login():
         return jsonify({"msg": "Missing role parameter"}), 400
 
     # Identity can be any data that is json serializable
-    access_token = create_access_token(identity=user)
+    access_token = create_access_token(identity=role)
     return jsonify({"access_token": access_token}), 200
 
 # Protect a view with jwt_required, which requires a valid access token
