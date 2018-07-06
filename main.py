@@ -48,9 +48,9 @@ class UserObject:
         self.username = username
         self.roles = roles
 
-@jwt.user_claims_loader
-def add_claims_to_access_token(role):
-    return {'roles': role}
+# @jwt.user_claims_loader
+# def add_claims_to_access_token(role):
+#     return {'roles': role}
 
 # @jwt.user_identity_loader
 # def user_identity_lookup(user):
