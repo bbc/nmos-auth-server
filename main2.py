@@ -15,7 +15,7 @@ web_api = WebAPI()
 app = web_api.app
 
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
-app.config['JWT_IDENTITY_CLAIM'] = 'role'
+app.config['JWT_IDENTITY_CLAIM'] = 'client'
 app.config['JWT_ALGORITHM'] = 'RS256'
 app.config['JWT_PRIVATE_KEY'] = '''
 -----BEGIN RSA PRIVATE KEY-----
@@ -42,6 +42,16 @@ HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D
 o2kQ+X5xK9cipRgEKwIDAQAB
 -----END PUBLIC KEY-----
 '''
+
+def print_public_key(cert):
+    from OpenSSL import crypto
+
+    #cert is the encrypted certificate in this format -----BEGIN -----END
+    crtObj = crypto.load_certificate(crypto.FILETYPE_PEM, cert)
+    pubKeyObject = crtObj.get_pubkey()
+    pubKeyString = crypto.dump_publickey(crypto.FILETYPE_PEM,pubKeyObject)
+    print pubKeyString
+    return pubKeyString
 
 jwt = JWTManager(app)
 
@@ -87,7 +97,7 @@ def role_required(roles):
         def wrapper(*args, **kwargs):
             print "start"
             jwt_data = get_jwt()
-            if jwt_data['role'] in roles:
+            if jwt_data['client'] == "controller" and jwt_data['scope'] == control:
                 return func(*args, **kwargs)
             return (400, jsonify({"msg": "Please Do One!"}))
         return wrapper
