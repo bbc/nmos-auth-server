@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request, current_app
 from flask_jwt_simple import (
     JWTManager, jwt_required, create_jwt, get_jwt, get_jwt_identity
 )
-from flask_jwt_simple.view_decorators import _decode_jwt_from_headers
+
 from nmoscommon.webapi import *
 try:
     from flask import _app_ctx_stack as ctx_stack
