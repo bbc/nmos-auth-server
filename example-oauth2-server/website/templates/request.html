@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<form action="/request_token" method="post">
+  <label>
+    <input type="text" name="client_id" placeholder="client_id" value="{{client.client_id}}" readonly="readonly"><br>
+  </label>
+  <label>
+    <input type="text" name="client_secret" placeholder="client_secret" value="{{client.client_secret}}" readonly="readonly"><br>
+  </label>
+  <label>
+    <input type="text" name="username" placeholder="username"><br>
+  </label>
+  <label>
+    <input type="text" name="password" placeholder="password"><br>
+  </label>
+  <label>
+    <input type="text" name="scope" placeholder="scope"><br>
+  </label>
+  <label>
+    <button type="submit">Request Token</button>
+  </label>
+</form>
+
+{% if token %}
+  This is your Token: <br>
+  {{ token|wordwrap(25) }}
+{% endif %}
+
+{% endblock %}

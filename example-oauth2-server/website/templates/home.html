@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if user %}
+    <div>Logged in as <strong>{{user}}</strong> (<a href="{{ url_for('.logout') }}">Log Out</a>)</div><br>
+
+    {% for client in clients %}
+      {% for info, data in client.client_info.items() %}
+        {{ info|string }} : {{ data|string }}<br>
+      {% endfor %}
+      {% for info, data in client.client_metadata.items() %}<br>
+        {{ info|string }} : {{ data|string }}
+      {% endfor %}
+    {% endfor %}
+
+    <hr>
+
+    <br><a href="{{ url_for('.create_client') }}">Create Client</a><br>
+
+    <br><a href="{{ url_for('.request_token') }}">Request Token</a>
+
+  {% else %}
+    <form action="" method="post">
+      <input type="text" name="username" placeholder="username">
+      <button type="submit">Login / Signup</button>
+    </form>
+  {% endif %}
+{% endblock %}

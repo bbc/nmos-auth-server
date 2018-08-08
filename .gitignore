@@ -3,3 +3,6 @@
 .venv
 env/
 venv/
+
+# build artefacts
+*.py[cod]
