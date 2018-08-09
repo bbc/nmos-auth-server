@@ -26,7 +26,11 @@ def add_numbers():
 
 @bp.route('/index')
 def index():
-    return render_template('index.html')
+    user = current_user()
+    if not user:
+        return redirect('/')
+    client = OAuth2Client.query.filter_by(user_id=user.id).first() #TODO - specific client
+    return render_template('index.html', client=client)
 
 
 @bp.route('/', methods=('GET', 'POST'))
@@ -143,4 +147,4 @@ o2kQ+X5xK9cipRgEKwIDAQAB
 @require_oauth('profile')
 def api_me():
     user = current_token.user
-    return jsonify(id=user.id, username=user.username)
+    return jsonify(id=user.id, username=user.username, simon="is the best")
