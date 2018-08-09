@@ -19,7 +19,8 @@ class User(db.Model):
     def get_user_id(self):
         return self.id
 
-    def check_password(self, password): #TODO - add password field to schema and validation
+    # TODO - add password field to schema and validation
+    def check_password(self, password):
         return password == 'valid'
 
 

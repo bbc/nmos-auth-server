@@ -8,7 +8,7 @@ app = create_app({
     'SQLALCHEMY_DATABASE_URI': 'sqlite:///db.sqlite',
     'OAUTH2_JWT_ENABLED': True,
     'OAUTH2_JWT_ISS': 'https://oauth.rd.bbc.co.uk',
-    'OAUTH2_JWT_ALG':'RS256',
+    'OAUTH2_JWT_ALG': 'RS256',
     'OAUTH2_JWT_EXP': 360,
     'OAUTH2_JWT_KEY': '''
 -----BEGIN RSA PRIVATE KEY-----
@@ -34,6 +34,7 @@ FaFp+DyAe+b4nDwuJaW2LURbr8AEZga7oQj0uYxcYw==
 def initdb():
     from website.models import db
     db.create_all()
+
 
 @app.cli.command()
 def dropdb():

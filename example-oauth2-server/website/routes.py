@@ -1,5 +1,5 @@
 from flask import Blueprint, request, session
-from flask import render_template, redirect, jsonify, url_for
+from flask import render_template, redirect, jsonify
 import requests
 from requests.auth import HTTPBasicAuth
 from werkzeug.security import gen_salt
@@ -18,18 +18,21 @@ def current_user():
         return User.query.get(uid)
     return None
 
+
 @bp.route('/_add_numbers')
 def add_numbers():
     a = request.args.get('a', 0, type=int)
     b = request.args.get('b', 0, type=int)
     return jsonify(result=a + b)
 
+
 @bp.route('/index')
 def index():
     user = current_user()
     if not user:
         return redirect('/')
-    client = OAuth2Client.query.filter_by(user_id=user.id).first() #TODO - specific client
+    # TODO - specific client
+    client = OAuth2Client.query.filter_by(user_id=user.id).first()
     return render_template('index.html', client=client)
 
 
@@ -77,12 +80,13 @@ def create_client():
     return redirect('/')
 
 
-@bp.route('/request_token', methods=['GET','POST'])
+@bp.route('/request_token', methods=['GET', 'POST'])
 def request_token():
     user = current_user()
     if not user:
         return redirect('/')
-    client = OAuth2Client.query.filter_by(user_id=user.id).first() #TODO - specific client
+    # TODO - specific client
+    client = OAuth2Client.query.filter_by(user_id=user.id).first()
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -91,8 +95,13 @@ def request_token():
         client_id = client.client_id
         client_secret = client.client_secret
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        data = {'scope' : scope, 'grant_type' : grant_type, 'username' : username, 'password' : password}
-        resp = requests.post('http://127.0.0.1:5000/oauth/token', auth=HTTPBasicAuth(client_id, client_secret), headers = headers, data = data).json()
+        data = {'scope': scope, 'grant_type': grant_type,
+                'username': username, 'password': password}
+        resp = requests.post(
+                'http://127.0.0.1:5000/oauth/token',
+                auth=HTTPBasicAuth(client_id, client_secret),
+                headers=headers,
+                data=data).json()
         print resp
         if 'access_token' in resp.keys():
             session['token'] = resp['access_token']
@@ -100,7 +109,8 @@ def request_token():
         pass
     else:
         session['token'] = None
-    return render_template('request.html', user=user, client=client, token = session['token'])
+    return render_template('request.html', user=user,
+                           client=client, token=session['token'])
 
 
 @bp.route('/oauth/authorize', methods=['GET', 'POST'])
@@ -131,7 +141,8 @@ def issue_token():
 def revoke_token():
     return authorization.create_endpoint_response('revocation')
 
-#route for certificate with public key
+
+# route for certificate with public key
 @bp.route('/certs', methods=['GET'])
 def get_cert():
     return '''
@@ -142,6 +153,7 @@ HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D
 o2kQ+X5xK9cipRgEKwIDAQAB
 -----END PUBLIC KEY-----
 '''
+
 
 @bp.route('/api/me')
 @require_oauth('profile')
