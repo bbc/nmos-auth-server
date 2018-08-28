@@ -159,4 +159,4 @@ o2kQ+X5xK9cipRgEKwIDAQAB
 @require_oauth('profile')
 def api_me():
     user = current_token.user
-    return jsonify(id=user.id, username=user.username, simon="is the best")
+    return jsonify(id=user.id, username=user.username)
