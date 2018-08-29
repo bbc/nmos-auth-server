@@ -3,6 +3,7 @@ from flask import Flask
 from .models import db
 from .oauth2 import config_oauth
 from .routes import bp
+from flask_cors import CORS
 
 
 def create_app(config=None):
@@ -30,3 +31,4 @@ def setup_app(app):
     db.init_app(app)
     config_oauth(app)
     app.register_blueprint(bp, url_prefix='')
+    CORS(app, origins=["http://localhost:5000", "http://127.0.0.1:5000"])

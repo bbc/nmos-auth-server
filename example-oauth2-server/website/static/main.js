@@ -2,30 +2,34 @@ $(function getToken() {
   console.log("Inside Function");
   $("#token").click(function(){
     var requestPayload = {
-                'grant_type': 'password',
-                'username': document.getElementById("username").value,
-                'password': document.getElementById("password").value,
-                'scope': document.getElementById("scope").value
+      'grant_type': 'password',
+      'username': document.getElementById("username").value,
+      'password': document.getElementById("password").value,
+      'scope': document.getElementById("scope").value
     };
+    var username = document.getElementById("client_id").value;
+    var password = document.getElementById("client_secret").value;
     $.ajax({
-      url: 'http://127.0.0.1:5000/oauth/token',
+      url: 'http://localhost:5000/oauth/token',
       type: 'POST',
       data: requestPayload,
-      dataType: 'json',
-      username: 'mpLdzPAchfON4qVCz6GO3o6S',
-      password: 'zIEYbZYMvu1XNT1bBurWS1tg0n58j91v5pchfBXOf9iAdzO3',
-      //contentType: 'x-www-form-urlencoded',
-      error: function (XMLHttpRequest, textStatus, errorThrown) {
-          alert('Error: ' + errorThrown);
-          console.log(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
-          return false;
+      crossDomain: true,
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader ("Authorization", "Basic " + btoa(username + ":" + password));
       },
+      //contentType: 'x-www-form-urlencoded',
+      //dataType: 'json'
       success: function(data) {
-        accessToken = data.access_token;
-        alert('Success!\r\nAccess Token:\r' + accessToken + '\r\n');
         console.log('Success!');
+        var accessToken = data.access_token;
         localStorage.setItem('token', accessToken);
+        alert('Success!\nAccess Token:\n' + accessToken);
         return data;
+      },
+      error: function (XMLHttpRequest, textStatus, errorThrown) {
+          console.log(XMLHttpRequest.status + " " + XMLHttpRequest.statusText);
+          alert('Error: ' + errorThrown);
+          return false;
       }
     });
   });
@@ -44,15 +48,16 @@ $(function getResource() {
       // Fetch the stored token from localStorage and set in the header
       beforeSend: function (xhr) { xhr.setRequestHeader ("Authorization", "Bearer " + localStorage.getItem('token')); },
       success: function (result) {
+        console.log('Success!');
         var returnResult = JSON.stringify(result);
-        alert('Success!\r\n' + returnResult);
         document.getElementById('callResults').innerHTML = returnResult;
+        alert('Success!\n' + returnResult);
         return result;
       },
       error: function (XMLHttpRequest, textStatus, errorThrown) {
-          alert('Error: ' + errorThrown);
-          console.log(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
-          return false;
+        console.log(XMLHttpRequest.status + ' ' + XMLHttpRequest.statusText);
+        alert('Error: ' + errorThrown);
+        return false;
       }
     });
   });
