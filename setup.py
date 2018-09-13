@@ -11,14 +11,14 @@ from setuptools import setup
 import os
 
 # Basic metadata
-name = "TEMPLATE"
+name = "rd_oauth2_server"
 version = "0.0.0"
-description = "A template on which to base future python libraries"
-url = 'https://github.com/bbc/rd-apmm-python-lib-template'
-author = 'James Weaver'
-author_email = 'james.barrett@bbc.co.uk'
-license = ''
-long_description = description
+description = "OAuth2 Server Implementation"
+url = 'https://github.com/bbc/rd-apmm-python-oauth'
+author = 'Danny Meloy'
+author_email = 'danny.meloy@bbc.co.uk'
+license = 'GNU Affero General Public License '
+long_description = "OAuth Server Implementation to produce JWTs for API Access"
 
 
 def is_package(path):
@@ -48,13 +48,13 @@ package_names = packages.keys()
 
 # This is where you list packages which are required
 packages_required = [
-    "six"
+    "six",
+    "Flask",
+    "Flask-SQLAlchemy",
+    "Authlib>=0.6",
+    "Flask-Cors"
 ]
 
-# This is where you list locations for packages not
-# available from pip. Each entry must be of the form:
-#  <url>#egg=<pkgname>=<version>
-# eg. https://github.com/bbc/rd-apmm-python-lib-nmos-common#egg=nmoscommon=0.1.0
 deps_required = []
 
 setup(name=name,

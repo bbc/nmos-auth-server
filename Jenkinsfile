@@ -78,24 +78,24 @@ pipeline {
                                 }
                             }
                         }
-                        stage ("Python 3 Unit Tests") {
-                            steps {
-                                script {
-                                    env.py3_result = "FAILURE"
-                                }
-                                bbcGithubNotify(context: "tests/py3", status: "PENDING")
-                                // Use a workdirectory in /tmp to avoid shebang length limitation
-                                sh 'tox -e py3 --recreate --workdir /tmp/$(basename ${WORKSPACE})/tox-py3'
-                                script {
-                                    env.py3_result = "SUCCESS" // This will only run if the sh above succeeded
-                                }
-                            }
-                            post {
-                                always {
-                                    bbcGithubNotify(context: "tests/py3", status: env.py3_result)
-                                }
-                            }
-                        }
+                        // stage ("Python 3 Unit Tests") {
+                        //     steps {
+                        //         script {
+                        //             env.py3_result = "FAILURE"
+                        //         }
+                        //         bbcGithubNotify(context: "tests/py3", status: "PENDING")
+                        //         // Use a workdirectory in /tmp to avoid shebang length limitation
+                        //         sh 'tox -e py3 --recreate --workdir /tmp/$(basename ${WORKSPACE})/tox-py3'
+                        //         script {
+                        //             env.py3_result = "SUCCESS" // This will only run if the sh above succeeded
+                        //         }
+                        //     }
+                        //     post {
+                        //         always {
+                        //             bbcGithubNotify(context: "tests/py3", status: env.py3_result)
+                        //         }
+                        //     }
+                        // }
                     }
                 }
             }

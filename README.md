@@ -2,22 +2,23 @@
 # RD-APMM-PYTHON-OAUTH-SECURITY
 <!---/NAME--->
 
-This is an example of a python package which can be built and modified
-as needed.
+A Flask-based implementation of an OAuth2 Authorisation Server
+based on [RFC 6749](https://tools.ietf.org/html/rfc6749) that produces
+access tokens in the form of [JSON Web Tokens](https://tools.ietf.org/html/rfc7519)
 
-<!---TEMPLATE_ONLY--->
-In addition the script `create_new_repo.py` can be run and will create
-a new copy of this template set up with the module name specified.
 
-The new repo created by this command doesn't have the
-`create_new_repo.py` script, and should only have one commit.
-<!---/TEMPLATE_ONLY--->
+## Get Started
+
+Please Check the `README.md` in the `oauth2_server` directory for
+instruction on starting the OAuth2 Server
+
 
 ## Basic Use of this Project
 
 A Makefile has been provided which provides easy access to several
-important methods we want to do pretty often:
+important methods for testing:
 
+```
 > make source  - Create source package
 > make install - Install on local system (only during development)
 > make clean   - Get rid of scratch and byte files
@@ -26,6 +27,7 @@ important methods we want to do pretty often:
 > make rpm     - Create rpm package
 > make wheel   - Create whl package
 > make egg     - Create egg package
+```
 
 I'd recommend against using the `make install` command in general:
 much better to run:

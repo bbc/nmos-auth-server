@@ -1,42 +1,54 @@
-from website.app import create_app
+import os
+from flask import Flask
+from flask_cors import CORS
+from .models import db
+from .oauth2 import config_oauth
+from .routes import bp
 
 
-app = create_app({
-    'SECRET_KEY': 'secret',
-    'OAUTH2_REFRESH_TOKEN_GENERATOR': True,
-    'SQLALCHEMY_TRACK_MODIFICATIONS': False,
-    'SQLALCHEMY_DATABASE_URI': 'sqlite:///db.sqlite',
-    'OAUTH2_JWT_ENABLED': True,
-    'OAUTH2_JWT_ISS': 'https://oauth.rd.bbc.co.uk',
-    'OAUTH2_JWT_ALG': 'RS256',
-    'OAUTH2_JWT_EXP': 360,
-    'OAUTH2_JWT_KEY': '''
------BEGIN RSA PRIVATE KEY-----
-MIICWwIBAAKBgQDdlatRjRjogo3WojgGHFHYLugdUWAY9iR3fy4arWNA1KoS8kVw
-33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQsHUfQrSDv+MuSUMAe8jzKE4qW
-+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5Do2kQ+X5xK9cipRgEKwIDAQAB
-AoGAD+onAtVye4ic7VR7V50DF9bOnwRwNXrARcDhq9LWNRrRGElESYYTQ6EbatXS
-3MCyjjX2eMhu/aF5YhXBwkppwxg+EOmXeh+MzL7Zh284OuPbkglAaGhV9bb6/5Cp
-uGb1esyPbYW+Ty2PC0GSZfIXkXs76jXAu9TOBvD0ybc2YlkCQQDywg2R/7t3Q2OE
-2+yo382CLJdrlSLVROWKwb4tb2PjhY4XAwV8d1vy0RenxTB+K5Mu57uVSTHtrMK0
-GAtFr833AkEA6avx20OHo61Yela/4k5kQDtjEf1N0LfI+BcWZtxsS3jDM3i1Hp0K
-Su5rsCPb8acJo5RO26gGVrfAsDcIXKC+bQJAZZ2XIpsitLyPpuiMOvBbzPavd4gY
-6Z8KWrfYzJoI/Q9FuBo6rKwl4BFoToD7WIUS+hpkagwWiz+6zLoX1dbOZwJACmH5
-fSSjAkLRi54PKJ8TFUeOP15h9sQzydI8zJU+upvDEKZsZc/UhT/SySDOxQ4G/523
-Y0sz/OZtSWcol/UMgQJALesy++GdvoIDLfJX5GBQpuFgFenRiRDabxrE9MNUZ2aP
-FaFp+DyAe+b4nDwuJaW2LURbr8AEZga7oQj0uYxcYw==
------END RSA PRIVATE KEY-----
-'''
-    })
+def create_app(confClass='BaseConfig', config=None):
+    app = Flask(__name__)
+
+    # load default configuration
+    app.config.from_object('oauth2_server.settings.' + confClass)
+
+    # load environment configuration
+    if 'WEBSITE_CONF' in os.environ:
+        app.config.from_envvar('WEBSITE_CONF')
+
+    # load app specified configuration
+    if config is not None:
+        if isinstance(config, dict):
+            app.config.update(config)
+        elif config.endswith('.py'):
+            app.config.from_pyfile(config)
+
+    setup_app(app)
+    return app
 
 
-@app.cli.command()
-def initdb():
-    from website.models import db
+def setup_app(app):
+    db.init_app(app)
+    config_oauth(app)
+    app.register_blueprint(bp, url_prefix='')
+    CORS(app, origins=["http://localhost:5000", "http://127.0.0.1:5000"])
+
+
+app = create_app('BaseConfig')
+
+
+def init_db():
+    from .models import db
     db.create_all()
 
 
 @app.cli.command()
+def initdb():
+    init_db()
+
+
+@app.cli.command()
 def dropdb():
-    from website.models import db
+    from .models import db
+    db.session.remove()
     db.drop_all()

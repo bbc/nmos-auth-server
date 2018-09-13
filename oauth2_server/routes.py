@@ -8,7 +8,6 @@ from authlib.specs.rfc6749 import OAuth2Error
 from .models import db, User, OAuth2Client
 from .oauth2 import authorization, require_oauth
 
-
 bp = Blueprint(__name__, 'home')
 
 
@@ -38,6 +37,7 @@ def home():
             user = User(username=username)
             db.session.add(user)
             db.session.commit()
+            # return render_template("404.html")
         session['id'] = user.id
         return redirect('/')
     user = current_user()
@@ -95,7 +95,7 @@ def request_token():
                 auth=HTTPBasicAuth(client_id, client_secret),
                 headers=headers,
                 data=data).json()
-        print resp
+        # print resp
         if 'access_token' in resp.keys():
             session['token'] = resp['access_token']
     if 'token' in session.keys():
