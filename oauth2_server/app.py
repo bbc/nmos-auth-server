@@ -1,17 +1,16 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from .models import db
-from .oauth2 import config_oauth
-from .routes import bp
+from models import db
+from oauth2 import config_oauth
+from routes import bp
 
 
 def create_app(confClass='BaseConfig', config=None):
     app = Flask(__name__)
 
-    # load default configuration
+    # load configuration
     app.config.from_object('oauth2_server.settings.' + confClass)
-
     # load environment configuration
     if 'WEBSITE_CONF' in os.environ:
         app.config.from_envvar('WEBSITE_CONF')
@@ -47,8 +46,12 @@ def initdb():
     init_db()
 
 
-@app.cli.command()
-def dropdb():
+def drop_db():
     from .models import db
     db.session.remove()
     db.drop_all()
+
+
+@app.cli.command()
+def dropdb():
+    drop_db()

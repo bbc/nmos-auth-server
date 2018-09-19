@@ -5,8 +5,8 @@ from requests.auth import HTTPBasicAuth
 from werkzeug.security import gen_salt
 from authlib.flask.oauth2 import current_token
 from authlib.specs.rfc6749 import OAuth2Error
-from .models import db, User, OAuth2Client
-from .oauth2 import authorization, require_oauth
+from models import db, User, OAuth2Client
+from oauth2 import authorization, require_oauth
 
 bp = Blueprint(__name__, 'home')
 

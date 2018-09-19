@@ -7,8 +7,8 @@ from authlib.flask.oauth2.sqla import (
 )
 from authlib.specs.rfc6749 import grants
 from werkzeug.security import gen_salt
-from .models import db, User
-from .models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+from models import db, User
+from models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 from authlib.specs.rfc7519 import jwt
 import datetime
 
@@ -78,10 +78,11 @@ def gen_access_token(client, grant_type, user, scope):
         }
         payload = {
             'iat': current_time,
-            'exp': current_time + datetime.timedelta(days=0, seconds=5),
+            'exp': current_time + datetime.timedelta(days=0, seconds=30),
             'nbf': current_time,
-            'sub': "steve",
-            'scope': scope
+            'sub': "api access",
+            'scope': scope,
+            'iss': client.client_id
         }
         key = '''
 -----BEGIN RSA PRIVATE KEY-----
