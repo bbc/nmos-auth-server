@@ -25,18 +25,8 @@ def error_handler(error):
     status = e[0]
     body = e[1]
     headers = e[2]
-    print error.message
+    print(error.message)
     return (jsonify(body), status, headers)
-
-
-@bp.route('/fetch_token')
-def fetch_token():
-    user = current_user()
-    if not user:
-        return redirect('/')
-    # TODO - specific client
-    client = OAuth2Client.query.filter_by(user_id=user.id).first()
-    return render_template('fetch_token.html', client=client)
 
 
 @bp.route('/', methods=('GET', 'POST'))
@@ -44,7 +34,6 @@ def home():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        print username, password
         if not username or not password:
             message = "Please Fill In Both Username and Password."
             return render_template('home.html', user=None, clients=None, message=message)
@@ -87,12 +76,6 @@ def signup():
         return redirect('/')
 
 
-@bp.route('/logout')
-def logout():
-    del session['id']
-    return redirect('/')
-
-
 @bp.route('/create_client', methods=('GET', 'POST'))
 def create_client():
     user = current_user()
@@ -110,6 +93,16 @@ def create_client():
     db.session.add(client)
     db.session.commit()
     return redirect('/')
+
+
+@bp.route('/fetch_token')
+def fetch_token():
+    user = current_user()
+    if not user:
+        return redirect('/')
+    # TODO - specific client
+    client = OAuth2Client.query.filter_by(user_id=user.id).first()
+    return render_template('fetch_token.html', client=client)
 
 
 @bp.route('/request_token', methods=['GET', 'POST'])
@@ -183,3 +176,9 @@ def get_cert():
     except OSError as e:
         print("Error: " + e + "\nFile at " + abs_pubkey_path + "doesn't exist")
         raise
+
+
+@bp.route('/logout')
+def logout():
+    del session['id']
+    return redirect('/')

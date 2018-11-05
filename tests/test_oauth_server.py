@@ -9,6 +9,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 import unittest
+import re
 # from mock import Mock
 # from mock import patch
 
@@ -33,9 +34,16 @@ class FlaskTestCase(unittest.TestCase):
         with self.app.app_context():
             drop_all()
 
-    def login(self, username):
-        return self.client.post('/', data=dict(
-            username=username), follow_redirects=True)
+    def signup(self, username, password, is04, is05):
+        return self.client.post('/signup',
+                                data=dict(username=username, password=password,
+                                          is04=is04, is05=is05),
+                                follow_redirects=True)
+
+    def login(self, username, password):
+        return self.client.post('/',
+                                data=dict(username=username, password=password),
+                                follow_redirects=True)
 
     def logout(self):
         return self.client.get('/logout', follow_redirects=True)
@@ -45,11 +53,20 @@ class FlaskTestCase(unittest.TestCase):
             rv = c.get('/')
             assert(b"OAuth2 Server" in rv.data)
 
-    def test_login_logout(self):
-        rv = self.login('dannym')
-        assert b'Logged in as' in rv.data
+    def test_signup_logout_login(self):
+        user = 'test'
+        password = 'testing'
+
+        rv = self.signup(user, password, 'read', 'write')
+        print(rv.data)
+        assert('Logged in as' in rv.data)
+
         rv = self.logout()
-        assert b'Login / Signup' in rv.data
+        assert(b'Login / Signup' in rv.data)
+
+        rv = self.login(user, password)
+        regex = r'Logged in as.*' + user
+        assert(re.search(regex, rv.data))
 
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ from authlib.flask.oauth2.sqla import (
     OAuth2TokenMixin,
 )
 
-__all__ = ['User', 'OAuth2Client', 'OAuth2AuthorizationCode', 'OAuth2Token', 'AccessRights']
+__all__ = ['db', 'User', 'OAuth2Client', 'OAuth2AuthorizationCode', 'OAuth2Token', 'AccessRights']
 
 db = SQLAlchemy()
 

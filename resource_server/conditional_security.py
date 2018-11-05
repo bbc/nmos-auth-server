@@ -1,19 +1,14 @@
 import requests
 from requests import ConnectionError
 from functools import wraps
-from authlib.specs.rfc7519 import jwt
 from flask import request
-from authlib.specs.rfc7519.claims import JWTClaims
 
-from authlib.common.errors import AuthlibHTTPError
-from authlib.specs.rfc7519.errors import ExpiredTokenError
-from authlib.flask.error import raise_http_exception
+from authlib.specs.rfc7519 import jwt
+from authlib.specs.rfc7519.claims import JWTClaims
 from .claims_options import IS_XX_CLAIMS
-from authlib.specs.rfc6749.errors import *
-from authlib.specs.rfc6750.errors import InvalidTokenError
 from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
     UnsupportedTokenTypeError
-from authlib.specs.rfc7519.errors import InvalidClaimError, MissingClaimError
+# from authlib.specs.rfc7519.errors import InvalidClaimError, MissingClaimError
 
 
 class JWTClaimsValidator(JWTClaims):
