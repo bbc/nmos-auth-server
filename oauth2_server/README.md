@@ -31,10 +31,9 @@ Set Flask and Authlib environment variables:
 Create Database and run the development server:
 
     $ flask initdb
-    $ flask run
+    $ flask run #use python app.py to run the server on the network
 
-Now, you can open your browser with `http://127.0.0.1:5000/`, login with any
-name you want.
+Now, you can open your browser with `http://127.0.0.1:5000/`. Click on the `sign-in` link to create an account. 
 
 Before testing, we need to create a client:
 
@@ -45,7 +44,7 @@ have enabled `password` grant types, let's try:
 
     $ curl -u ${client_id}:${client_secret} -XPOST http://127.0.0.1:5000/oauth/token -F grant_type=password -F username=${username} -F password=valid -F scope=profile
 
-Because this is an example, every user's password is `valid`. For now, you
+Use the username and password you used when signing up. For now, you
 can read the source in example or follow the long boring tutorial below.
 
 **IMPORTANT**: To test implicit grant, you need to `token_endpoint_auth_method` to `none`.
@@ -61,12 +60,15 @@ Here is our Flask website structure:
 
 ```
 app.py         --- FLASK_APP
-website/
+oath2_server/
   app.py       --- Flask App Factory
   models.py    --- SQLAlchemy Models
   oauth2.py    --- OAuth 2.0 Provider Configuration
   routes.py    --- Routes views
+  token.py     --- Contains Token Generator class
   templates/
+resource_server/
+  conditionalSecurity ---decorator for endpoints
 ```
 
 ### Installation
@@ -78,6 +80,7 @@ dependencies into `requirements.txt`:
 Flask
 Flask-SQLAlchemy
 Authlib
+etc.
 ```
 
 ### Hello World!
@@ -87,7 +90,7 @@ working well.
 
 
 ```python
-# website/routes.py
+# oauth2_server/routes.py
 from Flask import Blueprint
 bp = Blueprint(__name__, 'home')
 
@@ -97,12 +100,14 @@ def home():
 ```
 
 ```python
-# website/app.py
+# oauth2_server/app.py
 from flask import Flask
 
 def create_app(config=None):
     app = Flask(__name__)
-    # load app sepcified configuration
+    # load configuration
+    app.config.from_object('oauth2_server.settings.' + confClass)
+    # load app-specified configuration
     if config is not None:
         if isinstance(config, dict):
             app.config.update(config)
@@ -113,17 +118,12 @@ def create_app(config=None):
 
 ```python
 # app.py
-from website.app import create_app
+from oauth2_server.app import create_app
 
 app = create_app({
     'SECRET_KEY': 'secret',
 })
 ```
-
-
-The "Hello World!" example should run properly:
-
-    $ FLASK_APP=app.py flask run
 
 ## Define Models
 
@@ -137,12 +137,13 @@ Let's create the models in `website/models.py`. We need four models, which are
 - OAuth2Client: the oauth client model
 - OAuth2AuthorizationCode: for `grant_type=code` flow
 - OAuth2Token: save the `access_token` in this model.
+- Access Rights: stores API access rights per user, defined during signup
 
-Check how to define these models in `website/models.py`.
+Check how to define these models in `oauth2_server/models.py`.
 
 ## Implement Grants
 
-The source code is in `website/oauth2.py`. There are four standard grant types:
+The source code is in `oauth2_server/oauth2.py`. There are four standard grant types:
 
 - Authorization Code Grant
 - Implicit Grant
@@ -152,7 +153,7 @@ The source code is in `website/oauth2.py`. There are four standard grant types:
 And Refresh Token is implemented as a Grant in Authlib. You don't have to do
 any thing on Implicit and Client Credentials grants, but there are missing
 methods to be implemented in other grants, checkout the source code in
-`website/oauth2.py`.
+`oauth2_server/oauth2.py`.
 
 
 ## `@require_oauth`
@@ -177,7 +178,10 @@ bearer_cls = create_bearer_token_validator(db.session, OAuth2Token)
 require_oauth.register_token_validator(bearer_cls())
 ```
 
-Check the full implementation in `website/oauth2.py`.
+Check the full implementation in `oauth2_server/oauth2.py`.
+
+**When the Auth Server does not have access to the same databases as the Resource Server,
+use the `ConditionalSecurity` decorator found in `/resource_server/conditional_security`**
 
 
 ## OAuth Routes
@@ -186,7 +190,7 @@ For OAuth server itself, we only need to implement routes for authentication,
 and issuing tokens. Since we have added token revocation feature, we need a
 route for revoking too.
 
-Checkout these routes in `website/routes.py`. Their path begin with `/oauth/`.
+Checkout these routes in `oauth2_server/routes.py`. Their path begin with `/oauth/`.
 
 
 ## Other Routes
@@ -194,11 +198,11 @@ Checkout these routes in `website/routes.py`. Their path begin with `/oauth/`.
 But that is not enough. In this demo, you will need to have some web pages to
 create and manage your OAuth clients. Check that `/create_client` route.
 
-And we have an API route for testing. Check the code of `/api/me`.
+And we have an API route for testing. Check the code in `app.py` using the `/test` endpoint.
 
 ## Finish
 
-Now, init everything in `website/app.py`. And here you go. You've got an OAuth
+Now, initiailise everything in `oauth2_server/app.py`. And there you go. You've got an OAuth
 2.0 server.
 
 Read more information on <https://docs.authlib.org/>.
