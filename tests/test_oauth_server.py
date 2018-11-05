@@ -12,7 +12,8 @@ import unittest
 # from mock import Mock
 # from mock import patch
 
-from oauth2_server.app import create_app, init_db, drop_db
+from oauth2_server.app import create_app
+from oauth2_server.db_utils import create_all, drop_all
 
 
 class FlaskTestCase(unittest.TestCase):
@@ -22,7 +23,7 @@ class FlaskTestCase(unittest.TestCase):
         self.app.testing = True
         self.client = self.app.test_client()
         with self.app.app_context():
-            init_db()
+            create_all()
 
     @classmethod
     def setUpClass(cls):
@@ -30,7 +31,7 @@ class FlaskTestCase(unittest.TestCase):
 
     def tearDown(self):
         with self.app.app_context():
-            drop_db
+            drop_all()
 
     def login(self, username):
         return self.client.post('/', data=dict(

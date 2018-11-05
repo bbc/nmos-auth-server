@@ -2,7 +2,6 @@ import os
 from authlib.specs.rfc7519 import jwt
 import datetime
 from oauth2 import authorization
-from flask import request
 from models import AccessRights
 
 
@@ -25,7 +24,6 @@ class TokenGenerator():
         return access
 
     def get_audience(self, user, scope, access):
-        print user, scope, access
         if access is None:
             return None
         if scope == "is04":
@@ -48,8 +46,6 @@ class TokenGenerator():
         current_time = datetime.datetime.utcnow()
         access = self.get_access_rights(user, scope)
         audience = self.get_audience(user, scope, access)
-
-        print dir(request)
 
         header = {
               "alg": config["jwt_alg"],

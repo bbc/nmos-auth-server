@@ -14,7 +14,7 @@ if __name__ == "__main__":
         status = e[0]
         body = e[1]
         headers = e[2]
-        print error.message
+        print(error.message)
         return (jsonify(body), status, headers)
 
     # The below only runs using python app.py

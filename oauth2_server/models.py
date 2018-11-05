@@ -6,6 +6,8 @@ from authlib.flask.oauth2.sqla import (
     OAuth2TokenMixin,
 )
 
+__all__ = ['User', 'OAuth2Client', 'OAuth2AuthorizationCode', 'OAuth2Token', 'AccessRights']
+
 db = SQLAlchemy()
 
 
@@ -22,7 +24,6 @@ class User(db.Model):
 
     def get_user_id(self):
         return self.id
-
 
     def check_password(self, password):
         return password == self.password

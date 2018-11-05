@@ -2,7 +2,7 @@
 This set of functions must be run from within
 a "flask shell" to give app/database context '''
 
-from models import User, AccessRights, OAuth2Token, OAuth2Client, db
+from models import *
 # from oauth2_server.db_utils import *
 
 # -------------------- INIT ------------------------- #
@@ -45,11 +45,10 @@ def addUser(username, password):
 
 def updateField(table, find_field, find_value, change_field, change_value):
     entry = "table.query.filter_by(" + find_field + "=str(find_value)).first()"
-    print entry
     entry = eval(entry)
     entry.change_field = change_value
     add(entry)
-    print entry
+    return entry
 
 
 # -------------------- REMOVE ------------------------- #
@@ -106,7 +105,7 @@ def printUser(user):
         entry = User.query.get(user)
     elif isinstance(user, str):
         entry = User.query.filter_by(username=user).first()
-    print(entry)
+    return entry
 
 
 def printForeign(table, key, val):  # Key is usually user_id

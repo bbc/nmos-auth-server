@@ -78,8 +78,8 @@ class ConditionalSecurity(object):
                 oauthCerts = requests.get(url)
                 oauthCerts.raise_for_status()  # check request was succcessful
             except ConnectionError as e:
-                print "Error: " + str(e)
-                print "Cannot find Cert Endpoint. Is the Auth Server Running?"
+                print("Error: " + str(e))
+                print("Cannot find Cert Endpoint. Is the Auth Server Running?")
                 raise
             if oauthCerts.headers['content-type'].split(";")[0] == "text/html":
                 try:
