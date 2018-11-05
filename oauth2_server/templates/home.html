@@ -1,29 +1,33 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if user %}
-    <div>Logged in as <strong>{{user}}</strong> (<a href="{{ url_for('.logout') }}">Log Out</a>)</div><br>
+    <div>Logged in as <strong>{{user.username}}</strong> (<a href="{{ url_for('.logout') }}">Log Out</a>)</div><br>
 
     {% for client in clients %}
       {% for info, data in client.client_info.items() %}
         {{ info|string }} : {{ data|string }}<br>
-      {% endfor %}
-      {% for info, data in client.client_metadata.items() %}<br>
-        {{ info|string }} : {{ data|string }}
+      {% endfor %}<br>
+      {% for info, data in client.client_metadata.items() %}
+        {{ info|string }} : {{ data|string }}<br>
       {% endfor %}
     {% endfor %}
 
     <hr>
 
-    <br><a href="{{ url_for('.create_client') }}">Create Client</a><br>
+    <p><a href="{{ url_for('.create_client') }}">Create Client</a></p>
 
-    <br><a href="{{ url_for('.request_token') }}">Request Token</a><br>
+    <p><a href="{{ url_for('.request_token') }}">Request Token</a></p>
 
-    <br><a href="{{ url_for('.index') }}">Request Client-side Token</a>
+    <p><a href="{{ url_for('.fetch_token') }}">Request Client-side Token</a></p>
 
   {% else %}
     <form action="" method="post">
-      <input type="text" name="username" placeholder="username">
+      <p><input type="text" name="username" placeholder="username"></p>
+      <p><input type="text" name="password"  placeholder="password"></p>
       <button type="submit">Login / Signup</button>
     </form>
+    <p><a href="{{ url_for('.signup') }}">Signup</a></p>
+
+    <div><p>{{ message }}</p></div>
   {% endif %}
 {% endblock %}

@@ -7,7 +7,7 @@ from routes import bp
 
 
 def create_app(confClass='BaseConfig', config=None):
-    app = Flask(__name__)
+    app = Flask(__name__.split('.')[0])
 
     # load configuration
     app.config.from_object('oauth2_server.settings.' + confClass)
@@ -31,27 +31,3 @@ def setup_app(app):
     config_oauth(app)
     app.register_blueprint(bp, url_prefix='')
     CORS(app, origins=["http://localhost:5000", "http://127.0.0.1:5000"])
-
-
-app = create_app('BaseConfig')
-
-
-def init_db():
-    from .models import db
-    db.create_all()
-
-
-@app.cli.command()
-def initdb():
-    init_db()
-
-
-def drop_db():
-    from .models import db
-    db.session.remove()
-    db.drop_all()
-
-
-@app.cli.command()
-def dropdb():
-    drop_db()

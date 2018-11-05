@@ -9,8 +9,6 @@ from authlib.specs.rfc6749 import grants
 from werkzeug.security import gen_salt
 from models import db, User
 from models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
-from authlib.specs.rfc7519 import jwt
-import datetime
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
@@ -66,48 +64,6 @@ authorization = AuthorizationServer(
     save_token=save_token,
 )
 require_oauth = ResourceProtector()
-
-
-# TODO - add app context
-def gen_access_token(client, grant_type, user, scope):
-    try:
-        current_time = datetime.datetime.utcnow()
-        header = {
-              "alg": "RS256",
-              "typ": "JWT"
-        }
-        payload = {
-            'iat': current_time,
-            'exp': current_time + datetime.timedelta(days=0, seconds=30),
-            'nbf': current_time,
-            'sub': "api access",
-            'scope': scope,
-            'iss': client.client_id
-        }
-        key = '''
------BEGIN RSA PRIVATE KEY-----
-MIICWwIBAAKBgQDdlatRjRjogo3WojgGHFHYLugdUWAY9iR3fy4arWNA1KoS8kVw
-33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQsHUfQrSDv+MuSUMAe8jzKE4qW
-+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5Do2kQ+X5xK9cipRgEKwIDAQAB
-AoGAD+onAtVye4ic7VR7V50DF9bOnwRwNXrARcDhq9LWNRrRGElESYYTQ6EbatXS
-3MCyjjX2eMhu/aF5YhXBwkppwxg+EOmXeh+MzL7Zh284OuPbkglAaGhV9bb6/5Cp
-uGb1esyPbYW+Ty2PC0GSZfIXkXs76jXAu9TOBvD0ybc2YlkCQQDywg2R/7t3Q2OE
-2+yo382CLJdrlSLVROWKwb4tb2PjhY4XAwV8d1vy0RenxTB+K5Mu57uVSTHtrMK0
-GAtFr833AkEA6avx20OHo61Yela/4k5kQDtjEf1N0LfI+BcWZtxsS3jDM3i1Hp0K
-Su5rsCPb8acJo5RO26gGVrfAsDcIXKC+bQJAZZ2XIpsitLyPpuiMOvBbzPavd4gY
-6Z8KWrfYzJoI/Q9FuBo6rKwl4BFoToD7WIUS+hpkagwWiz+6zLoX1dbOZwJACmH5
-fSSjAkLRi54PKJ8TFUeOP15h9sQzydI8zJU+upvDEKZsZc/UhT/SySDOxQ4G/523
-Y0sz/OZtSWcol/UMgQJALesy++GdvoIDLfJX5GBQpuFgFenRiRDabxrE9MNUZ2aP
-FaFp+DyAe+b4nDwuJaW2LURbr8AEZga7oQj0uYxcYw==
------END RSA PRIVATE KEY-----
-'''
-        return jwt.encode(
-            header,
-            payload,
-            key
-        )
-    except Exception as e:
-            return e
 
 
 def config_oauth(app):

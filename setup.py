@@ -11,7 +11,7 @@ from setuptools import setup
 import os
 
 # Basic metadata
-name = "rd_oauth2_server"
+name = "python-oauth2-server"
 version = "0.0.0"
 description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/rd-apmm-python-oauth'

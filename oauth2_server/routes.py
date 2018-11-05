@@ -1,12 +1,13 @@
+import os
 from flask import Blueprint, request, session
 from flask import render_template, redirect, jsonify
 import requests
 from requests.auth import HTTPBasicAuth
 from werkzeug.security import gen_salt
-from authlib.flask.oauth2 import current_token
 from authlib.specs.rfc6749 import OAuth2Error
-from models import db, User, OAuth2Client
-from oauth2 import authorization, require_oauth
+from models import db, User, OAuth2Client, AccessRights
+from oauth2 import authorization
+from authlib.common.errors import AuthlibHTTPError
 
 bp = Blueprint(__name__, 'home')
 
@@ -18,34 +19,72 @@ def current_user():
     return None
 
 
-@bp.route('/index')
-def index():
+@bp.errorhandler(AuthlibHTTPError)
+def error_handler(error):
+    e = error()
+    status = e[0]
+    body = e[1]
+    headers = e[2]
+    print error.message
+    return (jsonify(body), status, headers)
+
+
+@bp.route('/fetch_token')
+def fetch_token():
     user = current_user()
     if not user:
         return redirect('/')
     # TODO - specific client
     client = OAuth2Client.query.filter_by(user_id=user.id).first()
-    return render_template('index.html', client=client)
+    return render_template('fetch_token.html', client=client)
 
 
 @bp.route('/', methods=('GET', 'POST'))
 def home():
     if request.method == 'POST':
         username = request.form.get('username')
+        password = request.form.get('password')
+        print username, password
+        if not username or not password:
+            message = "Please Fill In Both Username and Password."
+            return render_template('home.html', user=None, clients=None, message=message)
         user = User.query.filter_by(username=username).first()
         if not user:
-            user = User(username=username)
-            db.session.add(user)
-            db.session.commit()
-            # return render_template("404.html")
-        session['id'] = user.id
-        return redirect('/')
+            message = "That username is not recognised. Please signup."
+            return render_template('home.html', user=None, clients=None, message=message)
+        if user.password == password:
+            session['id'] = user.id
+            return redirect('/')
+        else:
+            message = "Invalid Password. Try Again."
+            return render_template('home.html', user=None, clients=None, message=message)
     user = current_user()
     if user:
         clients = OAuth2Client.query.filter_by(user_id=user.id).all()
     else:
         clients = []
-    return render_template('home.html', user=user, clients=clients)
+    return render_template('home.html', user=user, clients=clients, message="")
+
+
+@bp.route('/signup', methods=('GET', 'POST'))
+def signup():
+    if request.method == 'GET':
+        return render_template('signup.html')
+    if request.method == 'POST':
+        username = request.form.get('username', None)
+        password = request.form.get('password', None)
+        user = User(username=username, password=password)
+        db.session.add(user)
+        db.session.commit()
+
+        is04 = request.form.get('is04', None)
+        is05 = request.form.get('is05', None)
+        access = AccessRights(user_id=user.id, is04=is04, is05=is05)
+        db.session.add(access)
+        db.session.commit()
+
+        session['id'] = user.id
+        return redirect('/')
 
 
 @bp.route('/logout')
@@ -91,16 +130,13 @@ def request_token():
         data = {'scope': scope, 'grant_type': grant_type,
                 'username': username, 'password': password}
         resp = requests.post(
-                'http://127.0.0.1:5000/oauth/token',
+                request.url_root + 'oauth/token',
                 auth=HTTPBasicAuth(client_id, client_secret),
                 headers=headers,
                 data=data).json()
-        # print resp
         if 'access_token' in resp.keys():
             session['token'] = resp['access_token']
-    if 'token' in session.keys():
-        pass
-    else:
+    if 'token' not in session.keys():
         session['token'] = None
     return render_template('request.html', user=user,
                            client=client, token=session['token'])
@@ -138,18 +174,12 @@ def revoke_token():
 # route for certificate with public key
 @bp.route('/certs', methods=['GET'])
 def get_cert():
-    return '''
------BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd
-UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs
-HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D
-o2kQ+X5xK9cipRgEKwIDAQAB
------END PUBLIC KEY-----
-'''
-
-
-@bp.route('/api/me')
-@require_oauth('profile')
-def api_me():
-    user = current_token.user
-    return jsonify(id=user.id, username=user.username)
+    SCRIPT_DIR = os.path.dirname(__file__)
+    abs_pubkey_path = os.path.join(SCRIPT_DIR, "certs", "certificate.pem")
+    try:
+        with open(abs_pubkey_path, 'r') as myfile:
+            pubkey = myfile.read()
+        return pubkey
+    except OSError as e:
+        print("Error: " + e + "\nFile at " + abs_pubkey_path + "doesn't exist")
+        raise

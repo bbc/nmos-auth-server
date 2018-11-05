@@ -1,6 +1,6 @@
-body                  { font-family: sans-serif; background: #eee; }
-a, h1, h2             { color: #377ba8; }
-h1, h2                { font-family: 'Georgia', serif; margin: 0; }
+body                  { font-family: Gill Sans, sans-serif; background: #eee; }
+a, h1, h2             { color: #377ba8; font-family: Gill Sans, sans-serif; }
+h1, h2                { margin: 0; }
 h1                    { border-bottom: 2px solid #eee; }
 h2                    { font-size: 1.2em; }
 label, label > span   { display: block; }

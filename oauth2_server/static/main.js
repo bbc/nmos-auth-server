@@ -1,5 +1,8 @@
 $(function getToken() {
   console.log("Inside Function");
+  console.log(window.location.port);
+  console.log(window.location.hostname);
+  console.log(window.location.protocol);
   $("#token").click(function(){
     var requestPayload = {
       'grant_type': 'password',
@@ -7,15 +10,15 @@ $(function getToken() {
       'password': document.getElementById("password").value,
       'scope': document.getElementById("scope").value
     };
-    var username = document.getElementById("client_id").value;
-    var password = document.getElementById("client_secret").value;
+    var client_id = document.getElementById("client_id").value;
+    var client_secret = document.getElementById("client_secret").value;
     $.ajax({
-      url: 'http://localhost:5000/oauth/token',
+      url: 'http://' + window.location.hostname + ':' + window.location.port + '/oauth/token',
       type: 'POST',
       data: requestPayload,
       crossDomain: true,
       beforeSend: function (xhr) {
-        xhr.setRequestHeader ("Authorization", "Basic " + btoa(username + ":" + password));
+        xhr.setRequestHeader ("Authorization", "Basic " + btoa(client_id + ":" + client_secret));
       },
       //contentType: 'x-www-form-urlencoded',
       //dataType: 'json'
