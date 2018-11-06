@@ -2,7 +2,7 @@
 This set of functions must be run from within
 a "flask shell" to give app/database context '''
 
-from models import db, User, AccessRights
+from models import db, User, OAuth2Client, AccessRights
 # from oauth2_server.db_utils import *
 
 # -------------------- INIT ------------------------- #
@@ -87,11 +87,11 @@ def printTables():
         print("Table: ", table)
 
 
-def printEntries(table):
+def printTable(table):
     return [i for i in table.query.all()]
 
 
-def printTable(table):
+def printString(table):
     return [str(i) for i in table.query.all()]
 
 

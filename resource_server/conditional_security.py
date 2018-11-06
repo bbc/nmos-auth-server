@@ -39,14 +39,11 @@ class JWTClaimsValidator(JWTClaims):
         super(JWTClaimsValidator, self).validate()
         self.validate_nmos_api()
 
-    def validate_exp(self):
-        pass
-
 
 class ConditionalSecurity(object):
 
     def __init__(self, condition=True, claimsOptions=IS_XX_CLAIMS,
-                 certURL="http://127.0.0.1:5000/certs", certificate=None):
+                 certURL=None, certificate=None):
         self.condition = condition
         self.claimsOptions = claimsOptions
         self.certificateURL = certURL
@@ -118,13 +115,15 @@ class ConditionalSecurity(object):
     def getPublicKey(self):  # Make sure we have a certificate before extracting
         if self.certificate is None:
             try:  # TODO Add ability to check MDNS security service
-                print("Fetching Cert from endpoint " + str(self.certificateURL))
-                cert = self.fetchCertFromEndpoint(url=self.certificateURL)
+                cert_url = request.url_root + "certs"
+                print("Fetching Cert from endpoint " + str(cert_url))
+                cert = self.fetchCertFromEndpoint(url=cert_url)
+                print(cert)
             except Exception as e:
                 print("Error: " + str(e) + ". Trying to fetch Cert From File...")
                 cert = self.fetchCertFromFile("certs/certificate.pem")
             self.certificate = cert
-        pubKey = self.extractPublicKey(self.certificate)
+        pubKey = self.extractPublicKey(cert)
         return pubKey
 
     def JWTRequired(self):

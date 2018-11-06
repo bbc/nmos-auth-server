@@ -20,7 +20,7 @@ class TokenGenerator():
             user_access = AccessRights.query.filter_by(user_id=user.id).first()
             access = user_access.is05
         else:
-            access = "None"
+            access = None
         return access
 
     def get_audience(self, user, scope, access):
@@ -37,8 +37,18 @@ class TokenGenerator():
             if access == "read":
                 audience = "IS-04 Read Access".split(" ")
         else:
-            audience = "None"
+            audience = None
         return audience
+
+    def get_scope(self, user, client, scope):
+
+        if scope in ["is04", "IS04", "is-04", "IS-04"]:
+            new_scope = "is-04"
+        elif scope in ["is05", "IS05", "is-05", "IS-05"]:
+            new_scope = "is-05"
+        else:
+            new_scope = None
+        return new_scope
 
     def gen_access_token(self, client, grant_type, user, scope):
 
@@ -46,6 +56,7 @@ class TokenGenerator():
         current_time = datetime.datetime.utcnow()
         access = self.get_access_rights(user, scope)
         audience = self.get_audience(user, scope, access)
+        new_scope = self.get_scope(user, client, scope)
 
         header = {
               "alg": config["jwt_alg"],
@@ -57,10 +68,10 @@ class TokenGenerator():
             'nbf': current_time,
             'iss': config['jwt_iss'],
             'sub': user.username,
-            'scope': scope,
+            'scope': new_scope,
             'aud': audience,
-            'x-nmos-api': {'name': scope,
-                           'access': access}  # TODO Add backend DB for API access rights
+            'x-nmos-api': {'name': new_scope,
+                           'access': access}
         }
 
         try:
@@ -79,4 +90,5 @@ class TokenGenerator():
         )
 
 
+# Needed for access_token path in Flask config
 gen_token = TokenGenerator().gen_access_token

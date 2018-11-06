@@ -1,8 +1,7 @@
 $(function getToken() {
   console.log("Inside Function");
-  console.log(window.location.port);
-  console.log(window.location.hostname);
-  console.log(window.location.protocol);
+  var port = window.location.port;
+  var host = window.location.hostname;
   $("#token").click(function(){
     var requestPayload = {
       'grant_type': 'password',
@@ -10,10 +9,14 @@ $(function getToken() {
       'password': document.getElementById("password").value,
       'scope': document.getElementById("scope").value
     };
+    // if (requestPayload.scope.split(" ").length > 1) {
+    //   alert('Error: Please only provide a single scope');
+    //   return false;
+    // }
     var client_id = document.getElementById("client_id").value;
     var client_secret = document.getElementById("client_secret").value;
     $.ajax({
-      url: 'http://' + window.location.hostname + ':' + window.location.port + '/oauth/token',
+      url: 'http://' + host + ':' + port + '/oauth/token',
       type: 'POST',
       data: requestPayload,
       crossDomain: true,
@@ -42,18 +45,18 @@ $(function getToken() {
 $(function getResource() {
   $("#resource").click(function(){
     console.log("Inside Function");
+    var port = window.location.port;
+    var host = window.location.hostname;
     console.log(localStorage.getItem('token'));
     $.ajax({
-      url: 'http://127.0.0.1:5000/api/me',
+      url: 'http://' + host + ':' + port + '/test',
       type: 'GET',
       contentType: 'x-www-form-urlencoded',
-      dataType: 'json',
       // Fetch the stored token from localStorage and set in the header
       beforeSend: function (xhr) { xhr.setRequestHeader ("Authorization", "Bearer " + localStorage.getItem('token')); },
       success: function (result) {
         console.log('Success!');
         var returnResult = JSON.stringify(result);
-        document.getElementById('callResults').innerHTML = returnResult;
         alert('Success!\n' + returnResult);
         return result;
       },
