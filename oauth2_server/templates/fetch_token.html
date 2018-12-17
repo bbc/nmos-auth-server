@@ -1,23 +1,33 @@
 {% extends "layout.html" %}
 {% block body %}
- <script src="{{ url_for('static', filename='main.js') }}"></script>
+ <script src="static/main.js"></script>
 
 <br>
 <form action="/request_token" method="post">
+  <span>Client ID</span>
   <label>
-    <input type="text" name="client_id" id="client_id" placeholder="client_id" value="{{client.client_id}}" readonly="readonly"><br>
+    <input type="text" name="client_id" id="client_id"
+           placeholder="client_id" value="{{client.client_id}}"
+           readonly="readonly"><br>
   </label>
   <label>
-    <input type="text" name="client_secret" id="client_secret" placeholder="client_secret" value="{{client.client_secret}}" readonly="readonly"><br>
+    <span>Client Secret</span>
+    <input type="text" name="client_secret" id="client_secret"
+           placeholder="client_secret" value="{{client.client_secret}}"
+           readonly="readonly"><br>
   </label>
   <label>
-    <input type="text" name="username" id="username" placeholder="username"><br>
+    <span>Username</span>
+    <input type="text" name="username" id="username"><br>
   </label>
   <label>
-    <input type="text" name="password" id="password" placeholder="password"><br>
+    <span>Password</span>
+    <input type="text" name="password" id="password"><br>
   </label>
   <label>
-    <input type="text" name="scope" id="scope" placeholder="scope"><br>
+    <span>Scope</span>
+    <input type="text" name="scope" id="scope"
+           placeholder="is04 or is05"><br>
   </label>
 </form>
 

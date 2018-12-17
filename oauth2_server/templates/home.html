@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if user %}
-    <div>Logged in as <strong>{{user.username}}</strong> (<a href="{{ url_for('.logout') }}">Log Out</a>)</div><br>
+    <div>Logged in as <strong>{{user.username}}</strong> (<a href="{{ url_for('_logout') }}">Log Out</a>)</div><br>
 
     {% for client in clients %}
       {% for info, data in client.client_info.items() %}
@@ -14,11 +14,11 @@
 
     <hr>
 
-    <p><a href="{{ url_for('.create_client') }}">Create Client</a></p>
+    <p><a href="{{ url_for('_create_client') }}">Create Client</a></p>
 
-    <p><a href="{{ url_for('.request_token') }}">Request Token</a></p>
+    <p><a href="{{ url_for('_request_token') }}">Request Token</a></p>
 
-    <p><a href="{{ url_for('.fetch_token') }}">Request Client-side Token</a></p>
+    <p><a href="{{ url_for('_fetch_token') }}">Request Client-side Token</a></p>
 
   {% else %}
     <form action="" method="post">
@@ -26,7 +26,7 @@
       <p><input type="password" name="password"  placeholder="password"></p>
       <button type="submit">Login / Signup</button>
     </form>
-    <p><a href="{{ url_for('.signup') }}">Signup</a></p>
+    <p><a href="{{ url_for('_signup') }}">Signup</a></p>
 
     <div><p>{{ message }}</p></div>
   {% endif %}

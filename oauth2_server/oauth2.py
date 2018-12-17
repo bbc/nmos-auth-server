@@ -9,6 +9,7 @@ from authlib.specs.rfc6749 import grants
 from werkzeug.security import gen_salt
 from models import db, User
 from models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+from authlib.specs.rfc6749.errors import InvalidRequestError
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
@@ -42,6 +43,8 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
     def authenticate_user(self, username, password):
         user = User.query.filter_by(username=username).first()
+        if user is None:
+            raise InvalidRequestError("User Not Found")
         if user.check_password(password):
             return user
 
