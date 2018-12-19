@@ -2,7 +2,6 @@ import os
 from flask_cors import CORS
 from models import db
 from oauth2 import config_oauth
-# from routes import bp
 from handlers import register_handlers
 
 

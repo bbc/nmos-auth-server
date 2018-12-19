@@ -10,6 +10,7 @@ from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
     UnsupportedTokenTypeError
 # from authlib.flask.error import raise_http_exception
 # from authlib.specs.rfc7519.errors import InvalidClaimError, MissingClaimError
+from nmoscommon.mdnsbridge import IppmDNSBridge
 
 IS_XX_CLAIMS = {
     "iat": {"essential": True},
@@ -52,7 +53,7 @@ class JWTClaimsValidator(JWTClaims):
         self.validate_nmos()
 
 
-class OAuthSecurity(object):
+class NmosSecurity(object):
 
     def __init__(self, condition=True, claimsOptions=IS_XX_CLAIMS,
                  certificate=None):
@@ -77,6 +78,10 @@ class OAuthSecurity(object):
             certEndpoints.append(certEndpoint)
         print(certEndpoints)
         return certEndpoints
+
+    def fetchServiceEntries(self, serviceType):
+        bridge = IppmDNSBridge()
+        return bridge.getHref
 
     def fetchCertFromEndpoint(self):
         try:
