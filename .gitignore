@@ -60,6 +60,11 @@ instance/
 .webassets-cache
 *.sqlite
 
+# cert stuff
+*.pem
+*.pub
+*.key
+
 # Scrapy stuff:
 .scrapy
 
