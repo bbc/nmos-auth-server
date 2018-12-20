@@ -16,9 +16,7 @@ from __future__ import print_function, absolute_import
 
 import time
 import signal
-
 from socket import gethostname
-from security_api import SecurityAPI
 from os import getpid
 from systemd.daemon import notify, Notification
 
@@ -26,6 +24,7 @@ from nmoscommon.httpserver import HttpServer
 from nmoscommon.mdns import MDNSEngine
 from nmoscommon.logger import Logger
 from nmoscommon.nmoscommonconfig import config as _config
+from security_api import SecurityAPI
 
 import gevent
 from gevent import monkey

@@ -1,16 +1,17 @@
+import os
 import requests
-from requests import ConnectionError
+from requests.exceptions import RequestException
 from functools import wraps
 from flask import request
 
+from nmoscommon.mdnsbridge import IppmDNSBridge
 from authlib.specs.rfc7519 import jwt
 from authlib.specs.rfc7519.claims import JWTClaims
-# from claims_options import IS_XX_CLAIMS
 from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
     UnsupportedTokenTypeError
 # from authlib.flask.error import raise_http_exception
 # from authlib.specs.rfc7519.errors import InvalidClaimError, MissingClaimError
-from nmoscommon.mdnsbridge import IppmDNSBridge
+# from claims_options import IS_XX_CLAIMS
 
 IS_XX_CLAIMS = {
     "iat": {"essential": True},
@@ -23,6 +24,11 @@ IS_XX_CLAIMS = {
     "x-nmos-api": {"essential": True}
 }
 
+CERT_URL_PATH = "/certs"
+CERT_FILE_PATH = "certs/certificate.pem"
+MDNS_SERVICE_TYPE = "nmos-security"
+SCRIPT_DIR = os.path.dirname(__file__)
+
 
 class JWTClaimsValidator(JWTClaims):
 
@@ -30,17 +36,14 @@ class JWTClaimsValidator(JWTClaims):
         super(JWTClaimsValidator, self).__init__(payload, header, options=None, params=None)
 
     def validate_iss(self):
-        print("YOU ARE IN THE CHILD FUNC VALIDATE_ISS")
         super(JWTClaimsValidator, self).validate_iss()
         pass
 
     def validate_sub(self):
-        print("YOU ARE IN THE CHILD FUNC VALIDATE_SUB")
         super(JWTClaimsValidator, self).validate_sub()
         pass
 
     def validate_aud(self):
-        print("YOU ARE IN THE CHILD FUNC VALIDATE_AUD")
         super(JWTClaimsValidator, self).validate_aud()
         pass
 
@@ -61,61 +64,38 @@ class NmosSecurity(object):
         self.claimsOptions = claimsOptions
         self.certificate = certificate
         self.decorator = None
+        self.bridge = IppmDNSBridge()
 
-    def fetchCertEndpointsFromService(self, serviceType="nmos-security"):
-        certEndpoints = []
-        oauthServices = requests.get(
-            "http://localhost/x-ipstudio/mdnsbridge/v1.0/"
-            + serviceType + "/")
-        oauthServices.raise_for_status()  # check request was succcessful
-        oauthServices = oauthServices.json()
-        for record in oauthServices:
-            oauthAddr = record['representation'][0]['address']
-            oauthPort = record['representation'][0]['port']
-            certEndpoint = (
-                "http://" + str(oauthAddr) + ":" + str(oauthPort) + '/certs'
-            )
-            certEndpoints.append(certEndpoint)
-        print(certEndpoints)
-        return certEndpoints
+    def getHrefFromService(self, serviceType):
+        return self.bridge.getHref(serviceType)
 
-    def fetchServiceEntries(self, serviceType):
-        bridge = IppmDNSBridge()
-        return bridge.getHref
-
-    def fetchCertFromEndpoint(self):
+    def getCertFromEndpoint(self):
         try:
-            endpoints = self.fetchCertEndpointsFromService("nmos-security")
-            print(endpoints)
-        except ConnectionError as e:
-            print("Error: " + str(e))
-            print("Cannot find certificate at {}. Is the Auth Server Running?".format(endpoints))
+            href = self.getHrefFromService(MDNS_SERVICE_TYPE)
+            certHref = href + CERT_URL_PATH
+            print('cert href is: {}'.format(certHref))
+            cert = requests.get(certHref, timeout=0.5, proxies={'http': ''})
+            cert.raise_for_status()  # Raise error if status !=200
+        except RequestException as e:
+            print("Error: {0!s}".format(e))
+            print("Cannot find certificate at {}. Is the Auth Server Running?".format(certHref))
             raise
-        for url in endpoints:
+
+        contentType = cert.headers['content-type'].split(";")[0]
+        if contentType == "text/html":
             try:
-                oauthCerts = requests.get(url)
-                oauthCerts.raise_for_status()
-                break
-            except Exception as e:
-                pass
-        if oauthCerts.headers['content-type'].split(";")[0] == "text/html":
-            try:
-                if len(oauthCerts.json()) > 1:
-                    print("Multiple certificates at Endpoint. Returning First.")
-                cert = oauthCerts.json()[0]
+                if len(cert.json()) > 1:
+                    print("Multiple certificates at Endpoint. Returning First Instance.")
+                cert = cert.json()[0]
             except ValueError:
-                cert = oauthCerts.text
+                cert = cert.text
             self.certificate = cert
             return cert
         else:
-            raise ValueError("Incorrect Content-Type")
+            raise ValueError("Incorrect Content-Type. Expected 'text/html but got {}".format(contentType))
 
-    def fetchCertFromFile(self, filename):
-        import os
-        script_dir = os.path.dirname(__file__)
-        abs_cert_path = os.path.join(script_dir, filename)
-        print(abs_cert_path)
-        abs_cert_path = "/project-mcuk/ap/ipp/dannym/rd-apmm-python-oauth/oauth2_server/certs/certificate.pem"
+    def getCertFromFile(self, filename):
+        abs_cert_path = os.path.join(SCRIPT_DIR, filename)
         try:
             if filename is not None:
                 with open(abs_cert_path, 'r') as myfile:
@@ -133,7 +113,7 @@ class NmosSecurity(object):
         pubKeyObject = crtObj.get_pubkey()
         pubKeyString = crypto.dump_publickey(crypto.FILETYPE_PEM, pubKeyObject)
         if pubKeyString is None:
-            raise Exception(
+            raise ValueError(
                 "Public Key could not be extracted from certificate")
         else:
             return pubKeyString
@@ -142,11 +122,11 @@ class NmosSecurity(object):
         if self.certificate is None:
             print("Fetching Certificate...")
             try:
-                certURL = self.fetchCertFromEndpoint()
-                print("Fetching Cert from endpoint " + str(certURL))
+                print("Trying to fetch cert using mDNS...")
+                cert = self.getCertFromEndpoint()
             except Exception as e:
-                print("Error: " + str(e) + ". Trying to fetch Cert From File...")
-                cert = self.fetchCertFromFile("certs/certificate.pem")
+                print("Error: {0!s}. Trying to fetch Cert From File...".format(e))
+                cert = self.getCertFromFile(CERT_FILE_PATH)
             self.certificate = cert
         pubKey = self.extractPublicKey(self.certificate)
         return pubKey

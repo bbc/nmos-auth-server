@@ -13,7 +13,7 @@ from app import config_app
 from jinja2 import FileSystemLoader, ChoiceLoader
 from db_utils import create_all
 
-CWD = os.path.dirname(__file__)
+SCRIPT_DIR = os.path.dirname(__file__)
 
 
 class SecurityAPI(WebAPI):
@@ -30,15 +30,15 @@ class SecurityAPI(WebAPI):
     def add_templates_folder(self):
         my_loader = ChoiceLoader([
             self.app.jinja_loader,
-            FileSystemLoader(CWD + '/static'),
-            FileSystemLoader(CWD + '/templates')
+            FileSystemLoader(SCRIPT_DIR + '/static'),
+            FileSystemLoader(SCRIPT_DIR + '/templates')
         ])
         self.app.jinja_loader = my_loader
 
     # Custom function to serve CSS and Javascript files
     @route('/static/<filename>', auto_json=False)
     def style(self, filename):
-        return send_from_directory(CWD + '/static', filename)
+        return send_from_directory(SCRIPT_DIR + '/static', filename)
 
     def current_user(self):
         if 'id' in session:
@@ -176,7 +176,6 @@ class SecurityAPI(WebAPI):
     # route for certificate with public key
     @route('/certs', methods=['GET'], auto_json=False)
     def get_cert(self):
-        SCRIPT_DIR = os.path.dirname(__file__)
         abs_pubkey_path = os.path.join(SCRIPT_DIR, "certs", "certificate.pem")
         try:
             with open(abs_pubkey_path, 'r') as myfile:
