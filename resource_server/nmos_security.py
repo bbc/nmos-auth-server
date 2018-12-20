@@ -5,6 +5,7 @@ from functools import wraps
 from flask import request
 
 from nmoscommon.mdnsbridge import IppmDNSBridge
+from nmoscommon.nmoscommonconfig import config as _config
 from authlib.specs.rfc7519 import jwt
 from authlib.specs.rfc7519.claims import JWTClaims
 from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
@@ -28,6 +29,7 @@ CERT_URL_PATH = "/certs"
 CERT_FILE_PATH = "certs/certificate.pem"
 MDNS_SERVICE_TYPE = "nmos-security"
 SCRIPT_DIR = os.path.dirname(__file__)
+OAUTH_MODE = _config.get('oauth_mode', True)
 
 
 class JWTClaimsValidator(JWTClaims):
@@ -58,7 +60,7 @@ class JWTClaimsValidator(JWTClaims):
 
 class NmosSecurity(object):
 
-    def __init__(self, condition=True, claimsOptions=IS_XX_CLAIMS,
+    def __init__(self, condition=OAUTH_MODE, claimsOptions=IS_XX_CLAIMS,
                  certificate=None):
         self.condition = condition
         self.claimsOptions = claimsOptions

@@ -40,13 +40,10 @@ DNS_SD_HTTPS_PORT = 443
 DNS_SD_NAME = 'security_' + str(HOSTNAME) + "_" + str(getpid())
 DNS_SD_TYPE = '_nmos-security._tcp'
 
-OAUTH_MODE = _config.get('oauth_mode', 'true')
-
 
 class SecurityService:
     def __init__(self, logger=None):
         self.config = _config
-        self.config.update({"priority": 0, "oauth_mode": OAUTH_MODE})
         self.logger = Logger("security", logger)
         self.running = False
         self.httpServer = None
@@ -63,10 +60,16 @@ class SecurityService:
         if not str(priority).isdigit() or priority < 100:
             priority = 0
 
-        self.mdns.register(DNS_SD_NAME + "_http", DNS_SD_TYPE, PORT,
-                           {"pri": priority,
-                            "api_ver": ",".join(API_VERSIONS),
-                            "api_proto": "http"})
+        if self.config["https_mode"] != "enabled" and self.config["enable_mdns"]:
+            self.mdns.register(DNS_SD_NAME + "_http", DNS_SD_TYPE, PORT,
+                               {"pri": priority,
+                                "api_ver": ",".join(API_VERSIONS),
+                                "api_proto": "http"})
+        if self.config["https_mode"] != "disabled" and self.config["enable_mdns"]:
+            self.mdns.register(DNS_SD_NAME + "_https", DNS_SD_TYPE, PORT,
+                               {"pri": priority,
+                                "api_ver": ",".join(API_VERSIONS),
+                                "api_proto": "https"})
 
         self.httpServer = HttpServer(SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config])
         self.httpServer.start()
