@@ -11,13 +11,13 @@ from setuptools import setup
 import os
 
 # Basic metadata
-name = "nmos-oauth-server"
+name = "nmos-oauth"
 version = "0.0.0"
 description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/rd-apmm-python-oauth'
 author = 'Danny Meloy'
 author_email = 'danny.meloy@bbc.co.uk'
-license = 'GNU Affero General Public License'
+license = 'BSD'
 long_description = "OAuth Server Implementation to produce JWTs for API Access"
 
 
@@ -52,7 +52,7 @@ packages_required = [
     "nmoscommon",
     "Flask",
     "Flask-SQLAlchemy",
-    "Authlib>=0.6",
+    "Authlib>=0.10",
     "Flask-Cors",
     "requests",
     "gevent"
