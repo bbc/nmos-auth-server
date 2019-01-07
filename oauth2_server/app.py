@@ -1,16 +1,14 @@
 import os
-from flask import Flask
 from flask_cors import CORS
 from models import db
 from oauth2 import config_oauth
-from routes import bp
+from handlers import register_handlers
 
 
-def create_app(confClass='BaseConfig', config=None):
-    app = Flask(__name__)
+def config_app(app, confClass='BaseConfig', config=None):
 
     # load configuration
-    app.config.from_object('oauth2_server.settings.' + confClass)
+    app.config.from_object('settings.' + confClass)
     # load environment configuration
     if 'WEBSITE_CONF' in os.environ:
         app.config.from_envvar('WEBSITE_CONF')
@@ -29,29 +27,7 @@ def create_app(confClass='BaseConfig', config=None):
 def setup_app(app):
     db.init_app(app)
     config_oauth(app)
-    app.register_blueprint(bp, url_prefix='')
-    CORS(app, origins=["http://localhost:5000", "http://127.0.0.1:5000"])
-
-
-app = create_app('BaseConfig')
-
-
-def init_db():
-    from .models import db
-    db.create_all()
-
-
-@app.cli.command()
-def initdb():
-    init_db()
-
-
-def drop_db():
-    from .models import db
-    db.session.remove()
-    db.drop_all()
-
-
-@app.cli.command()
-def dropdb():
-    drop_db()
+    register_handlers(app)
+    # app.register_blueprint(bp, url_prefix='')
+    CORS(app)
+    # CORS(app, origins=["http://localhost:5000", "http://127.0.0.1:5000"])

@@ -5,6 +5,10 @@ from authlib.flask.oauth2.sqla import (
     OAuth2AuthorizationCodeMixin,
     OAuth2TokenMixin,
 )
+from authlib.specs.rfc6749.errors import OAuth2Error
+
+__all__ = ['db', 'User', 'OAuth2Client',
+           'OAuth2AuthorizationCode', 'OAuth2Token', 'AccessRights']
 
 db = SQLAlchemy()
 
@@ -12,16 +16,19 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(40), unique=True)
+    password = db.Column(db.String(20))
 
     def __str__(self):
-        return self.username
+        output = ''
+        for c in self.__table__.columns:
+            output += '{}: {},  '.format(c.name, getattr(self, c.name))
+        return output
 
     def get_user_id(self):
         return self.id
 
-    # TODO - add password field to schema and validation
     def check_password(self, password):
-        return password == 'valid'
+        return password == self.password
 
 
 class OAuth2Client(db.Model, OAuth2ClientMixin):
@@ -31,6 +38,11 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
     user_id = db.Column(
         db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship('User')
+
+    def check_requested_scopes(self, scopes):  # Just for testing purposes
+        if len(set(scopes)) != 1:
+            raise OAuth2Error("Must list a single scope", None, 400)
+        return super(OAuth2Client, self).check_requested_scopes(scopes)
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
@@ -53,3 +65,20 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     def is_refresh_token_expired(self):
         expires_at = self.issued_at + self.expires_in * 2
         return expires_at < time.time()
+
+
+class AccessRights(db.Model):
+    __tablename__ = 'access_rights'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
+    user = db.relationship('User')
+    is04 = db.Column(db.String(25))
+    is05 = db.Column(db.String(25))
+
+    def __str__(self):
+        output = ''
+        for c in self.__table__.columns:
+            output += '{}: {},  '.format(c.name, getattr(self, c.name))
+        return output
