@@ -60,12 +60,12 @@ class SecurityService:
         if not str(priority).isdigit() or priority < 100:
             priority = 0
 
-        if self.config["https_mode"] != "enabled" and self.config["enable_mdns"]:
+        if self.config["https_mode"] != "enabled":
             self.mdns.register(DNS_SD_NAME + "_http", DNS_SD_TYPE, PORT,
                                {"pri": priority,
                                 "api_ver": ",".join(API_VERSIONS),
                                 "api_proto": "http"})
-        if self.config["https_mode"] != "disabled" and self.config["enable_mdns"]:
+        if self.config["https_mode"] != "disabled":
             self.mdns.register(DNS_SD_NAME + "_https", DNS_SD_TYPE, PORT,
                                {"pri": priority,
                                 "api_ver": ",".join(API_VERSIONS),
