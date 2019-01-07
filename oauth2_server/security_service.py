@@ -32,7 +32,6 @@ monkey.patch_all()
 
 PORT = 4999
 HOSTNAME = gethostname().split(".", 1)[0]
-HTTPS_MODE = _config.get('https_mode', 'disabled')
 API_VERSIONS = ["v1.0"]
 
 DNS_SD_HTTP_PORT = 80
