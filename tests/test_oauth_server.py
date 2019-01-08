@@ -10,17 +10,20 @@ from __future__ import print_function
 from __future__ import absolute_import
 import unittest
 import re
+import os
 # from mock import Mock
 # from mock import patch
 
-from oauth2_server.app import create_app
+from oauth2_server.app import config_app
 from oauth2_server.db_utils import create_all, drop_all
+from oauth2_server.security_api import SecurityAPI
 
 
 class FlaskTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.app = create_app('TestConfig')
+        self.api = SecurityAPI(None, None)
+        self.app = config_app(self.api.app, 'TestConfig')
         self.app.testing = True
         self.client = self.app.test_client()
         with self.app.app_context():
@@ -33,6 +36,7 @@ class FlaskTestCase(unittest.TestCase):
     def tearDown(self):
         with self.app.app_context():
             drop_all()
+            os.remove(self.app.config['SQLALCHEMY_DATABASE_URI'].split('///', 1)[1])
 
     def signup(self, username, password, is04, is05):
         return self.client.post('/signup',
@@ -58,11 +62,7 @@ class FlaskTestCase(unittest.TestCase):
         password = 'testing'
 
         rv = self.signup(user, password, 'read', 'write')
-        print(rv.data)
         assert('Logged in as' in rv.data)
-
-        rv = self.logout()
-        assert(b'Login / Signup' in rv.data)
 
         rv = self.login(user, password)
         regex = r'Logged in as.*' + user

@@ -1,16 +1,16 @@
 import os
 from flask import request, session, send_from_directory
-from flask import render_template, redirect
+from flask import render_template, redirect, url_for
 import requests
 from requests.auth import HTTPBasicAuth
 from werkzeug.security import gen_salt
+from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
 from nmoscommon.webapi import WebAPI, route
 
 from models import db, User, OAuth2Client, AccessRights
 from oauth2 import authorization
 from app import config_app
-from jinja2 import FileSystemLoader, ChoiceLoader
 from db_utils import create_all
 
 SCRIPT_DIR = os.path.dirname(__file__)
@@ -185,7 +185,10 @@ class SecurityAPI(WebAPI):
             print("Error: " + e + "\nFile at " + abs_pubkey_path + "doesn't exist")
             raise
 
-    @route('/logout')
+    @route('/logout/')
     def logout(self):
-        del session['id']
-        return redirect('/')
+        try:
+            del session['id']
+        except Exception as e:
+            self.logger.writeDebug("Error: {}. Couldn't delete session ID".format(str(e)))
+        return redirect(url_for('_home'), code=302)

@@ -8,7 +8,11 @@ from handlers import register_handlers
 def config_app(app, confClass='BaseConfig', config=None):
 
     # load configuration
-    app.config.from_object('settings.' + confClass)
+    settings = 'settings'
+    if __package__ is not None:
+        settings = __package__ + '.settings'
+    app.config.from_object(settings + '.' + confClass)
+
     # load environment configuration
     if 'WEBSITE_CONF' in os.environ:
         app.config.from_envvar('WEBSITE_CONF')
