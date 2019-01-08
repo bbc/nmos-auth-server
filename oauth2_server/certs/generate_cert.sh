@@ -6,7 +6,7 @@
 # cat jwtRS256.key
 # cat jwtRS256.key.pub
 
-KEYFILE="key.pem";
+KEYFILE="privkey.pem";
 CERTFILE="certificate.pem";
 PUBKEYFILE="pubkey.pem";
 subinfo='/C=UK//L=Manchester/O=BBC/CN=www.bbc.co.uk';
