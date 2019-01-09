@@ -51,7 +51,7 @@ packages_required = [
     "six",
     "nmoscommon",
     "Flask",
-    "Flask-SQLAlchemy",
+    "Flask-SQLAlchemy < 1.1",
     "Authlib>=0.10",
     "Flask-Cors",
     "requests",

@@ -25,7 +25,7 @@ IS_XX_CLAIMS = {
     "x-nmos-api": {"essential": True}
 }
 
-CERT_URL_PATH = "/certs"
+CERT_ENDPOINT = "/certs"
 CERT_FILE_PATH = "certs/certificate.pem"
 MDNS_SERVICE_TYPE = "nmos-security"
 SCRIPT_DIR = os.path.dirname(__file__)
@@ -74,7 +74,7 @@ class NmosSecurity(object):
     def getCertFromEndpoint(self):
         try:
             href = self.getHrefFromService(MDNS_SERVICE_TYPE)
-            certHref = href + CERT_URL_PATH
+            certHref = href + CERT_ENDPOINT
             print('cert href is: {}'.format(certHref))
             cert = requests.get(certHref, timeout=0.5, proxies={'http': ''})
             cert.raise_for_status()  # Raise error if status !=200

@@ -44,7 +44,7 @@ def addUser(username, password):
 
 
 def updateField(table, find_field, find_value, change_field, change_value):
-    entry = "table.query.filter_by(" + find_field + "=str(find_value)).first()"
+    entry = "table.query.filter_by(" + find_field + "=str(" + find_value + ")).first()"
     entry = eval(entry)
     entry.change_field = change_value
     add(entry)
