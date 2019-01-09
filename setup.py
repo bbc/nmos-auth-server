@@ -54,7 +54,7 @@ packages_required = [
     "flask-cors",
     "requests",
     "gevent",
-    "systemd"
+    "systemd",
     "nmoscommon",
     "authlib>=0.10",
 ]
