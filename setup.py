@@ -35,6 +35,8 @@ def create_cert_folder():
                 raise
             pass
 
+        subprocess.call('/var/nmosoauth/generate_cert.sh')
+
     except OSError as e:
         if e.errno != os.errno.EACCES:
             raise
@@ -49,13 +51,14 @@ class PostDevelopCommand(develop):
     """Post-installation for development mode."""
     def run(self):
         develop.run(self)
+        create_cert_folder()
 
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
         install.run(self)
-        subprocess.call('./var/nmosoauth/generate_cert.sh')
+        create_cert_folder()
 
 
 def is_package(path):
