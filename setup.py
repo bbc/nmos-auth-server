@@ -72,5 +72,5 @@ setup(name=name,
       package_dir=packages,
       install_requires=packages_required,
       scripts=[],
-      data_files=[],
+      data_files=[('/var/ipstudio', 'auth_server/certs/generate_cert.sh')],
       long_description=long_description)
