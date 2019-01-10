@@ -7,8 +7,10 @@
 # not have permission to reproduce it.
 
 from __future__ import print_function
-from setuptools import setup
 import os
+from setuptools import setup
+from setuptools.command.develop import develop
+from setuptools.command.install import install
 
 # Basic metadata
 name = "nmos-oauth"
@@ -19,6 +21,39 @@ author = 'Danny Meloy'
 author_email = 'danny.meloy@bbc.co.uk'
 license = 'BSD'
 long_description = "OAuth Server Implementation to produce JWTs for API Access"
+
+
+def create_cert_folder():
+    dname = "/var/nmosoauth/"
+
+    try:
+        try:
+            os.makedirs(dname)
+        except OSError as e:
+            if e.errno != os.errno.EEXIST:
+                raise
+            pass
+
+    except OSError as e:
+        if e.errno != os.errno.EACCES:
+            raise
+        pass
+        # Directory couldn't be created.
+        # Please see README.md for instructions
+        # on creating certs.
+        # This should only happen with un-priviladged installs
+
+
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+    def run(self):
+        develop.run(self)
+
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        install.run(self)
 
 
 def is_package(path):
@@ -72,5 +107,10 @@ setup(name=name,
       package_dir=packages,
       install_requires=packages_required,
       scripts=[],
-      data_files=[('/var/nmosoauth', 'auth_server/certs/generate_cert.sh')],
-      long_description=long_description)
+      data_files=[('/var/nmosoauth', ['nmosoauth/auth_server/certs/generate_cert.sh'])],
+      long_description=long_description,
+      cmdclass={
+        'develop': PostDevelopCommand,
+        'install': PostInstallCommand,
+        }
+      )
