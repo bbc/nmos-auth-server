@@ -11,6 +11,7 @@ import os
 from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
+import subprocess
 
 # Basic metadata
 name = "nmos-oauth"
@@ -54,6 +55,7 @@ class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
         install.run(self)
+        subprocess.call('./var/nmosoauth/generate_cert.sh')
 
 
 def is_package(path):
