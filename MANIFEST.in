@@ -1,3 +1,4 @@
 include README.md
 include tox.ini
 recursive-include tests *.py
+include nmosoauth/auth_server/certs/generate_cert.sh
