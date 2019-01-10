@@ -32,6 +32,4 @@ def setup_app(app):
     db.init_app(app)
     config_oauth(app)
     register_handlers(app)
-    # app.register_blueprint(bp, url_prefix='')
     CORS(app)
-    # CORS(app, origins=["http://localhost:5000", "http://127.0.0.1:5000"])

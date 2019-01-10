@@ -49,13 +49,14 @@ package_names = packages.keys()
 # This is where you list packages which are required
 packages_required = [
     "six",
-    "nmoscommon",
-    "Flask",
-    "Flask-SQLAlchemy",
-    "Authlib>=0.10",
-    "Flask-Cors",
+    "flask",
+    "flask-sqlalchemy<=1.10",
+    "flask-cors",
     "requests",
-    "gevent"
+    "gevent",
+    "systemd",
+    "nmoscommon",
+    "authlib>=0.10",
 ]
 
 deps_required = []

@@ -12,11 +12,9 @@ class TokenGenerator():
 
     def get_access_rights(self, user, scope):
         if scope == "is04":
-            print("Scope is IS-04")
             user_access = AccessRights.query.filter_by(user_id=user.id).first()
             access = user_access.is04
         elif scope == "is05":
-            print("Scope is IS-05")
             user_access = AccessRights.query.filter_by(user_id=user.id).first()
             access = user_access.is05
         else:

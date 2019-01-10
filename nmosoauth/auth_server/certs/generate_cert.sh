@@ -9,7 +9,7 @@
 KEYFILE="privkey.pem";
 CERTFILE="certificate.pem";
 PUBKEYFILE="pubkey.pem";
-subinfo='/C=UK//L=Manchester/O=BBC/CN=www.bbc.co.uk';
+subinfo='/C=UK/L=Manchester/O=BBC/CN=www.bbc.co.uk';
 
 [ -e $CERTFILE ] && rm $CERTFILE;
 [ -e $KEYFILE ] && rm $KEYFILE;

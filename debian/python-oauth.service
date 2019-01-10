@@ -1,0 +1,14 @@
+[Unit]
+Description=nmos-oauth
+Wants=network-online.target apache2.service
+After=network.target network-online.target apache2.service
+
+[Service]
+User=ipstudio
+Restart=always
+RestartSec=3
+ExecStart=/usr/bin/nmosoauth
+
+[Install]
+WantedBy=multi-user.target
+Alias=nmos-oauth.service ips-oauth.service
