@@ -14,6 +14,7 @@ from app import config_app
 from db_utils import create_all
 
 SCRIPT_DIR = os.path.dirname(__file__)
+FILE_DIR = '/var/nmosoauth'
 
 
 class SecurityAPI(WebAPI):
@@ -176,7 +177,7 @@ class SecurityAPI(WebAPI):
     # route for certificate with public key
     @route('/certs', methods=['GET'], auto_json=False)
     def get_cert(self):
-        abs_pubkey_path = os.path.join(SCRIPT_DIR, "certs", "certificate.pem")
+        abs_pubkey_path = os.path.join(FILE_DIR, "privkey.pem")
         try:
             with open(abs_pubkey_path, 'r') as myfile:
                 pubkey = myfile.read()

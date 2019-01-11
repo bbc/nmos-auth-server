@@ -4,6 +4,8 @@ import datetime
 from oauth2 import authorization
 from models import AccessRights
 
+FILE_DIR = '/var/nmosoauth'
+
 
 class TokenGenerator():
 
@@ -76,8 +78,7 @@ class TokenGenerator():
             key = config['jwt_key']
         except Exception as e:
             print("Error: " + e)
-            SCRIPT_DIR = os.path.dirname(__file__)
-            abs_key_path = os.path.join(SCRIPT_DIR, "certs", "key.pem")
+            abs_key_path = os.path.join(FILE_DIR, "privkey.pem")
             with open(abs_key_path, 'r') as myfile:
                 key = myfile.read()
 

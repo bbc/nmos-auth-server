@@ -13,7 +13,7 @@ MODNAME=$(PROJECT)
 
 # The rules for names and versions in python, rpm, and deb are different
 # and not entirely compatible. As such py2dsc will automatically convert
-# your package name into a suitable deb name and version number, and this 
+# your package name into a suitable deb name and version number, and this
 # code replicates that.
 DEBNAME=$(shell echo $(MODNAME) | tr '[:upper:]_' '[:lower:]-')
 DEBVERSION=$(shell echo $(VERSION) | sed 's/\.dev/~dev/')

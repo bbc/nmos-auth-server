@@ -24,41 +24,28 @@ license = 'BSD'
 long_description = "OAuth Server Implementation to produce JWTs for API Access"
 
 
-def create_cert_folder():
-    dname = "/var/nmosoauth/"
-
+def gen_certs():
     try:
-        try:
-            os.makedirs(dname)
-        except OSError as e:
-            if e.errno != os.errno.EEXIST:
-                raise
-            pass
+        fname = '/var/nmosoauth/generate_cert.sh'
+        subprocess.Popen([fname])
 
-        subprocess.call('/var/nmosoauth/generate_cert.sh')
-
-    except OSError as e:
-        if e.errno != os.errno.EACCES:
-            raise
+    except Exception as e:
+        print('Error: {}'.format(str(e)))
         pass
-        # Directory couldn't be created.
-        # Please see README.md for instructions
-        # on creating certs.
-        # This should only happen with un-priviladged installs
 
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
     def run(self):
         develop.run(self)
-        create_cert_folder()
+        gen_certs()
 
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
         install.run(self)
-        create_cert_folder()
+        gen_certs()
 
 
 def is_package(path):
@@ -109,10 +96,16 @@ setup(name=name,
       author_email=author_email,
       license=license,
       packages=package_names,
+      include_package_data=True,
       package_dir=packages,
       install_requires=packages_required,
       scripts=[],
-      data_files=[('/var/nmosoauth', ['nmosoauth/auth_server/certs/generate_cert.sh'])],
+      data_files=[
+        ('/var/nmosoauth', ['nmosoauth/auth_server/certs/generate_cert.sh']),
+        # ('/var/nmosoauth', ['nmosoauth/auth_server/db.sqlite']),
+        ('/usr/bin', ['bin/nmosoauth']),
+        ('/lib/systemd/system', ['debian/python-oauth.service'])
+      ],
       long_description=long_description,
       cmdclass={
         'develop': PostDevelopCommand,

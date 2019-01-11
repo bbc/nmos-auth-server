@@ -26,7 +26,7 @@ IS_XX_CLAIMS = {
 }
 
 CERT_ENDPOINT = "/certs"
-CERT_FILE_PATH = "certs/certificate.pem"
+CERT_FILE_PATH = "/var/nmosoauth/pubkey.pem"
 MDNS_SERVICE_TYPE = "nmos-security"
 SCRIPT_DIR = os.path.dirname(__file__)
 OAUTH_MODE = _config.get('oauth_mode', True)
