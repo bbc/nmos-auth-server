@@ -30,7 +30,7 @@ def gen_certs():
         subprocess.Popen([fname])
 
     except Exception as e:
-        print('Error: {}'.format(str(e)))
+        print('Error: {}. Failed to generate certificates.'.format(str(e)))
         pass
 
 
@@ -96,10 +96,13 @@ setup(name=name,
       author_email=author_email,
       license=license,
       packages=package_names,
-      include_package_data=True,
       package_dir=packages,
       install_requires=packages_required,
+      include_package_data=True,
       scripts=[],
+      package_data={
+        'nmosoauth' : ['auth_server/templates/*', 'auth_server/static/*]
+      },
       data_files=[
         ('/var/nmosoauth', ['nmosoauth/auth_server/certs/generate_cert.sh']),
         # ('/var/nmosoauth', ['nmosoauth/auth_server/db.sqlite']),
