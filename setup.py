@@ -101,7 +101,7 @@ setup(name=name,
       include_package_data=True,
       scripts=[],
       package_data={
-        'nmosoauth' : ['auth_server/templates/*', 'auth_server/static/*]
+        'nmosoauth' : ['auth_server/templates/*', 'auth_server/static/*']
       },
       data_files=[
         ('/var/nmosoauth', ['nmosoauth/auth_server/certs/generate_cert.sh']),
