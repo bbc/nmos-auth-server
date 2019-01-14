@@ -13,6 +13,11 @@ from setuptools.command.develop import develop
 from setuptools.command.install import install
 import subprocess
 
+import pwd
+import grp
+import os
+
+
 # Basic metadata
 name = "nmos-oauth"
 version = "0.0.0"
@@ -33,12 +38,20 @@ def gen_certs():
         print('Error: {}. Failed to generate certificates.'.format(str(e)))
         pass
 
+def change_permissions():
+    user = 'ipstudio'
+    path = '/var/nmosoauth/'
+    uid = pwd.getpwnam(user).pw_uid
+    gid = grp.getgrnam(user).gr_gid
+    os.chown(path, uid, gid)
+
 
 class PostDevelopCommand(develop):
     """Post-installation for development mode."""
     def run(self):
         develop.run(self)
         gen_certs()
+        change_permissions()
 
 
 class PostInstallCommand(install):
@@ -46,6 +59,7 @@ class PostInstallCommand(install):
     def run(self):
         install.run(self)
         gen_certs()
+        change_permissions()
 
 
 def is_package(path):
@@ -105,7 +119,6 @@ setup(name=name,
       },
       data_files=[
         ('/var/nmosoauth', ['nmosoauth/auth_server/certs/generate_cert.sh']),
-        # ('/var/nmosoauth', ['nmosoauth/auth_server/db.sqlite']),
         ('/usr/bin', ['bin/nmosoauth']),
         ('/lib/systemd/system', ['debian/python-oauth.service'])
       ],

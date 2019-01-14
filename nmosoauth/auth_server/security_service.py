@@ -24,7 +24,7 @@ from nmoscommon.httpserver import HttpServer
 from nmoscommon.mdns import MDNSEngine
 from nmoscommon.logger import Logger
 from nmoscommon.nmoscommonconfig import config as _config
-from security_api import SecurityAPI
+from .security_api import SecurityAPI
 
 import gevent
 from gevent import monkey

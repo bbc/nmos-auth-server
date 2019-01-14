@@ -13,7 +13,7 @@ class BaseConfig(object):
     TESTING = False
     SECRET_KEY = 'secret'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite://{}/db.sqlite'.format(FILE_DIR)
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/db.sqlite'.format(FILE_DIR)
     OAUTH2_ACCESS_TOKEN_GENERATOR = pkg + 'token_generator.gen_token'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_JWT_ENABLED = True

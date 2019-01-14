@@ -8,10 +8,10 @@ from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
 from nmoscommon.webapi import WebAPI, route
 
-from models import db, User, OAuth2Client, AccessRights
-from oauth2 import authorization
-from app import config_app
-from db_utils import create_all
+from .models import db, User, OAuth2Client, AccessRights
+from .oauth2 import authorization
+from .app import config_app
+from .db_utils import create_all
 
 SCRIPT_DIR = os.path.dirname(__file__)
 FILE_DIR = '/var/nmosoauth'

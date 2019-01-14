@@ -6,10 +6,9 @@ from authlib.flask.oauth2.sqla import (
     create_bearer_token_validator,
 )
 from authlib.specs.rfc6749 import grants
-from werkzeug.security import gen_salt
-from models import db, User
-from models import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 from authlib.specs.rfc6749.errors import InvalidRequestError
+from werkzeug.security import gen_salt
+from .models import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):

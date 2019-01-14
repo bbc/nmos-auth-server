@@ -1,8 +1,8 @@
 import os
 from authlib.specs.rfc7519 import jwt
 import datetime
-from oauth2 import authorization
-from models import AccessRights
+from .oauth2 import authorization
+from .models import AccessRights
 
 FILE_DIR = '/var/nmosoauth'
 
