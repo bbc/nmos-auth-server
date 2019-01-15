@@ -1,7 +1,7 @@
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
 # from authlib.flask.error import raise_http_exception
 from .db_utils import create_all, drop_all
-from flask import jsonify
+from flask import jsonify, render_template
 
 
 def register_handlers(app):
@@ -20,10 +20,6 @@ def register_handlers(app):
     def authlib_base_handler(error):
         return jsonify(error=str(error)), 400
 
-    @app.cli.command()
-    def initdb():
-        create_all()
-
-    @app.cli.command()
-    def dropdb():
-        drop_all()
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'), 404
