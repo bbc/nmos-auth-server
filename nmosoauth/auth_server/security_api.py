@@ -177,7 +177,7 @@ class SecurityAPI(WebAPI):
     # route for certificate with public key
     @route('/certs', methods=['GET'], auto_json=False)
     def get_cert(self):
-        abs_pubkey_path = os.path.join(FILE_DIR, "privkey.pem")
+        abs_pubkey_path = os.path.join(FILE_DIR, "certificate.pem")
         try:
             with open(abs_pubkey_path, 'r') as myfile:
                 pubkey = myfile.read()
