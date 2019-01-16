@@ -1,6 +1,6 @@
 import os
 from flask import request, session, send_from_directory
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, jsonify
 import requests
 from requests.auth import HTTPBasicAuth
 from werkzeug.security import gen_salt
@@ -181,7 +181,7 @@ class SecurityAPI(WebAPI):
         try:
             with open(abs_pubkey_path, 'r') as myfile:
                 pubkey = myfile.read()
-            return pubkey
+            return jsonify({'default': pubkey})
         except OSError as e:
             print("Error: " + e + "\nFile at " + abs_pubkey_path + "doesn't exist")
             raise
