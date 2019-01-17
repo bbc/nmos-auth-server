@@ -12,11 +12,10 @@ from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 import subprocess
-
 import pwd
 import grp
-import os
 
+from nmosoauth.constants import NMOSOAUTH_DIR
 
 # Basic metadata
 name = "nmos-oauth"
@@ -28,22 +27,22 @@ author_email = 'danny.meloy@bbc.co.uk'
 license = 'BSD'
 long_description = "OAuth Server Implementation to produce JWTs for API Access"
 
+USER = 'ipstudio'
+
 
 def gen_certs():
     try:
-        fname = '/var/nmosoauth/generate_cert.sh'
+        fname = os.path.join(NMOSOAUTH_DIR, 'generate_cert.sh')
         subprocess.Popen([fname])
-
     except Exception as e:
         print('Error: {}. Failed to generate certificates.'.format(str(e)))
+        print('Please run "generate_cert.sh" at {}'.format(NMOSOAUTH_DIR))
         pass
 
 def change_permissions():
-    user = 'ipstudio'
-    path = '/var/nmosoauth/'
-    uid = pwd.getpwnam(user).pw_uid
-    gid = grp.getgrnam(user).gr_gid
-    os.chown(path, uid, gid)
+    uid = pwd.getpwnam(USER).pw_uid
+    gid = grp.getgrnam(USER).gr_gid
+    os.chown(NMOSOAUTH_DIR, uid, gid)
 
 
 class PostDevelopCommand(develop):
@@ -118,7 +117,7 @@ setup(name=name,
         'nmosoauth' : ['auth_server/templates/*', 'auth_server/static/*']
       },
       data_files=[
-        ('/var/nmosoauth', ['nmosoauth/auth_server/certs/generate_cert.sh']),
+        ('/var/nmosoauth', ['nmosoauth/certs/generate_cert.sh']),
         ('/usr/bin', ['bin/nmosoauth']),
         ('/lib/systemd/system', ['debian/python-oauth.service'])
       ],

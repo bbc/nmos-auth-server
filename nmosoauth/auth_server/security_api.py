@@ -12,9 +12,9 @@ from .models import db, User, OAuth2Client, AccessRights
 from .oauth2 import authorization
 from .app import config_app
 from .db_utils import create_all
+from ..constants import CERT_PATH, CERT_KEY
 
 SCRIPT_DIR = os.path.dirname(__file__)
-FILE_DIR = '/var/nmosoauth'
 
 
 class SecurityAPI(WebAPI):
@@ -177,13 +177,12 @@ class SecurityAPI(WebAPI):
     # route for certificate with public key
     @route('/certs', methods=['GET'], auto_json=False)
     def get_cert(self):
-        abs_pubkey_path = os.path.join(FILE_DIR, "certificate.pem")
         try:
-            with open(abs_pubkey_path, 'r') as myfile:
-                pubkey = myfile.read()
-            return jsonify({'default': pubkey})
+            with open(CERT_PATH, 'r') as myfile:
+                cert = myfile.read()
+            return jsonify({CERT_KEY: cert})
         except OSError as e:
-            print("Error: " + e + "\nFile at " + abs_pubkey_path + "doesn't exist")
+            print("Error: " + e + "\nFile at " + CERT_PATH + " doesn't exist")
             raise
 
     @route('/logout/')

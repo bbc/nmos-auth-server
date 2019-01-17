@@ -1,7 +1,5 @@
 import os
-
-SCRIPT_DIR = os.path.dirname(__file__)
-FILE_DIR = '/var/nmosoauth'
+from ..constants import NMOSOAUTH_DIR, PRIVKEY_FILE, DATABASE_NAME
 
 pkg = ''
 if __package__ is not None:
@@ -13,18 +11,17 @@ class BaseConfig(object):
     TESTING = False
     SECRET_KEY = 'secret'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/db.sqlite'.format(FILE_DIR)
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/{}.sqlite'.format(NMOSOAUTH_DIR, DATABASE_NAME)
     OAUTH2_ACCESS_TOKEN_GENERATOR = pkg + 'token_generator.gen_token'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_JWT_ENABLED = True
     OAUTH2_JWT_ISS = 'https://oauth.rd.bbc.co.uk'
     OAUTH2_JWT_ALG = 'RS256'
     OAUTH2_JWT_EXP = 30
-    OAUTH2_JWT_KEY_PATH = FILE_DIR + '/privkey.pem'
-    # OAUTH2_JWT_KEY_PATH = SCRIPT_DIR + '/certs/privkey.pem'
+    OAUTH2_JWT_KEY_PATH = os.path.join(NMOSOAUTH_DIR, PRIVKEY_FILE)
 
 
 class TestConfig(BaseConfig):
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite://{}/dbtest.sqlite'.format(FILE_DIR)
+    SQLALCHEMY_DATABASE_URI = 'sqlite://{}/test_{}.sqlite'.format(NMOSOAUTH_DIR, DATABASE_NAME)

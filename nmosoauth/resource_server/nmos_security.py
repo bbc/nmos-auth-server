@@ -3,6 +3,7 @@ import requests
 from requests.exceptions import RequestException
 from functools import wraps
 from flask import request
+from OpenSSL import crypto
 
 from nmoscommon.mdnsbridge import IppmDNSBridge
 from nmoscommon.nmoscommonconfig import config as _config
@@ -10,9 +11,9 @@ from authlib.specs.rfc7519 import jwt
 from authlib.specs.rfc7519.claims import JWTClaims
 from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
     UnsupportedTokenTypeError
-# from authlib.flask.error import raise_http_exception
 # from authlib.specs.rfc7519.errors import InvalidClaimError, MissingClaimError
 # from claims_options import IS_XX_CLAIMS
+from ..constants import CERT_ENDPOINT, CERT_PATH
 
 IS_XX_CLAIMS = {
     "iat": {"essential": True},
@@ -25,8 +26,6 @@ IS_XX_CLAIMS = {
     "x-nmos-api": {"essential": True}
 }
 
-CERT_ENDPOINT = "/certs"
-CERT_FILE_PATH = "/var/nmosoauth/pubkey.pem"
 MDNS_SERVICE_TYPE = "nmos-security"
 SCRIPT_DIR = os.path.dirname(__file__)
 OAUTH_MODE = _config.get('oauth_mode', True)
@@ -61,12 +60,12 @@ class JWTClaimsValidator(JWTClaims):
 class NmosSecurity(object):
 
     def __init__(self, condition=OAUTH_MODE, claimsOptions=IS_XX_CLAIMS,
-                 certificate=None):
+                 certificate=None, logger=None):
         self.condition = condition
         self.claimsOptions = claimsOptions
         self.certificate = certificate
-        self.decorator = None
         self.bridge = IppmDNSBridge()
+        self.logger = logger
 
     def getHrefFromService(self, serviceType):
         return self.bridge.getHref(serviceType)
@@ -84,23 +83,21 @@ class NmosSecurity(object):
             raise
 
         contentType = cert.headers['content-type'].split(";")[0]
-        if contentType == "text/html":
+        if contentType == "application/json":
             try:
                 if len(cert.json()) > 1:
                     print("Multiple certificates at Endpoint. Returning First Instance.")
-                cert = cert.json()[0]
-            except ValueError:
-                cert = cert.text
-            self.certificate = cert
-            return cert
+                cert = cert.json()['default']
+            except KeyError as e:
+                print("Error: {}. Endpoint contains: {}".format(str(e), cert.json()))
+                raise
         else:
-            raise ValueError("Incorrect Content-Type. Expected 'text/html but got {}".format(contentType))
+            raise ValueError("Incorrect Content-Type. Expected 'application/json but got {}".format(contentType))
 
     def getCertFromFile(self, filename):
-        abs_cert_path = os.path.join(SCRIPT_DIR, filename)
         try:
             if filename is not None:
-                with open(abs_cert_path, 'r') as myfile:
+                with open(filename, 'r') as myfile:
                     cert_data = myfile.read()
                     self.certificate = cert_data
                     return cert_data
@@ -109,8 +106,6 @@ class NmosSecurity(object):
             raise
 
     def extractPublicKey(self, certificate):
-        from OpenSSL import crypto
-
         crtObj = crypto.load_certificate(crypto.FILETYPE_PEM, certificate)
         pubKeyObject = crtObj.get_pubkey()
         pubKeyString = crypto.dump_publickey(crypto.FILETYPE_PEM, pubKeyObject)
@@ -128,7 +123,7 @@ class NmosSecurity(object):
                 cert = self.getCertFromEndpoint()
             except Exception as e:
                 print("Error: {0!s}. Trying to fetch Cert From File...".format(e))
-                cert = self.getCertFromFile(CERT_FILE_PATH)
+                cert = self.getCertFromFile(CERT_PATH)
             self.certificate = cert
         pubKey = self.extractPublicKey(self.certificate)
         return pubKey
@@ -158,5 +153,5 @@ class NmosSecurity(object):
             # Return the function unchanged, not decorated.
             return func
         # Return decorated function
-        self.decorator = self.JWTRequired()
-        return self.decorator(func)
+        decorator = self.JWTRequired()
+        return decorator(func)
