@@ -2,5 +2,5 @@ include README.md
 include tox.ini
 include stdeb.cfg
 recursive-include nmosoauth *
-include nmosoauth/certs generate_cert.py
+include nmosoauth/certs/generate_cert.sh
 recursive-include tests *.py

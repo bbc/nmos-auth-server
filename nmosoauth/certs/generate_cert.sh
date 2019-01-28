@@ -1,12 +1,9 @@
 #!/bin/bash
 
-# ssh-keygen -t rsa -b 2048 -f jwtRS256.key -N ''
-# # Don't add passphrase
-# openssl rsa -in jwtRS256.key -pubout -outform PEM -out jwtRS256.key.pub
-
 KEYFILE="privkey.pem";
 CERTFILE="certificate.pem";
 PUBKEYFILE="pubkey.pem";
+NMOSOAUTH_DIR="/var/nmosoauth"
 subinfo='/C=UK/L=Manchester/O=BBC/CN=www.bbc.co.uk';
 
 [ -e $CERTFILE ] && rm $CERTFILE;
@@ -20,6 +17,6 @@ chown ipstudio:ipstudio $KEYFILE
 chown ipstudio:ipstudio $PUBKEYFILE
 chown ipstudio:ipstudio $CERTFILE
 
-mv $KEYFILE /var/nmosoauth
-mv $CERTFILE /var/nmosoauth
-mv $PUBKEYFILE /var/nmosoauth
+mv $KEYFILE $NMOSOAUTH_DIR
+mv $CERTFILE $NMOSOAUTH_DIR
+mv $PUBKEYFILE $NMOSOAUTH_DIR

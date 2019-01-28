@@ -9,13 +9,7 @@
 from __future__ import print_function
 import os
 from setuptools import setup
-from setuptools.command.develop import develop
-from setuptools.command.install import install
-import subprocess
-import pwd
-import grp
 
-from nmosoauth.constants import NMOSOAUTH_DIR
 
 # Basic metadata
 name = "nmos-oauth"
@@ -26,39 +20,6 @@ author = 'Danny Meloy'
 author_email = 'danny.meloy@bbc.co.uk'
 license = 'BSD'
 long_description = "OAuth Server Implementation to produce JWTs for API Access"
-
-USER = 'ipstudio'
-
-
-def gen_certs():
-    try:
-        fname = os.path.join(NMOSOAUTH_DIR, 'generate_cert.sh')
-        subprocess.Popen([fname])
-    except Exception as e:
-        print('Error: {}. Failed to generate certificates.'.format(str(e)))
-        print('Please run "generate_cert.sh" at {}'.format(NMOSOAUTH_DIR))
-        pass
-
-def change_permissions():
-    uid = pwd.getpwnam(USER).pw_uid
-    gid = grp.getgrnam(USER).gr_gid
-    os.chown(NMOSOAUTH_DIR, uid, gid)
-
-
-class PostDevelopCommand(develop):
-    """Post-installation for development mode."""
-    def run(self):
-        develop.run(self)
-        gen_certs()
-        change_permissions()
-
-
-class PostInstallCommand(install):
-    """Post-installation for installation mode."""
-    def run(self):
-        install.run(self)
-        gen_certs()
-        change_permissions()
 
 
 def is_package(path):
@@ -114,16 +75,10 @@ setup(name=name,
       include_package_data=True,
       scripts=[],
       package_data={
-        'nmosoauth' : ['auth_server/templates/*', 'auth_server/static/*']
+        'nmosoauth': ['auth_server/templates/*', 'auth_server/static/*']
       },
       data_files=[
-        ('/var/nmosoauth', ['nmosoauth/certs/generate_cert.sh']),
         ('/usr/bin', ['bin/nmosoauth']),
-        ('/lib/systemd/system', ['debian/python-oauth.service'])
       ],
       long_description=long_description,
-      cmdclass={
-        'develop': PostDevelopCommand,
-        'install': PostInstallCommand,
-        }
       )
