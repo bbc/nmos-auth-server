@@ -1,9 +1,8 @@
 '''
-This set of functions must be run from within
+This set of functions can be run from within
 a "flask shell" to give app/database context '''
 
 from .models import db, User, AccessRights
-# from oauth2_server.db_utils import *
 
 # -------------------- INIT ------------------------- #
 

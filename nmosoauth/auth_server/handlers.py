@@ -1,9 +1,15 @@
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
 # from authlib.flask.error import raise_http_exception
 from flask import jsonify, render_template
+from .db_utils import create_all
 
 
 def register_handlers(app):
+
+    # create all db tables
+    @app.before_first_request
+    def create_tables():
+        create_all()
 
     @app.errorhandler(AuthlibHTTPError)
     def authlib_http_handler(error):

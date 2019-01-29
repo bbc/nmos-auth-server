@@ -25,6 +25,8 @@ case "$1" in
     configure)
         chown ipstudio:ipstudio /var/nmosoauth
         /var/nmosoauth/generate_cert.sh
+        systemctl daemon-reload
+        systemctl restart python-nmos-oauth
     ;;
 
     triggered)

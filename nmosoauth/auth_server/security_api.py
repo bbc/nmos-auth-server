@@ -11,7 +11,6 @@ from nmoscommon.webapi import WebAPI, route
 from .models import db, User, OAuth2Client, AccessRights
 from .oauth2 import authorization
 from .app import config_app
-from .db_utils import create_all
 from ..constants import CERT_PATH, CERT_KEY
 
 SCRIPT_DIR = os.path.dirname(__file__)
@@ -24,8 +23,6 @@ class SecurityAPI(WebAPI):
         self.logger = logger
         self.add_templates_folder()
         config_app(self.app, 'BaseConfig')  # OAuth and DB config
-        with self.app.app_context():
-            create_all()
 
     # Add html templates folder to list of Jinja loaders
     def add_templates_folder(self):
