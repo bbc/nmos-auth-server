@@ -18,7 +18,7 @@
 
 pipeline {
     agent {
-        label "16.04&&ipstudio-deps"
+        label "ubuntu&&apmm-slave"
     }
     options {
         ansiColor('xterm') // Add support for coloured output
