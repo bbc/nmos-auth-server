@@ -10,7 +10,7 @@ subinfo='/C=UK/L=Manchester/O=BBC/CN=www.bbc.co.uk';
 [ -e $KEYFILE ] && rm $KEYFILE;
 [ -e $PUBKEYFILE ] && rm $PUBKEYFILE;
 
-openssl req -newkey rsa:2048 -nodes -subj "$subinfo" -keyout $KEYFILE -x509 -days 365 -outform PEM -out $CERTFILE;
+openssl req -newkey rsa:2048 -nodes -subj "$subinfo" -keyout $KEYFILE -x509 -days 365 -outform PEM -out $CERTFILE > /dev/null 2>&1;
 openssl x509 -in $CERTFILE -noout -pubkey > $PUBKEYFILE
 
 chown ipstudio:ipstudio $KEYFILE
