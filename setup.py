@@ -58,7 +58,7 @@ packages_required = [
     "gevent",
     "systemd",
     "nmoscommon",
-    "authlib>=0.11",
+    "authlib>=0.10",
 ]
 
 deps_required = []
