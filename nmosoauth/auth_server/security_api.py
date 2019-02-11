@@ -89,7 +89,7 @@ class SecurityAPI(WebAPI):
             session['id'] = user.id
             return redirect('/')
 
-    @route('/create_client', methods=['GET', 'POST'], auto_json=False)
+    @route('/register_client', methods=['GET', 'POST'], auto_json=False)
     def create_client(self):
         user = self.current_user()
         if not user:
@@ -145,7 +145,7 @@ class SecurityAPI(WebAPI):
         return render_template('request.html', user=user,
                                client=client, token=session['token'])
 
-    @route('/oauth/authorize', methods=['GET', 'POST'], auto_json=False)
+    @route('/authorize', methods=['GET', 'POST'], auto_json=False)
     def authorization(self):
         user = self.current_user()
         if request.method == 'GET':
@@ -163,11 +163,11 @@ class SecurityAPI(WebAPI):
             grant_user = None
         return authorization.create_authorization_response(grant_user=grant_user)
 
-    @route('/oauth/token', methods=['POST'], auto_json=False)
+    @route('/token', methods=['POST'], auto_json=False)
     def issue_token(self):
         return authorization.create_token_response()
 
-    @route('/oauth/revoke', methods=['POST'], auto_json=False)
+    @route('/revoke', methods=['POST'], auto_json=False)
     def revoke_token(self):
         return authorization.create_endpoint_response('revocation')
 
