@@ -15,11 +15,11 @@ set -e
 
 
 case "$1" in
-    remove|purge)
+    purge)
 	     rm -rf /var/nmosoauth
     ;;
 
-    upgrade|failed-upgrade)
+    remove|upgrade|failed-upgrade)
     ;;
 
     *)
