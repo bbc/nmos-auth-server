@@ -5,6 +5,9 @@ pkg = ''
 if __package__ is not None:
     pkg = __package__ + '.'
 
+print(os.path.dirname(__file__))
+print(os.getcwd())
+
 
 class BaseConfig(object):
     DEBUG = True
@@ -24,4 +27,4 @@ class BaseConfig(object):
 class TestConfig(BaseConfig):
     DEBUG = True
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite://{}/test_{}.sqlite'.format(NMOSOAUTH_DIR, DATABASE_NAME)
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'

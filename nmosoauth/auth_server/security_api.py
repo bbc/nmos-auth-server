@@ -18,12 +18,12 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class SecurityAPI(WebAPI):
-    def __init__(self, logger, config):
+    def __init__(self, logger, config, confClass):
         super(SecurityAPI, self).__init__()
         self._config = config
         self.logger = logger
         self.add_templates_folder()
-        config_app(self.app, 'BaseConfig')  # OAuth and DB config
+        config_app(self.app, confClass)  # OAuth and DB config
 
     # Add html templates folder to list of Jinja loaders
     def add_templates_folder(self):

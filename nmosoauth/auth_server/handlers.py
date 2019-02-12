@@ -7,8 +7,7 @@ from .db_utils import create_all
 def register_handlers(app):
 
     # create all db tables
-    @app.before_first_request
-    def create_tables():
+    with app.app_context():
         create_all()
 
     @app.errorhandler(AuthlibHTTPError)

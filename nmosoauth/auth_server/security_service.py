@@ -36,7 +36,7 @@ API_VERSIONS = ["v1.0"]
 
 DNS_SD_HTTP_PORT = 80
 DNS_SD_HTTPS_PORT = 443
-DNS_SD_NAME = 'security_' + str(HOSTNAME) + "_" + str(getpid())
+DNS_SD_NAME = 'auth_' + str(HOSTNAME) + "_" + str(getpid())
 DNS_SD_TYPE = '_nmos-auth._tcp'
 
 
@@ -70,7 +70,7 @@ class SecurityService:
                                 "api_ver": ",".join(API_VERSIONS),
                                 "api_proto": "https"})
 
-        self.httpServer = HttpServer(SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config])
+        self.httpServer = HttpServer(SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config, 'BaseConfig'])
         self.httpServer.start()
         while not self.httpServer.started.is_set():
             self.logger.writeInfo('Waiting for httpserver to start...')
