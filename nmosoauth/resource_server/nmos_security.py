@@ -79,6 +79,7 @@ class NmosSecurity(object):
                 if len(cert.json()) > 1:
                     self.logger.writeWarning("Multiple certificates at Endpoint. Returning First Instance.")
                 cert = cert.json()['default']
+                return cert
             except KeyError as e:
                 self.logger.writeError("Error: {}. Endpoint contains: {}".format(str(e), cert.json()))
                 raise
