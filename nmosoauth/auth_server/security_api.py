@@ -12,8 +12,9 @@ from .models import db, User, OAuth2Client, AccessRights
 from .oauth2 import authorization
 from .app import config_app
 from ..constants import CERT_PATH, CERT_KEY
+from ..resource_server.nmos_security import NmosSecurity
 
-SCRIPT_DIR = os.path.dirname(__file__)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class SecurityAPI(WebAPI):
@@ -37,6 +38,11 @@ class SecurityAPI(WebAPI):
     @route('/static/<filename>', auto_json=False)
     def style(self, filename):
         return send_from_directory(SCRIPT_DIR + '/static', filename)
+
+    @route('/test', auto_json=True)
+    @NmosSecurity(condition=True)
+    def test(self):
+        return (200, "Hello World")
 
     def current_user(self):
         if 'id' in session:

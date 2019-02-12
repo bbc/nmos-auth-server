@@ -17,8 +17,8 @@ from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
 from .claims_options import IS_XX_CLAIMS
 from ..constants import CERT_ENDPOINT, CERT_PATH
 
-MDNS_SERVICE_TYPE = "nmos-security"
-SCRIPT_DIR = os.path.dirname(__file__)
+MDNS_SERVICE_TYPE = "nmos-auth"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OAUTH_MODE = _config.get('oauth_mode', True)
 
 

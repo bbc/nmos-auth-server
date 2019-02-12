@@ -37,7 +37,7 @@ API_VERSIONS = ["v1.0"]
 DNS_SD_HTTP_PORT = 80
 DNS_SD_HTTPS_PORT = 443
 DNS_SD_NAME = 'security_' + str(HOSTNAME) + "_" + str(getpid())
-DNS_SD_TYPE = '_nmos-security._tcp'
+DNS_SD_TYPE = '_nmos-auth._tcp'
 
 
 class SecurityService:
