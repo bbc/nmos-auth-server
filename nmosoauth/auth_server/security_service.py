@@ -43,7 +43,7 @@ DNS_SD_TYPE = '_nmos-auth._tcp'
 class SecurityService:
     def __init__(self, logger=None):
         self.config = _config
-        self.logger = Logger("security", logger)
+        self.logger = Logger("nmosoauth", logger)
         self.running = False
         self.httpServer = None
         self.mdns = MDNSEngine()

@@ -56,7 +56,7 @@ class NmosSecurity(object):
         self.claimsOptions = claimsOptions
         self.certificate = certificate
         self.bridge = IppmDNSBridge()
-        self.logger = defaultLogger
+        self.logger = defaultLogger("nmossecurity")
 
     def getHrefFromService(self, serviceType):
         return self.bridge.getHref(serviceType)
