@@ -40,7 +40,6 @@ class JWTClaimsValidator(JWTClaims):
         pass
 
     def validate_nmos(self):
-        self.logger.writeInfo("YOU ARE IN THE FUNC VALIDATE NMOS API")
         pass
 
     def validate(self, now=None, leeway=0):
