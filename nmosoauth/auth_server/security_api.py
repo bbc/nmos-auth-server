@@ -1,8 +1,6 @@
 import os
 from flask import request, session, send_from_directory
 from flask import render_template, redirect, url_for, jsonify
-import requests
-from requests.auth import HTTPBasicAuth
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
@@ -122,35 +120,6 @@ class SecurityAPI(WebAPI):
         client = OAuth2Client.query.filter_by(user_id=user.id).first()
         return render_template('fetch_token.html', client=client)
 
-    @route('/request_token', methods=['GET', 'POST'], auto_json=False)
-    def request_token(self):
-        user = self.current_user()
-        if not user:
-            return redirect('/')
-        # TODO - specific client
-        client = OAuth2Client.query.filter_by(user_id=user.id).first()
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
-            scope = request.form.get('scope')
-            grant_type = 'password'
-            client_id = client.client_id
-            client_secret = client.client_secret
-            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-            data = {'scope': scope, 'grant_type': grant_type,
-                    'username': username, 'password': password}
-            resp = requests.post(
-                    request.url_root + 'oauth/token',
-                    auth=HTTPBasicAuth(client_id, client_secret),
-                    headers=headers,
-                    data=data).json()
-            if 'access_token' in resp.keys():
-                session['token'] = resp['access_token']
-        if 'token' not in session.keys():
-            session['token'] = None
-        return render_template('request.html', user=user,
-                               client=client, token=session['token'])
-
     @route('/authorize', methods=['GET', 'POST'], auto_json=False)
     def authorization(self):
         user = self.current_user()
@@ -185,7 +154,7 @@ class SecurityAPI(WebAPI):
                 cert = myfile.read()
             return jsonify({CERT_KEY: cert})
         except OSError as e:
-            print("Error: " + e + "\nFile at " + CERT_PATH + " doesn't exist")
+            self.logger.writeError("Error: " + e + "\nFile at " + CERT_PATH + " doesn't exist")
             raise
 
     @route('/logout/')

@@ -4,7 +4,7 @@ KEYFILE="privkey.pem";
 CERTFILE="certificate.pem";
 PUBKEYFILE="pubkey.pem";
 NMOSOAUTH_DIR="/var/nmosoauth"
-subinfo='/C=UK/L=Manchester/O=BBC/CN=www.bbc.co.uk';
+subinfo='/C=UK/L=London/O=Example/CN=www.example.co.uk';
 
 [ -e $CERTFILE ] && rm $CERTFILE;
 [ -e $KEYFILE ] && rm $KEYFILE;
