@@ -14,7 +14,7 @@ from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
 
 from .claims_options import IS_XX_CLAIMS
 from .claims_validator import JWTClaimsValidator
-from ..constants import CERT_ENDPOINT, CERT_PATH
+from ..constants import CERT_ENDPOINT, CERT_PATH, CERT_KEY
 
 MDNS_SERVICE_TYPE = "nmos-auth"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -51,7 +51,7 @@ class NmosSecurity(object):
             try:
                 if len(cert.json()) > 1:
                     self.logger.writeWarning("Multiple certificates at Endpoint. Returning First Instance.")
-                cert = cert.json()['default']
+                cert = cert.json()[CERT_KEY]
                 return cert
             except KeyError as e:
                 self.logger.writeError("Error: {}. Endpoint contains: {}".format(str(e), cert.json()))

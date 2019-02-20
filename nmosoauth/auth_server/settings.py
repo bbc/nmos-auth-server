@@ -25,7 +25,7 @@ class TestConfig(BaseConfig):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
-    # OAUTH2_JWT_KEY_PATH = tempfile.NamedTemporaryFile(dir='.').name
+    OAUTH2_JWT_KEY_PATH = None
     OAUTH2_JWT_KEY = '''
 -----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDI+QXfWFLCkAtw

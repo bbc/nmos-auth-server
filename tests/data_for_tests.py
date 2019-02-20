@@ -1,3 +1,24 @@
+"""
+EQUIVALENT TO:
+{
+  "sub": "dannym",
+  "exp": 1582136965,
+  "scope": "is-05",
+  "iss": "https://oauth.rd.bbc.co.uk",
+  "iat": 1550579365,
+  "x-nmos-api": {
+    "access": "write",
+    "name": "is-05"
+  },
+  "nbf": 1550579365,
+  "aud": [
+    "IS-05",
+    "Write",
+    "Access"
+  ]
+}
+"""
+
 BEARER_TOKEN = {
     "access_token":	'''
 eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYW5ueW0iLCJleHAi\

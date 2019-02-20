@@ -42,7 +42,10 @@ IS_04_QUERY_CLAIMS = {
              },
     "x-nmos-api": {
                     "essential": True,
-                    "value": "is-04"
+                    "value": {
+                                "name": "is-04",
+                                "access": "write"
+                            }
                    }
 }
 
@@ -59,7 +62,10 @@ IS_04_NODE_CLAIMS = {
              },
     "x-nmos-api": {
                     "essential": True,
-                    "value": "is-04"
+                    "value": {
+                                "name": "is-04",
+                                "access": "write"
+                            }
                    }
 }
 

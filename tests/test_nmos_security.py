@@ -27,7 +27,7 @@ class TestNmosSecurity(unittest.TestCase):
         self.security = NmosSecurity(condition=True)
 
     def dummy(self):
-        pass
+        return "SUCCESS"
 
     @mock.patch.object(NmosSecurity, "JWTRequired")
     def testCondition(self, mockJWTRequired):
@@ -40,7 +40,7 @@ class TestNmosSecurity(unittest.TestCase):
         mockJWTRequired.assert_called_once()
 
     @mock.patch("nmosoauth.resource_server.nmos_security.request")
-    def testJWTRequiredWithRequest(self, mockRequest):
+    def testJWTRequiredWithBadRequest(self, mockRequest):
         mockRequest.headers.get.return_value = None
         self.assertRaises(MissingAuthorizationError, self.security(self.dummy))
 
@@ -93,15 +93,22 @@ class TestNmosSecurity(unittest.TestCase):
         self.assertRaises(Exception, self.security.extractPublicKey, "")
         self.assertEqual(self.security.extractPublicKey(CERT['default']), PUB_KEY)
 
+    @mock.patch.object(NmosSecurity, "getCertFromEndpoint")
     @mock.patch("nmosoauth.resource_server.nmos_security.request")
-    def testJWTClaimsValidator(self, mockRequest):
+    def testJWTClaimsValidator(self, mockRequest, mockGetCert):
         mockRequest.headers.get.return_value = "Bearer " + BEARER_TOKEN["access_token"]
+        mockGetCert.return_value = CERT['default']
 
         self.security = NmosSecurity(condition=True, claimsOptions=IS_04_REG_CLAIMS)
         self.assertRaises(InvalidClaimError, self.security(self.dummy))
 
         self.security = NmosSecurity(condition=True, claimsOptions=IS_05_CLAIMS)
-        self.security(self.dummy)()
+        self.assertEqual(self.security(self.dummy)(), "SUCCESS")
+
+        # NOTE: Assumes Only Write Access is permitted
+        IS_05_CLAIMS["x-nmos-api"]["value"]["access"] = "read"
+        self.security = NmosSecurity(condition=True, claimsOptions=IS_05_CLAIMS)
+        self.assertRaises(InvalidClaimError, self.security(self.dummy))
 
 
 if __name__ == '__main__':
