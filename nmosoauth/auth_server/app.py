@@ -4,6 +4,7 @@ from .models import db
 from .oauth2 import config_oauth
 from .handlers import register_handlers
 from .db_utils import create_all
+from .basic_auth import auth
 
 
 def config_app(app, confClass='BaseConfig', config=None):
@@ -31,6 +32,7 @@ def config_app(app, confClass='BaseConfig', config=None):
 
 def setup_app(app):
     db.init_app(app)
+    auth.init_app(app)
     config_oauth(app)
     register_handlers(app)
     CORS(app)

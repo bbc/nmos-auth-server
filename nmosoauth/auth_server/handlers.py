@@ -22,3 +22,7 @@ def register_handlers(app):
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
+
+    @app.errorhandler(401)
+    def login_page(e):
+        render_template('home.html')
