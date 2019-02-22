@@ -9,6 +9,7 @@ from nmoscommon.webapi import WebAPI, route
 from .models import db, User, OAuth2Client, AccessRights
 from .oauth2 import authorization
 from .app import config_app
+from .basic_auth import basicAuth
 from ..constants import CERT_PATH, CERT_KEY
 from ..resource_server.nmos_security import NmosSecurity
 
@@ -16,12 +17,12 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class SecurityAPI(WebAPI):
-    def __init__(self, logger, config, confClass):
+    def __init__(self, logger, nmosConfig, confClass, extraConfig=None):
         super(SecurityAPI, self).__init__()
-        self._config = config
+        self._config = nmosConfig
         self.logger = logger
         self.add_templates_folder()
-        config_app(self.app, confClass)  # OAuth and DB config
+        config_app(self.app, confClass=confClass, config=extraConfig)  # OAuth and DB config
 
     # Add html templates folder to list of Jinja loaders
     def add_templates_folder(self):
@@ -94,14 +95,16 @@ class SecurityAPI(WebAPI):
             return redirect('/')
 
     @route('/register_client', methods=['GET', 'POST'], auto_json=False)
+    @basicAuth.required
     def create_client(self):
         user = self.current_user()
-        if not user:
-            return redirect('/')
         if request.method == 'GET':
             return render_template('create_client.html')
         client = OAuth2Client(**request.form.to_dict(flat=True))
-        client.user_id = user.id
+        if user:
+            client.user_id = user.id
+        else:
+            client.user_id = 1
         client.client_id = gen_salt(24)
         if client.token_endpoint_auth_method == 'none':
             client.client_secret = ''
@@ -154,13 +157,13 @@ class SecurityAPI(WebAPI):
                 cert = myfile.read()
             return jsonify({CERT_KEY: cert})
         except OSError as e:
-            self.logger.writeError("Error: " + e + "\nFile at " + CERT_PATH + " doesn't exist")
+            self.logger.writeError("Error: {}\nFile at {} doesn't exist".format(e, CERT_PATH))
             raise
 
-    @route('/logout/')
+    @route('/logout', auto_json=False)
     def logout(self):
         try:
             del session['id']
         except Exception as e:
             self.logger.writeDebug("Error: {}. Couldn't delete session ID".format(str(e)))
-        return redirect(url_for('_home'), code=302)
+        return redirect('/')

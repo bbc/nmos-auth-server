@@ -11,44 +11,74 @@ from __future__ import absolute_import
 import unittest
 import mock
 
+
+from nmoscommon.logger import Logger
 from nmosoauth.auth_server.db_utils import drop_all
 from nmosoauth.auth_server.security_api import SecurityAPI
 from nmosoauth.auth_server.security_api import User
-from data_for_tests import BEARER_TOKEN
+from data_for_tests import BEARER_TOKEN, TEST_PRIV_KEY
+from base64 import b64encode
+from flask import request
 
 
 class TestNmosOauth(unittest.TestCase):
 
     def setUp(self):
-        self.api = SecurityAPI(None, None, 'TestConfig')
+        self.api = SecurityAPI(logger=Logger("testing"), nmosConfig=None,
+                               extraConfig={"OAUTH2_JWT_KEY": TEST_PRIV_KEY},
+                               confClass='TestConfig')
         self.app = self.api.app
         self.client = self.app.test_client()
+
+        self.mockUser = self.createMockUser("steve", "password")
+        patcher = mock.patch("nmosoauth.auth_server.basic_auth.User")
+        self.mockBasicUser = patcher.start()
+        self.mockBasicUser.query.filter_by.return_value.first.return_value = self.mockUser
+        self.addCleanup(patcher.stop)
 
     def tearDown(self):
         with self.app.app_context():
             drop_all()
 
-    def testRoutes(self):
-        rv = self.client.get('/')
-        self.assertEqual(rv.status_code, 200)
-        rv = self.client.get('/token')
-        self.assertEqual(rv.status_code, 405)
-        rv = self.client.get('/revoke')
-        self.assertEqual(rv.status_code, 405)
-        rv = self.client.get('/register_client')
-        self.assertEqual(rv.status_code, 302)
-        rv = self.client.get('/fetch_token')
-        self.assertEqual(rv.status_code, 302)
+    def createMockUser(self, username, password):
+        tempUser = User()
+        tempUser.username = username
+        tempUser.password = password
+        return tempUser
 
+    def auth_headers(self, user):
+        headers = {'Authorization': 'Basic ' + b64encode("{0}:{1}".format(user.username, user.password))}
+        return headers
+
+    def testInitialsRoutes(self):
+
+        headers = self.auth_headers(self.mockUser)
+
+        with self.client as client:
+            rv = client.get('/', follow_redirects=True)
+            self.assertEqual(rv.status_code, 200)
+            rv = client.get('/token', follow_redirects=True)
+            self.assertEqual(rv.status_code, 405)
+            rv = client.get('/revoke', follow_redirects=True)
+            self.assertEqual(rv.status_code, 405)
+            rv = client.get('/register_client')
+            self.assertEqual(rv.status_code, 401)
+            rv = client.get('/register_client', headers=headers)
+            self.assertEqual(rv.status_code, 200)
+            rv = client.get('/fetch_token')
+            self.assertEqual(rv.status_code, 302)
+            rv = client.get('/logout')
+            self.assertEqual(rv.status_code, 302)
+
+    @mock.patch("nmosoauth.auth_server.basic_auth.User")
     @mock.patch("nmosoauth.auth_server.security_api.render_template")
     @mock.patch("nmosoauth.auth_server.security_api.User")
     # @mock.patch("nmosoauth.auth_server.security_api.request")
-    def testHome(self, mockUser, mockTemplate):
-        tempUser = User()
-        tempUser.username = "steve"
-        tempUser.password = "password"
+    def testHome(self, mockUser, mockTemplate, mockAuth):
 
-        mockUser.query.filter_by.return_value.first.return_value = tempUser
+        user = self.createMockUser('steve', 'password')
+        mockAuth.query.filter_by.return_value.first.return_value = user
+
         mockTemplate.return_value = "test"
 
         with self.client.post('/', data=dict(username="", password="")):
@@ -58,7 +88,7 @@ class TestNmosOauth(unittest.TestCase):
             mockTemplate.assert_called_with(
                 'home.html', clients=None, message='Invalid Password. Try Again.', user=None)
         with self.client.post('/', data=dict(username="steve", password="password")) as rv:
-            self.assertEqual(rv.status_code, 302)
+            self.assertEqual(rv.status_code, 200)
         mockUser.query.filter_by.return_value.first.return_value = None
         with self.client.post('/', data=dict(username="steve", password="password")):
             mockTemplate.assert_called_with(

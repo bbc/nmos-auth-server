@@ -5,12 +5,14 @@
   <link rel="icon" href="http://newsvote.bbc.co.uk/favicon.ico">
 </head>
 
-<h1>404 Error Page</h1>
+<h1>40{{ code }} Error Page: {{ message }}</h1>
 
 <section class="error-container">
   <span>4</span>
   <span><span class="screen-reader-text">0</span></span>
-  <span>4</span>
+  <span>{{ code }}</span>
 </section>
 <div class="link-container">
 </div>
+
+<h1><a href="{{ url_for('_home') }}">Click Here</a> to take you home</h1>
