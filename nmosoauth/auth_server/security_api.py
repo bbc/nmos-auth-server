@@ -1,6 +1,6 @@
 import os
 from flask import request, session, send_from_directory
-from flask import render_template, redirect, url_for, jsonify
+from flask import render_template, redirect, jsonify
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
@@ -10,6 +10,7 @@ from .models import db, User, OAuth2Client, AccessRights
 from .oauth2 import authorization
 from .app import config_app
 from .basic_auth import basicAuth
+from .db_utils import getUser
 from ..constants import CERT_PATH, CERT_KEY
 from ..resource_server.nmos_security import NmosSecurity
 
@@ -101,10 +102,9 @@ class SecurityAPI(WebAPI):
         if request.method == 'GET':
             return render_template('create_client.html')
         client = OAuth2Client(**request.form.to_dict(flat=True))
-        if user:
-            client.user_id = user.id
-        else:
-            client.user_id = 1
+        if not user and request.authorization:
+            user = getUser(request.authorization.username)
+        client.user_id = user.id
         client.client_id = gen_salt(24)
         if client.token_endpoint_auth_method == 'none':
             client.client_secret = ''
@@ -126,9 +126,11 @@ class SecurityAPI(WebAPI):
     @route('/authorize', methods=['GET', 'POST'], auto_json=False)
     def authorization(self):
         user = self.current_user()
+        if not user and request.authorization:
+            user = getUser(request.authorization.username)
         if request.method == 'GET':
             try:
-                grant = authorization.validate_consent_request(end_user=user)
+                grant = authorization.validate_consent_request(end_user=user, request=request)
             except OAuth2Error as error:
                 return error.error
             return render_template('authorize.html', user=user, grant=grant)

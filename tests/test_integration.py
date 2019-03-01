@@ -18,7 +18,6 @@ from nmosoauth.auth_server.security_api import SecurityAPI
 from nmosoauth.auth_server.security_api import User
 from data_for_tests import BEARER_TOKEN, TEST_PRIV_KEY
 from base64 import b64encode
-from flask import request
 
 
 class TestNmosOauth(unittest.TestCase):
@@ -50,9 +49,7 @@ class TestNmosOauth(unittest.TestCase):
         headers = {'Authorization': 'Basic ' + b64encode("{0}:{1}".format(user.username, user.password))}
         return headers
 
-    def testInitialsRoutes(self):
-
-        headers = self.auth_headers(self.mockUser)
+    def testInitialRoutes(self):
 
         with self.client as client:
             rv = client.get('/', follow_redirects=True)
@@ -61,23 +58,30 @@ class TestNmosOauth(unittest.TestCase):
             self.assertEqual(rv.status_code, 405)
             rv = client.get('/revoke', follow_redirects=True)
             self.assertEqual(rv.status_code, 405)
-            rv = client.get('/register_client')
-            self.assertEqual(rv.status_code, 401)
-            rv = client.get('/register_client', headers=headers)
-            self.assertEqual(rv.status_code, 200)
             rv = client.get('/fetch_token')
             self.assertEqual(rv.status_code, 302)
             rv = client.get('/logout')
             self.assertEqual(rv.status_code, 302)
 
-    @mock.patch("nmosoauth.auth_server.basic_auth.User")
+    def testBasicAuthRoutes(self):
+
+        headers = self.auth_headers(self.mockUser)
+        with self.client as client:
+            rv = client.get('/register_client')
+            self.assertEqual(rv.status_code, 401)
+
+            rv = client.get('/register_client', headers=headers)
+            self.assertEqual(rv.status_code, 200)
+
+            wrongUser = self.createMockUser("bob", "pass")
+            headers = self.auth_headers(wrongUser)
+            rv = client.get('/register_client', headers=headers)
+            self.assertEqual(rv.status_code, 401)
+
     @mock.patch("nmosoauth.auth_server.security_api.render_template")
     @mock.patch("nmosoauth.auth_server.security_api.User")
     # @mock.patch("nmosoauth.auth_server.security_api.request")
-    def testHome(self, mockUser, mockTemplate, mockAuth):
-
-        user = self.createMockUser('steve', 'password')
-        mockAuth.query.filter_by.return_value.first.return_value = user
+    def testHome(self, mockUser, mockTemplate):
 
         mockTemplate.return_value = "test"
 

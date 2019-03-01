@@ -1,16 +1,17 @@
 <!doctype html>
+{% set numbers = (code|string|list) %}
 <head>
   <title>BBC R&amp;D OAuth2 Server</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='error.css') }}">
   <link rel="icon" href="http://newsvote.bbc.co.uk/favicon.ico">
 </head>
 
-<h1>40{{ code }} Error Page: {{ message }}</h1>
+<h1>{{ code }} Error Page: {{ message }}</h1>
 
 <section class="error-container">
-  <span>4</span>
-  <span><span class="screen-reader-text">0</span></span>
-  <span>{{ code }}</span>
+  <span>{{numbers[0]}}</span>
+  <span><span class="screen-reader-text">{{numbers[1]}}</span></span>
+  <span>{{numbers[2]}}</span>
 </section>
 <div class="link-container">
 </div>

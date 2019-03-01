@@ -1,7 +1,5 @@
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
-# from authlib.flask.error import raise_http_exception
-from flask import jsonify, render_template, abort, Response
-from werkzeug.exceptions import HTTPException
+from flask import jsonify, render_template
 
 
 def register_handlers(app):
@@ -18,14 +16,17 @@ def register_handlers(app):
     def authlib_base_handler(error):
         return jsonify(error=str(error)), 400
 
+    @app.errorhandler(401)
+    def page_unauthorised(e):
+        code = 401
+        return render_template('error.html', code=code, message="Unauthorised"), code
+
     @app.errorhandler(404)
     def page_not_found(e):
-        return render_template('404.html', code=4, message="Not Found"), 404
+        code = 404
+        return render_template('error.html', code=code, message="Not Found"), code
 
     @app.errorhandler(403)
     def page_forbiddon(e):
-        return render_template('404.html', code=3, message="Forbiddon"), 403
-
-    @app.errorhandler(401)
-    def page_unauthorised(e):
-        return render_template('404.html', code=1, message="Unauthorised"), 401
+        code = 403
+        return render_template('error.html', code=code, message="Forbiddon"), code

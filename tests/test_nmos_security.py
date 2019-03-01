@@ -56,7 +56,7 @@ class TestNmosSecurity(unittest.TestCase):
         resp._content = json.dumps(content)
         resp.headers = headers
         mockObject.get.return_value = resp
-        res = eval("self.security." + method + "()")
+        res = eval("self.security.{}()".format(method))
         return res
 
     @mock.patch.object(NmosSecurity, "getHrefFromService")

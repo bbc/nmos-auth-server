@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from ..constants import NMOSOAUTH_DIR, PRIVKEY_FILE, DATABASE_NAME
 
 pkg = ''
@@ -10,6 +11,7 @@ class BaseConfig(object):
     DEBUG = True
     TESTING = False
     SECRET_KEY = 'secret'
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=5)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/{}.sqlite'.format(NMOSOAUTH_DIR, DATABASE_NAME)
     BASIC_AUTH_REALM = "NMOS Auth Server Login Required"
@@ -18,7 +20,7 @@ class BaseConfig(object):
     OAUTH2_JWT_ENABLED = True
     OAUTH2_JWT_ISS = 'https://oauth.rd.bbc.co.uk'
     OAUTH2_JWT_ALG = 'RS256'
-    OAUTH2_JWT_EXP = 31557600
+    OAUTH2_JWT_EXP = 60
     OAUTH2_JWT_KEY_PATH = os.path.join(NMOSOAUTH_DIR, PRIVKEY_FILE)
 
 

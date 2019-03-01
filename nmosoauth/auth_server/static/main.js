@@ -39,7 +39,7 @@ $(function getToken() {
       //dataType: 'json'
       success: function(data) {
         var accessToken = data.access_token;
-        localStorage.setItem('token', accessToken);
+        sessionStorage.setItem('token', accessToken);
         alert('Success!\nAccess Token:\n' + accessToken);
         return data;
       },
@@ -53,13 +53,13 @@ $(function getResource() {
   $("#resource").click(function(){
     var port = window.location.port;
     var host = window.location.hostname;
-    console.log(localStorage.getItem('token'));
+    console.log(sessionStorage.getItem('token'));
     $.ajax({
       url: 'http://' + host + ':' + port + '/test',
       type: 'GET',
       contentType: 'x-www-form-urlencoded',
       // Fetch the stored token from localStorage and set in the header
-      beforeSend: function (xhr) { xhr.setRequestHeader ("Authorization", "Bearer " + localStorage.getItem('token')); },
+      beforeSend: function (xhr) { xhr.setRequestHeader ("Authorization", "Bearer " + sessionStorage.getItem('token')); },
       success: function (result) {
         var returnResult = JSON.stringify(result);
         alert('Success!\n' + returnResult);
