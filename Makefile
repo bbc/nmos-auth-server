@@ -66,6 +66,7 @@ test:
 
 deb_dist: $(topbuilddir)/dist/$(MODNAME)-$(VERSION).tar.gz
 	$(PY2DSC) --with-python2=true --with-python3=false $(topbuilddir)/dist/$(MODNAME)-$(VERSION).tar.gz
+	sed -i 's/--with/--with apache2 --with systemd --with/' deb_dist/$(DEBNAME)-$(DEBVERSION)/debian/rules
 
 $(DEBIANDIR)/%: $(topdir)/debian/% deb_dist
 	cp -r $< $@
