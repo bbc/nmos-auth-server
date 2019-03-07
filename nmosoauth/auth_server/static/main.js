@@ -28,7 +28,7 @@ $(function getToken() {
     var client_id = document.getElementById("client_id").value;
     var client_secret = document.getElementById("client_secret").value;
     $.ajax({
-      url: 'http://' + host + ':' + port + '/token',
+      url: 'http://' + host + ':' + port + '/x-nmos/oauth/v1.0/token/',
       type: 'POST',
       data: requestPayload,
       crossDomain: true,
@@ -55,7 +55,7 @@ $(function getResource() {
     var host = window.location.hostname;
     console.log(sessionStorage.getItem('token'));
     $.ajax({
-      url: 'http://' + host + ':' + port + '/test',
+      url: 'http://' + host + ':' + port + '/x-nmos/oauth/v1.0/test/',
       type: 'GET',
       contentType: 'x-www-form-urlencoded',
       // Fetch the stored token from localStorage and set in the header
