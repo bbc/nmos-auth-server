@@ -90,7 +90,7 @@ def printTable(table):
     return [i for i in table.query.all()]
 
 
-def printString(table):
+def printTableString(table):
     return [str(i) for i in table.query.all()]
 
 
@@ -99,7 +99,7 @@ def printField(table, field):
     return eval(s)
 
 
-def printUser(user):
+def getUser(user):
     if isinstance(user, int):
         entry = User.query.get(user)
     elif isinstance(user, str):

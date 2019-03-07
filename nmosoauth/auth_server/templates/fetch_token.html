@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
- <script src="static/main.js"></script>
+ <script src="{{ url_for('_style', filename='main.js') }}"></script>
 
 <br>
 <form action="/request_token" method="post">

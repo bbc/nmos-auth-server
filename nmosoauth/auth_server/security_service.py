@@ -70,7 +70,9 @@ class SecurityService:
                                 "api_ver": ",".join(API_VERSIONS),
                                 "api_proto": "https"})
 
-        self.httpServer = HttpServer(SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config, 'BaseConfig'])
+        self.httpServer = HttpServer(
+            SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config, 'BaseConfig', None]
+        )
         self.httpServer.start()
         while not self.httpServer.started.is_set():
             self.logger.writeInfo('Waiting for httpserver to start...')

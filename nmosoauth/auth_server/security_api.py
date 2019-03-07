@@ -1,8 +1,6 @@
 import os
 from flask import request, session, send_from_directory
-from flask import render_template, redirect, url_for, jsonify
-import requests
-from requests.auth import HTTPBasicAuth
+from flask import render_template, redirect, jsonify, url_for
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
@@ -11,19 +9,28 @@ from nmoscommon.webapi import WebAPI, route
 from .models import db, User, OAuth2Client, AccessRights
 from .oauth2 import authorization
 from .app import config_app
+from .basic_auth import basicAuth
+from .db_utils import getUser
 from ..constants import CERT_PATH, CERT_KEY
 from ..resource_server.nmos_security import NmosSecurity
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+APINAMESPACE = "x-nmos"
+APINAME = "oauth"
+APIVERSION = "v1.0"
+
+DEVICE_ROOT = '/{}/{}'.format(APINAMESPACE, APINAME)
+VERSION_ROOT = '{}/{}/'.format(DEVICE_ROOT, APIVERSION)
+
 
 class SecurityAPI(WebAPI):
-    def __init__(self, logger, config, confClass):
+    def __init__(self, logger, nmosConfig, confClass, extraConfig=None):
         super(SecurityAPI, self).__init__()
-        self._config = config
+        self._config = nmosConfig
         self.logger = logger
         self.add_templates_folder()
-        config_app(self.app, confClass)  # OAuth and DB config
+        config_app(self.app, confClass=confClass, config=extraConfig)  # OAuth and DB config
 
     # Add html templates folder to list of Jinja loaders
     def add_templates_folder(self):
@@ -34,23 +41,40 @@ class SecurityAPI(WebAPI):
         ])
         self.app.jinja_loader = my_loader
 
-    # Custom function to serve CSS and Javascript files
-    @route('/static/<filename>', auto_json=False)
-    def style(self, filename):
-        return send_from_directory(SCRIPT_DIR + '/static', filename)
-
-    @route('/test', auto_json=True)
-    @NmosSecurity(condition=True)
-    def test(self):
-        return (200, "Hello World")
-
     def current_user(self):
         if 'id' in session:
             uid = session['id']
             return User.query.get(uid)
         return None
 
-    @route('/', methods=['GET', 'POST'], auto_json=False)
+    # Custom function to serve CSS and Javascript files
+    @route(VERSION_ROOT + 'static/<filename>', auto_json=False)
+    def style(self, filename):
+        return send_from_directory(SCRIPT_DIR + '/static', filename)
+
+    @route('/')
+    def __index(self):
+        return (200, [APINAMESPACE + "/"])
+
+    @route('/' + APINAMESPACE + "/")
+    def __namespaceindex(self):
+        return (200, [APINAME + "/"])
+
+    @route(DEVICE_ROOT + '/')
+    def __nameindex(self):
+        return (200, [APIVERSION + "/"])
+
+    @route(VERSION_ROOT)
+    def __versionindex(self):
+        obj = ["home/", "signup/", "register_client/", "fetch_token/", "revoke/", "authorize/", "token/", "certs/"]
+        return (200, obj)
+
+    @route(VERSION_ROOT + 'test/', auto_json=True)
+    @NmosSecurity(condition=True)
+    def test(self):
+        return (200, "Hello World")
+
+    @route(VERSION_ROOT + 'home/', methods=['GET', 'POST'], auto_json=False)
     def home(self):
         if request.method == 'POST':
             username = request.form.get('username')
@@ -64,7 +88,7 @@ class SecurityAPI(WebAPI):
                 return render_template('home.html', user=None, clients=None, message=message)
             if user.password == password:
                 session['id'] = user.id
-                return redirect('/')
+                return redirect(url_for('_home'))
             else:
                 message = "Invalid Password. Try Again."
                 return render_template('home.html', user=None, clients=None, message=message)
@@ -75,7 +99,7 @@ class SecurityAPI(WebAPI):
             clients = []
         return render_template('home.html', user=user, clients=clients, message="")
 
-    @route('/signup', methods=['GET', 'POST'], auto_json=False)
+    @route(VERSION_ROOT + 'signup/', methods=['GET', 'POST'], auto_json=False)
     def signup(self):
         if request.method == 'GET':
             return render_template('signup.html')
@@ -93,16 +117,17 @@ class SecurityAPI(WebAPI):
             db.session.commit()
 
             session['id'] = user.id
-            return redirect('/')
+            return redirect(url_for('_home'))
 
-    @route('/register_client', methods=['GET', 'POST'], auto_json=False)
+    @route(VERSION_ROOT + 'register_client/', methods=['GET', 'POST'], auto_json=False)
+    @basicAuth.required
     def create_client(self):
         user = self.current_user()
-        if not user:
-            return redirect('/')
         if request.method == 'GET':
             return render_template('create_client.html')
         client = OAuth2Client(**request.form.to_dict(flat=True))
+        if not user and request.authorization:
+            user = getUser(request.authorization.username)
         client.user_id = user.id
         client.client_id = gen_salt(24)
         if client.token_endpoint_auth_method == 'none':
@@ -111,52 +136,25 @@ class SecurityAPI(WebAPI):
             client.client_secret = gen_salt(48)
         db.session.add(client)
         db.session.commit()
-        return redirect('/')
+        return redirect(url_for('_home'))
 
-    @route('/fetch_token', auto_json=False)
+    @route(VERSION_ROOT + 'fetch_token/', auto_json=False)
     def fetch_token(self):
         user = self.current_user()
         if not user:
-            return redirect('/')
+            return redirect(url_for('_home'))
         # TODO - specific client
         client = OAuth2Client.query.filter_by(user_id=user.id).first()
         return render_template('fetch_token.html', client=client)
 
-    @route('/request_token', methods=['GET', 'POST'], auto_json=False)
-    def request_token(self):
-        user = self.current_user()
-        if not user:
-            return redirect('/')
-        # TODO - specific client
-        client = OAuth2Client.query.filter_by(user_id=user.id).first()
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
-            scope = request.form.get('scope')
-            grant_type = 'password'
-            client_id = client.client_id
-            client_secret = client.client_secret
-            headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-            data = {'scope': scope, 'grant_type': grant_type,
-                    'username': username, 'password': password}
-            resp = requests.post(
-                    request.url_root + 'oauth/token',
-                    auth=HTTPBasicAuth(client_id, client_secret),
-                    headers=headers,
-                    data=data).json()
-            if 'access_token' in resp.keys():
-                session['token'] = resp['access_token']
-        if 'token' not in session.keys():
-            session['token'] = None
-        return render_template('request.html', user=user,
-                               client=client, token=session['token'])
-
-    @route('/authorize', methods=['GET', 'POST'], auto_json=False)
+    @route(VERSION_ROOT + 'authorize/', methods=['GET', 'POST'], auto_json=False)
     def authorization(self):
         user = self.current_user()
+        if not user and request.authorization:
+            user = getUser(request.authorization.username)
         if request.method == 'GET':
             try:
-                grant = authorization.validate_consent_request(end_user=user)
+                grant = authorization.validate_consent_request(end_user=user, request=request)
             except OAuth2Error as error:
                 return error.error
             return render_template('authorize.html', user=user, grant=grant)
@@ -169,29 +167,29 @@ class SecurityAPI(WebAPI):
             grant_user = None
         return authorization.create_authorization_response(grant_user=grant_user)
 
-    @route('/token', methods=['POST'], auto_json=False)
+    @route(VERSION_ROOT + 'token/', methods=['POST'], auto_json=False)
     def issue_token(self):
         return authorization.create_token_response()
 
-    @route('/revoke', methods=['POST'], auto_json=False)
+    @route(VERSION_ROOT + 'revoke/', methods=['POST'], auto_json=False)
     def revoke_token(self):
         return authorization.create_endpoint_response('revocation')
 
     # route for certificate with public key
-    @route('/certs', methods=['GET'], auto_json=False)
+    @route(VERSION_ROOT + 'certs/', methods=['GET'], auto_json=False)
     def get_cert(self):
         try:
             with open(CERT_PATH, 'r') as myfile:
                 cert = myfile.read()
             return jsonify({CERT_KEY: cert})
         except OSError as e:
-            print("Error: " + e + "\nFile at " + CERT_PATH + " doesn't exist")
+            self.logger.writeError("Error: {}\nFile at {} doesn't exist".format(e, CERT_PATH))
             raise
 
-    @route('/logout/')
+    @route(VERSION_ROOT + 'logout/', auto_json=False)
     def logout(self):
         try:
             del session['id']
         except Exception as e:
             self.logger.writeDebug("Error: {}. Couldn't delete session ID".format(str(e)))
-        return redirect(url_for('_home'), code=302)
+        return redirect(url_for('_home'))

@@ -60,6 +60,7 @@ packages_required = [
     "nmoscommon",
     "pyopenssl",
     "authlib>=0.10",
+    "flask_basicauth"
 ]
 
 deps_required = []

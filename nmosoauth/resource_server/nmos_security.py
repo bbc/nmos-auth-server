@@ -9,42 +9,16 @@ from nmoscommon.mdnsbridge import IppmDNSBridge
 from nmoscommon.nmoscommonconfig import config as _config
 from nmoscommon.logger import Logger as defaultLogger
 from authlib.specs.rfc7519 import jwt
-from authlib.specs.rfc7519.claims import JWTClaims
 from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
     UnsupportedTokenTypeError
-# from authlib.specs.rfc7519.errors import InvalidClaimError, MissingClaimError
 
 from .claims_options import IS_XX_CLAIMS
-from ..constants import CERT_ENDPOINT, CERT_PATH
+from .claims_validator import JWTClaimsValidator
+from ..constants import CERT_ENDPOINT, CERT_PATH, CERT_KEY
 
 MDNS_SERVICE_TYPE = "nmos-auth"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 OAUTH_MODE = _config.get('oauth_mode', True)
-
-
-class JWTClaimsValidator(JWTClaims):
-
-    def __init__(self, payload, header, options=None, params=None):  # for clarity only
-        super(JWTClaimsValidator, self).__init__(payload, header, options=None, params=None)
-
-    def validate_iss(self):
-        super(JWTClaimsValidator, self).validate_iss()
-        pass
-
-    def validate_sub(self):
-        super(JWTClaimsValidator, self).validate_sub()
-        pass
-
-    def validate_aud(self):
-        super(JWTClaimsValidator, self).validate_aud()
-        pass
-
-    def validate_nmos(self):
-        pass
-
-    def validate(self, now=None, leeway=0):
-        super(JWTClaimsValidator, self).validate()
-        self.validate_nmos()
 
 
 class NmosSecurity(object):
@@ -77,7 +51,7 @@ class NmosSecurity(object):
             try:
                 if len(cert.json()) > 1:
                     self.logger.writeWarning("Multiple certificates at Endpoint. Returning First Instance.")
-                cert = cert.json()['default']
+                cert = cert.json()[CERT_KEY]
                 return cert
             except KeyError as e:
                 self.logger.writeError("Error: {}. Endpoint contains: {}".format(str(e), cert.json()))
@@ -133,8 +107,10 @@ class NmosSecurity(object):
                 if token_type.lower() != "bearer":
                     raise UnsupportedTokenTypeError()
                 pubKey = self.getPublicKey()
-                claims = jwt.decode(token_string, pubKey,
-                                    JWTClaimsValidator, self.claimsOptions, None)
+                claims = jwt.decode(s=token_string, key=pubKey,
+                                    claims_cls=JWTClaimsValidator,
+                                    claims_options=self.claimsOptions,
+                                    claims_params=None)
                 claims.validate()
                 return func(*args, **kwargs)
             return processAccessToken
