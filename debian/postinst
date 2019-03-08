@@ -30,8 +30,6 @@ case "$1" in
       if [ -f  /var/nmosoauth/generate_cert.sh ]; then
         /var/nmosoauth/generate_cert.sh
       fi
-      systemctl daemon-reload
-      systemctl restart python-nmos-oauth
     ;;
 
     triggered)
