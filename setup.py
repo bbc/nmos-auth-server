@@ -51,7 +51,7 @@ package_names = packages.keys()
 packages_required = [
     "six",
     "flask",
-    "sqlalchemy<=1.10",
+    "sqlalchemy",
     "flask-sqlalchemy",
     "flask-cors",
     "requests",
