@@ -17,7 +17,7 @@ from ..resource_server.nmos_security import NmosSecurity
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 APINAMESPACE = "x-nmos"
-APINAME = "oauth"
+APINAME = "auth"
 APIVERSION = "v1.0"
 
 DEVICE_ROOT = '/{}/{}'.format(APINAMESPACE, APINAME)
