@@ -4,7 +4,7 @@ EQUIVALENT TO:
   "sub": "dannym",
   "exp": 1582136965,
   "scope": "is-05",
-  "iss": "https://oauth.rd.bbc.co.uk",
+  "iss": "http://rd.bbc.co.uk/x-nmos/auth/v1.0/",
   "iat": 1550579365,
   "x-nmos-api": {
     "access": "write",

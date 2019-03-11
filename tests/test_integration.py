@@ -19,7 +19,7 @@ from nmosoauth.auth_server.security_api import User
 from data_for_tests import BEARER_TOKEN, TEST_PRIV_KEY
 from base64 import b64encode
 
-VERSION_ROOT = '/x-nmos/oauth/v1.0'
+VERSION_ROOT = '/x-nmos/auth/v1.0'
 
 
 class TestNmosOauth(unittest.TestCase):
