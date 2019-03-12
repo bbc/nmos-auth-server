@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<form action="" method="post">
+<form action="{{ url_for('_create_client_post') }}" method="post">
   <label>
     <span>Client Name</span>
     <input type="text" name="client_name" value="R&amp;D Web Router">

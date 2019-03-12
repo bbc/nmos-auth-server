@@ -28,7 +28,7 @@ $(function getToken() {
     var client_id = document.getElementById("client_id").value;
     var client_secret = document.getElementById("client_secret").value;
     $.ajax({
-      url: 'http://' + host + ':' + port + '/x-nmos/auth/v1.0/token/',
+      url: 'http://' + host + ':' + port + '/x-nmos/auth/v1.0/token',
       type: 'POST',
       data: requestPayload,
       crossDomain: true,

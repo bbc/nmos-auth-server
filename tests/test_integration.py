@@ -56,10 +56,10 @@ class TestNmosOauth(unittest.TestCase):
         with self.client as client:
             rv = client.get(VERSION_ROOT + '/', follow_redirects=True)
             self.assertEqual(rv.status_code, 200)
-            rv = client.get(VERSION_ROOT + '/token/', follow_redirects=True)
-            self.assertEqual(rv.status_code, 405)
-            rv = client.get(VERSION_ROOT + '/revoke/', follow_redirects=True)
-            self.assertEqual(rv.status_code, 405)
+            rv = client.get(VERSION_ROOT + '/token', follow_redirects=True)
+            self.assertEqual(rv.status_code, 200)
+            rv = client.get(VERSION_ROOT + '/revoke', follow_redirects=True)
+            self.assertEqual(rv.status_code, 200)
             rv = client.get(VERSION_ROOT + '/fetch_token/')
             self.assertEqual(rv.status_code, 302)
             rv = client.get(VERSION_ROOT + '/logout/')
@@ -70,14 +70,14 @@ class TestNmosOauth(unittest.TestCase):
         headers = self.auth_headers(self.mockUser)
         with self.client as client:
             rv = client.get(VERSION_ROOT + '/register_client/')
-            self.assertEqual(rv.status_code, 401)
+            self.assertEqual(rv.status_code, 302)
 
-            rv = client.get(VERSION_ROOT + '/register_client/', headers=headers)
-            self.assertEqual(rv.status_code, 200)
+            rv = client.post(VERSION_ROOT + '/register_client')
+            self.assertEqual(rv.status_code, 401)
 
             wrongUser = self.createMockUser("bob", "pass")
             headers = self.auth_headers(wrongUser)
-            rv = client.get(VERSION_ROOT + '/register_client/', headers=headers)
+            rv = client.post(VERSION_ROOT + '/register_client', headers=headers)
             self.assertEqual(rv.status_code, 401)
 
     @mock.patch("nmosoauth.auth_server.security_api.render_template")

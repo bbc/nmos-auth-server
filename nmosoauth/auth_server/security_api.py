@@ -53,19 +53,19 @@ class SecurityAPI(WebAPI):
         return send_from_directory(SCRIPT_DIR + '/static', filename)
 
     @route('/')
-    def __index(self):
+    def index(self):
         return (200, [APINAMESPACE + "/"])
 
     @route('/' + APINAMESPACE + "/")
-    def __namespaceindex(self):
+    def namespaceindex(self):
         return (200, [APINAME + "/"])
 
     @route(DEVICE_ROOT + '/')
-    def __nameindex(self):
+    def nameindex(self):
         return (200, [APIVERSION + "/"])
 
     @route(VERSION_ROOT)
-    def __versionindex(self):
+    def versionindex(self):
         obj = ["home/", "signup/", "register_client/", "fetch_token/", "revoke/", "authorize/", "token/", "certs/"]
         return (200, obj)
 
@@ -99,32 +99,33 @@ class SecurityAPI(WebAPI):
             clients = []
         return render_template('home.html', user=user, clients=clients, message="")
 
-    @route(VERSION_ROOT + 'signup/', methods=['GET', 'POST'], auto_json=False)
-    def signup(self):
-        if request.method == 'GET':
-            return render_template('signup.html')
-        if request.method == 'POST':
-            username = request.form.get('username', None)
-            password = request.form.get('password', None)
-            user = User(username=username, password=password)
-            db.session.add(user)
-            db.session.commit()
+    @route(VERSION_ROOT + 'signup', methods=['POST'], auto_json=False)
+    def signup_post(self):
+        username = request.form.get('username', None)
+        password = request.form.get('password', None)
+        if not username or not password:
+            return redirect(url_for('_signup_get'))
+        user = User(username=username, password=password)
+        db.session.add(user)
+        db.session.commit()
 
-            is04 = request.form.get('is04', None)
-            is05 = request.form.get('is05', None)
-            access = AccessRights(user_id=user.id, is04=is04, is05=is05)
-            db.session.add(access)
-            db.session.commit()
+        is04 = request.form.get('is04', None)
+        is05 = request.form.get('is05', None)
+        access = AccessRights(user_id=user.id, is04=is04, is05=is05)
+        db.session.add(access)
+        db.session.commit()
 
-            session['id'] = user.id
-            return redirect(url_for('_home'))
+        session['id'] = user.id
+        return redirect(url_for('_home'))
 
-    @route(VERSION_ROOT + 'register_client/', methods=['GET', 'POST'], auto_json=False)
+    @route(VERSION_ROOT + 'signup/', methods=['GET'], auto_json=False)
+    def signup_get(self):
+        return render_template('signup.html')
+
+    @route(VERSION_ROOT + 'register_client', methods=['POST'], auto_json=False)
     @basicAuth.required
-    def create_client(self):
+    def create_client_post(self):
         user = self.current_user()
-        if request.method == 'GET':
-            return render_template('create_client.html')
         client = OAuth2Client(**request.form.to_dict(flat=True))
         if not user and request.authorization:
             user = getUser(request.authorization.username)
@@ -138,26 +139,27 @@ class SecurityAPI(WebAPI):
         db.session.commit()
         return redirect(url_for('_home'))
 
+    @route(VERSION_ROOT + 'register_client/', methods=['GET'], auto_json=False)
+    def create_client_get(self):
+        user = self.current_user()
+        if not user:
+            return redirect(url_for('_home'))
+        return render_template('create_client.html')
+
     @route(VERSION_ROOT + 'fetch_token/', auto_json=False)
     def fetch_token(self):
         user = self.current_user()
         if not user:
             return redirect(url_for('_home'))
-        # TODO - specific client
+        # TODO - drop-down select box
         client = OAuth2Client.query.filter_by(user_id=user.id).first()
         return render_template('fetch_token.html', client=client)
 
-    @route(VERSION_ROOT + 'authorize/', methods=['GET', 'POST'], auto_json=False)
-    def authorization(self):
+    @route(VERSION_ROOT + 'authorize', methods=['POST'], auto_json=False)
+    def authorization_post(self):
         user = self.current_user()
         if not user and request.authorization:
             user = getUser(request.authorization.username)
-        if request.method == 'GET':
-            try:
-                grant = authorization.validate_consent_request(end_user=user, request=request)
-            except OAuth2Error as error:
-                return error.error
-            return render_template('authorize.html', user=user, grant=grant)
         if not user and 'username' in request.form:
             username = request.form.get('username')
             user = User.query.filter_by(username=username).first()
@@ -167,13 +169,32 @@ class SecurityAPI(WebAPI):
             grant_user = None
         return authorization.create_authorization_response(grant_user=grant_user)
 
-    @route(VERSION_ROOT + 'token/', methods=['POST'], auto_json=False)
-    def issue_token(self):
+    @route(VERSION_ROOT + 'authorize/', methods=['GET'], auto_json=False)
+    def authorization_get(self):
+        user = self.current_user()
+        if not user and request.authorization:
+            user = getUser(request.authorization.username)
+        try:
+            grant = authorization.validate_consent_request(end_user=user, request=request)
+        except OAuth2Error as error:
+            return error.error
+        return render_template('authorize.html', user=user, grant=grant)
+
+    @route(VERSION_ROOT + 'token', methods=['POST'], auto_json=False)
+    def issue_token_post(self):
         return authorization.create_token_response()
 
-    @route(VERSION_ROOT + 'revoke/', methods=['POST'], auto_json=False)
-    def revoke_token(self):
+    @route(VERSION_ROOT + 'token/', methods=['GET'], auto_json=True)
+    def issue_token_get(self):
+        return (200, "Endpoint to request access tokens. Only supports POST requests.")
+
+    @route(VERSION_ROOT + 'revoke', methods=['POST'], auto_json=False)
+    def revoke_token_post(self):
         return authorization.create_endpoint_response('revocation')
+
+    @route(VERSION_ROOT + 'revoke/', methods=['GET'], auto_json=True)
+    def revoke_token_get(self):
+        return (200, "Endpoint to revoke access tokens. Only supports POST requests.")
 
     # route for certificate with public key
     @route(VERSION_ROOT + 'certs/', methods=['GET'], auto_json=False)

@@ -2,7 +2,7 @@
 {% block body %}
 
 <br>
-<form action="" method="post">
+<form action="{{ url_for('_signup_post') }}" method="post">
   <label>
     <input type="text" name="username" id="username" placeholder="username"><br>
   </label>

@@ -71,7 +71,7 @@ class SecurityService:
                                 "api_proto": "https"})
 
         self.httpServer = HttpServer(
-            SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config, 'BaseConfig', None]
+            SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config, 'ProductionConfig', None]
         )
         self.httpServer.start()
         while not self.httpServer.started.is_set():

@@ -15,7 +15,7 @@
 
     <hr>
 
-    <p><a href="{{ url_for('_create_client') }}">Create Client</a></p>
+    <p><a href="{{ url_for('_create_client_get') }}">Create Client</a></p>
 
     <p><a href="{{ url_for('_fetch_token') }}">Request Token</a></p>
 
@@ -25,8 +25,8 @@
       <p><input type="password" name="password"  placeholder="password"></p>
       <button type="submit">Login / Signup</button>
     </form>
-    <p><a href="{{ url_for('_signup') }}">Signup</a></p>
+    <p><a href="{{ url_for('_signup_get') }}">Signup</a></p>
   {% endif %}
-  
+
   <div><p>{{ message }}</p></div>
 {% endblock %}
