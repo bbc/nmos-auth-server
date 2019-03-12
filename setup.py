@@ -13,7 +13,7 @@ from setuptools import setup
 
 # Basic metadata
 name = "nmos-oauth"
-version = "0.0.2"
+version = "0.0.3"
 description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/rd-apmm-python-oauth'
 author = 'Danny Meloy'
