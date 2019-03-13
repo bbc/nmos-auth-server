@@ -184,17 +184,9 @@ class SecurityAPI(WebAPI):
     def issue_token_post(self):
         return authorization.create_token_response()
 
-    @route(VERSION_ROOT + 'token/', methods=['GET'], auto_json=True)
-    def issue_token_get(self):
-        return (200, "Endpoint to request access tokens. Only supports POST requests.")
-
     @route(VERSION_ROOT + 'revoke', methods=['POST'], auto_json=False)
     def revoke_token_post(self):
         return authorization.create_endpoint_response('revocation')
-
-    @route(VERSION_ROOT + 'revoke/', methods=['GET'], auto_json=True)
-    def revoke_token_get(self):
-        return (200, "Endpoint to revoke access tokens. Only supports POST requests.")
 
     # route for certificate with public key
     @route(VERSION_ROOT + 'certs/', methods=['GET'], auto_json=False)
