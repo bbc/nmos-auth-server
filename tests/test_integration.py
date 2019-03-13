@@ -51,15 +51,11 @@ class TestNmosOauth(unittest.TestCase):
         headers = {'Authorization': 'Basic ' + b64encode("{0}:{1}".format(user.username, user.password))}
         return headers
 
-    def testInitialRoutes(self):
+    def testGetInitialRoutes(self):
 
         with self.client as client:
             rv = client.get(VERSION_ROOT + '/', follow_redirects=True)
             self.assertEqual(rv.status_code, 200)
-            rv = client.get(VERSION_ROOT + '/token', follow_redirects=True)
-            self.assertEqual(rv.status_code, 405)
-            rv = client.get(VERSION_ROOT + '/revoke', follow_redirects=True)
-            self.assertEqual(rv.status_code, 405)
             rv = client.get(VERSION_ROOT + '/fetch_token/')
             self.assertEqual(rv.status_code, 302)
             rv = client.get(VERSION_ROOT + '/logout/')
