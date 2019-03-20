@@ -1,7 +1,17 @@
 {% extends "layout.html" %}
 {% block body %}
   {% if user %}
-    <div>Logged in as <strong>{{user.username}}</strong> (<a href="{{ url_for('_logout') }}">Log Out</a>)</div><br>
+    <div>
+      <span>Logged in as <strong>{{user.username}}</strong> (<a href="{{ url_for('_logout') }}">Log Out</a>)</span>
+      <br>
+
+      <p>
+        <a href="{{ url_for('_create_client_get') }}">Create Client</a> |
+        <a href="{{ url_for('_fetch_token') }}">Request Token</a> |
+        <a href="{{ url_for('_get_cert') }}">Certificates</a></p>
+    </div>
+
+    <hr>
 
     {% for client in clients %}
     <strong>Client {{ loop.index }}</strong><br>
@@ -13,11 +23,7 @@
       {% endfor %}<br>
     {% endfor %}
 
-    <hr>
 
-    <p><a href="{{ url_for('_create_client_get') }}">Create Client</a></p>
-
-    <p><a href="{{ url_for('_fetch_token') }}">Request Token</a></p>
 
   {% else %}
     <form action="" method="post">
