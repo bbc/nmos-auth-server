@@ -138,7 +138,9 @@ class NmosSecurity(object):
         def JWTDecorator(func):
             @wraps(func)
             def processAccessToken(*args, **kwargs):
-                if ('Upgrade' in request.headers.keys() and 'websocket' == request.headers['Upgrade'].lower()):
+                # Check to see if request is a Websocket upgrade, else treat request as a standard HTTP request
+                headers = request.headers
+                if ('Upgrade' in headers.keys() and headers['Upgrade'].lower() == 'websocket'):
                     self.logger.writeInfo("Using Socket handler")
                     self.handleSocketAuth(*args, **kwargs)
                 else:
