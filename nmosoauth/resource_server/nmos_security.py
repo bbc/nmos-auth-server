@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 from requests.exceptions import RequestException
 from functools import wraps
 from flask import request
@@ -12,6 +13,7 @@ from nmoscommon.logger import Logger as defaultLogger
 from authlib.specs.rfc7519 import jwt
 from authlib.specs.rfc6749.errors import MissingAuthorizationError, \
     UnsupportedTokenTypeError
+from authlib.common.errors import AuthlibBaseError
 
 from .claims_options import IS_XX_CLAIMS
 from .claims_validator import JWTClaimsValidator
@@ -126,13 +128,18 @@ class NmosSecurity(object):
         else:
             self.logger.writeWarning("Websocket does not have auth header, looking in query string..")
             query_string = environment.get('QUERY_STRING', None)
-            if query_string is not None:
-                try:
-                    auth_string = parse_qs(query_string)['authorization'][0]
-                except KeyError:
-                    self.logger.writeError("'authorization' URL param doesn't exist. Websocket authentication failed.")
-                    raise MissingAuthorizationError()
-        self.processAccessToken(auth_string)
+            try:
+                if query_string is not None:
+                    try:
+                        auth_string = parse_qs(query_string)['authorization'][0]
+                    except KeyError:
+                        self.logger.writeError("'authorization' URL param doesn't exist. Websocket authentication failed.")
+                        raise MissingAuthorizationError()
+                self.processAccessToken(auth_string)
+            except AuthlibBaseError as e:
+                err = {"type": "error", "data": "Socket Authentication Error"}
+                ws.send(json.dumps(err))
+                raise
 
     def JWTRequired(self):
         def JWTDecorator(func):
