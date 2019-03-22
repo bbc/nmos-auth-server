@@ -133,10 +133,12 @@ class NmosSecurity(object):
                     try:
                         auth_string = parse_qs(query_string)['authorization'][0]
                     except KeyError:
-                        self.logger.writeError("'authorization' URL param doesn't exist. Websocket authentication failed.")
+                        self.logger.writeError("""
+                            'authorization' URL param doesn't exist. Websocket authentication failed.
+                        """)
                         raise MissingAuthorizationError()
                 self.processAccessToken(auth_string)
-            except AuthlibBaseError as e:
+            except AuthlibBaseError:
                 err = {"type": "error", "data": "Socket Authentication Error"}
                 ws.send(json.dumps(err))
                 raise
