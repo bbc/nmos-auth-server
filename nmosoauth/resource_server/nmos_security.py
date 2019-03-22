@@ -3,6 +3,7 @@ import requests
 from requests.exceptions import RequestException
 from functools import wraps
 from flask import request
+from urlparse import parse_qs
 from OpenSSL import crypto
 
 from nmoscommon.mdnsbridge import IppmDNSBridge
@@ -94,24 +95,57 @@ class NmosSecurity(object):
         pubKey = self.extractPublicKey(self.certificate)
         return pubKey
 
+    def processAccessToken(self, auth_string):
+        token_type, token_string = auth_string.split(None, 1)
+        if token_string == "null" or token_string == "":
+            raise MissingAuthorizationError()
+        if token_type.lower() != "bearer":
+            raise UnsupportedTokenTypeError()
+        pubKey = self.getPublicKey()
+        claims = jwt.decode(s=token_string, key=pubKey,
+                            claims_cls=JWTClaimsValidator,
+                            claims_options=self.claimsOptions,
+                            claims_params=None)
+        claims.validate()
+
+    def handleHttpAuth(self):
+        """Handle bearer token string ("Bearer xAgy65...") in "Authorzation" Request Header"""
+        auth_string = request.headers.get('Authorization', None)
+        if auth_string is None:
+            raise MissingAuthorizationError()
+        self.processAccessToken(auth_string)
+
+    def handleSocketAuth(self, *args, **kwargs):
+        """Handle bearer token string ("Bearer xAgy65...") in Websocket URL Query Param"""
+        ws = args[0]
+        environment = ws.environ
+        auth_header = environment.get('HTTP_AUTHORIZATION', None)
+        if auth_header is not None:
+            self.logger.writeInfo("auth header string is {}".format(auth_header))
+            auth_string = auth_header
+        else:
+            self.logger.writeWarning("Websocket does not have auth header, looking in query string..")
+            query_string = environment.get('QUERY_STRING', None)
+            if query_string is not None:
+                try:
+                    auth_string = parse_qs(query_string)['authorization'][0]
+                except KeyError:
+                    self.logger.writeError("'authorization' URL param doesn't exist. Websocket authentication failed.")
+                    raise MissingAuthorizationError()
+        self.processAccessToken(auth_string)
+
     def JWTRequired(self):
         def JWTDecorator(func):
             @wraps(func)
             def processAccessToken(*args, **kwargs):
-                auth = request.headers.get('Authorization')
-                if not auth:
-                    raise MissingAuthorizationError()
-                token_type, token_string = auth.split(None, 1)
-                if token_string == "null" or token_string == "":
-                    raise MissingAuthorizationError()
-                if token_type.lower() != "bearer":
-                    raise UnsupportedTokenTypeError()
-                pubKey = self.getPublicKey()
-                claims = jwt.decode(s=token_string, key=pubKey,
-                                    claims_cls=JWTClaimsValidator,
-                                    claims_options=self.claimsOptions,
-                                    claims_params=None)
-                claims.validate()
+                # Check to see if request is a Websocket upgrade, else treat request as a standard HTTP request
+                headers = request.headers
+                if ('Upgrade' in headers.keys() and headers['Upgrade'].lower() == 'websocket'):
+                    self.logger.writeInfo("Using Socket handler")
+                    self.handleSocketAuth(*args, **kwargs)
+                else:
+                    self.logger.writeInfo("Using HTTP handler")
+                    self.handleHttpAuth()
                 return func(*args, **kwargs)
             return processAccessToken
         return JWTDecorator
@@ -120,6 +154,7 @@ class NmosSecurity(object):
         if not self.condition:
             # Return the function unchanged, not decorated.
             return func
+
         # Return decorated function
         decorator = self.JWTRequired()
         return decorator(func)
