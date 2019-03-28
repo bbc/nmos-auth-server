@@ -3,7 +3,7 @@ from authlib.specs.rfc7519 import jwt
 import datetime
 from .oauth2 import authorization
 from .models import AccessRights
-from ..constants import NMOSOAUTH_DIR
+from .constants import NMOSOAUTH_DIR
 
 
 class TokenGenerator():

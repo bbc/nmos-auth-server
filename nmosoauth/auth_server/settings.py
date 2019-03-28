@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta
-from ..constants import NMOSOAUTH_DIR, PRIVKEY_FILE, DATABASE_NAME
+from .constants import NMOSOAUTH_DIR, PRIVKEY_FILE, DATABASE_NAME
 
 pkg = ''
 if __package__ is not None:

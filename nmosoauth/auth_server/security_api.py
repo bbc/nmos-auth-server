@@ -11,7 +11,7 @@ from .oauth2 import authorization
 from .app import config_app
 from .basic_auth import basicAuth
 from .db_utils import getUser
-from ..constants import CERT_PATH, CERT_KEY
+from .constants import CERT_PATH, CERT_KEY
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
