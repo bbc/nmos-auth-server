@@ -1,6 +1,6 @@
 import os
 from flask import request, session, send_from_directory
-from flask import render_template, redirect, jsonify, url_for
+from flask import render_template, redirect, url_for
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
