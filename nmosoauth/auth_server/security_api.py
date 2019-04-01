@@ -1,6 +1,6 @@
 import os
 from flask import request, session, send_from_directory
-from flask import render_template, redirect, jsonify, url_for
+from flask import render_template, redirect, url_for
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
@@ -11,8 +11,7 @@ from .oauth2 import authorization
 from .app import config_app
 from .basic_auth import basicAuth
 from .db_utils import getUser
-from ..constants import CERT_PATH, CERT_KEY
-from ..resource_server.nmos_security import NmosSecurity
+from .constants import CERT_PATH, CERT_KEY
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -70,7 +69,6 @@ class SecurityAPI(WebAPI):
         return (200, obj)
 
     @route(VERSION_ROOT + 'test/', auto_json=True)
-    @NmosSecurity(condition=True)
     def test(self):
         return (200, "Hello World")
 
@@ -189,12 +187,12 @@ class SecurityAPI(WebAPI):
         return authorization.create_endpoint_response('revocation')
 
     # route for certificate with public key
-    @route(VERSION_ROOT + 'certs/', methods=['GET'], auto_json=False)
+    @route(VERSION_ROOT + 'certs/', methods=['GET'], auto_json=True)
     def get_cert(self):
         try:
             with open(CERT_PATH, 'r') as myfile:
                 cert = myfile.read()
-            return jsonify({CERT_KEY: cert})
+            return (200, {CERT_KEY: cert})
         except OSError as e:
             self.logger.writeError("Error: {}\nFile at {} doesn't exist".format(e, CERT_PATH))
             raise
