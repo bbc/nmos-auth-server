@@ -213,7 +213,7 @@ pipeline {
                             env.artifactoryUpload_result = "FAILURE"
                         }
                         bbcGithubNotify(context: "artifactory/upload", status: "PENDING")
-                        bbcTwineUpload(toxenv: "py3")
+                        bbcTwineUpload(toxenv: "py3", sdist: true)
                         script {
                             env.artifactoryUpload_result = "SUCCESS" // This will only run if the steps above succeeded
                         }
