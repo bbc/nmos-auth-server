@@ -2,7 +2,7 @@
 This set of functions can be run from within
 a "flask shell" to give app/database context '''
 
-from .models import db, User, AccessRights
+from .models import db, User, OAuth2Client, AccessRights
 
 # -------------------- INIT ------------------------- #
 
@@ -65,21 +65,28 @@ def remove(entry):
 
 def removeUser(user):
     if isinstance(user, int):
-        entry = User.query.get(id=user)
+        entry = User.query.get(user)
     elif isinstance(user, str):
         entry = User.query.filter_by(username=user).first()
     remove(entry)
 
 
-def removeAll(table):  # To clear token data
+def removeClient(client_id):
+    if isinstance(client_id, int):
+        entry = OAuth2Client.query.get(client_id)
+    else:
+        entry = OAuth2Client.query.filter_by(client_id=client_id).first()
+    remove(entry)
 
+
+def removeAll(table):  # To clear token data
     for each in table.query.all():
         db.session.delete(each)
         remove(each)
 
 
 # -------------------- PRINT ------------------------- #
-# from oauth2_server.db_utils import *
+# from nmosoauth.auth_server.db_utils import *
 
 def printTables():
     for table in db.metadata.tables:

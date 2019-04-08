@@ -3,7 +3,6 @@ from flask_cors import CORS
 from .models import db
 from .oauth2 import config_oauth
 from .handlers import register_handlers
-from .db_utils import create_all
 from .basic_auth import basicAuth
 
 
@@ -39,4 +38,4 @@ def setup_app(app):
 
     # create all db tables
     with app.app_context():
-        create_all()
+        db.create_all()

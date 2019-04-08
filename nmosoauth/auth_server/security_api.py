@@ -10,9 +10,8 @@ from .models import db, User, OAuth2Client, AccessRights
 from .oauth2 import authorization
 from .app import config_app
 from .basic_auth import basicAuth
-from .db_utils import getUser
-from ..constants import CERT_PATH, CERT_KEY
-from ..resource_server.nmos_security import NmosSecurity
+from .db_utils import getUser, removeClient
+from .constants import CERT_PATH, CERT_KEY
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -145,6 +144,11 @@ class SecurityAPI(WebAPI):
         if not user:
             return redirect(url_for('_home'))
         return render_template('create_client.html')
+
+    @route(VERSION_ROOT + 'delete_client/<client_id>', auto_json=False)
+    def delete_client(self, client_id):
+        removeClient(client_id)
+        return redirect(url_for('_home'))
 
     @route(VERSION_ROOT + 'fetch_token/', auto_json=False)
     def fetch_token(self):

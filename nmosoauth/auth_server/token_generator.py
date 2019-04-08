@@ -58,8 +58,8 @@ class TokenGenerator():
         new_scope = self.get_scope(user, client, scope)
 
         header = {
-              "alg": config["jwt_alg"],
-              "typ": "JWT"
+            "alg": config["jwt_alg"],
+            "typ": "JWT"
         }
         payload = {
             'iat': current_time,
