@@ -1,5 +1,5 @@
 body {
-  font-family: "Gill Sans", sans-serif;
+  font-family: sans-serif;
   background: #eee;
   margin: 0;
   color: #555;
@@ -27,13 +27,17 @@ label, label > span   {
   margin: 15px auto;
 }
 
-input, textarea {
+input, textarea, select {
   background-color: transparent; /* Remove background fill */
 	border-radius: 0; /* Remove corner curve */
 	border: 2px solid #ccc; /* 2px white border */
   height: 45px;
   width: 40%;
   font-size: 1em;
+}
+
+textarea {
+  font-family: sans-serif;
 }
 
 /*------------------- NAV BAR -------------------*/
