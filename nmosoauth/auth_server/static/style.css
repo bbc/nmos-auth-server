@@ -1,5 +1,6 @@
 body                  { font-family: Gill Sans, sans-serif; background: #eee; }
-a, h1, h2             { color: #377ba8; font-family: Gill Sans, sans-serif; }
+a, h1, h2             { color: #555; font-family: Gill Sans, sans-serif; }
+a                     { text-decoration: none;}
 h1, h2                { margin: 0; }
 h1                    { border-bottom: 2px solid #eee; }
 h2                    { font-size: 1.2em; }
@@ -17,3 +18,27 @@ label                 { margin: 15px 0; }
 .flash                { background: #cee5F5; padding: 0.5em;
                         border: 1px solid #aacbe2; }
 .error                { background: #f0d6d6; padding: 0.5em; }
+
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+  background-color: #f1f1f1;
+}

@@ -14,14 +14,34 @@
     <hr>
 
     {% for client in clients %}
-    <strong>Client {{ loop.index }}</strong> <sup><a href="{{ url_for('_delete_client', client_id=client.client_id) }}"> delete</a></sup> <br>
-      {% for info, data in client.client_info.items() %}
-        {{ info|string }} : {{ data|string }}<br>
-      {% endfor %}<br>
-      {% for info, data in client.client_metadata.items() %}
-        {{ info|string }} : {{ data|string }}<br>
-      {% endfor %}<br>
+    <button class="collapsible"><strong>Client {{ loop.index }} - {{ client.client_name }}</strong>
+    <sup><a href="{{ url_for('_delete_client', client_id=client.client_id) }}"> delete</a></sup></button>
+      <div class="content">
+        {% for info, data in client.client_info.items() %}
+          <p>{{ info|string }} : {{ data|string }}</p>
+        {% endfor %}<br>
+        {% for info, data in client.client_metadata.items() %}
+          <p>{{ info|string }} : {{ data|string }}</p>
+        {% endfor %}
+      </div><br>
     {% endfor %}
+
+    <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+          } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
+        });
+      }
+    </script>
 
 
 
