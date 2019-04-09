@@ -2,26 +2,27 @@
 {% block body %}
  <script src="{{ url_for('_style', filename='main.js') }}"></script>
 
-<br>
+<h2>Fetch Token</h2>
+
 <form action="" method="post">
-  <span>Client ID</span>
   <label>
+    <span>Client ID:</span>
     <input type="text" name="client_id" id="client_id"
            placeholder="client_id" value="{{client.client_id}}"
            readonly="readonly"><br>
   </label>
   <label>
-    <span>Client Secret</span>
+    <span>Client Secret:</span>
     <input type="text" name="client_secret" id="client_secret"
            placeholder="client_secret" value="{{client.client_secret}}"
            readonly="readonly"><br>
   </label>
   <label>
-    <span>Username</span>
+    <span>Username:</span>
     <input type="text" name="username" id="username"><br>
   </label>
   <label>
-    <span>Password</span>
+    <span>Password:</span>
     <input type="text" name="password" id="password"><br>
   </label>
   <label>

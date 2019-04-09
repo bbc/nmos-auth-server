@@ -1,23 +1,101 @@
-body                  { font-family: Gill Sans, sans-serif; background: #eee; }
-a, h1, h2             { color: #555; font-family: Gill Sans, sans-serif; }
-a                     { text-decoration: none;}
-h1, h2                { margin: 0; }
-h1                    { border-bottom: 2px solid #eee; }
-h2                    { font-size: 1.2em; }
-label, label > span   { display: block; }
-label                 { margin: 15px 0; }
-.page                 { margin: 2em auto; width: 35em; border: 5px solid #ccc;
-                        padding: 0.8em; background: white; }
-.entries              { list-style: none; margin: 0; padding: 0; }
-.entries li           { margin: 0.8em 1.2em; }
-.entries li h2        { margin-left: -1em; }
-.add-entry            { font-size: 0.9em; border-bottom: 1px solid #ccc; }
-.add-entry dl         { font-weight: bold; }
-.metanav              { text-align: right; font-size: 0.8em; padding: 0.3em;
-                        margin-bottom: 1em; background: #fafafa; }
-.flash                { background: #cee5F5; padding: 0.5em;
-                        border: 1px solid #aacbe2; }
-.error                { background: #f0d6d6; padding: 0.5em; }
+body {
+  font-family: "Gill Sans", sans-serif;
+  background: #eee;
+  margin: 0;
+  color: #555;
+}
+
+h2 {
+  margin: 0px;
+  margin-bottom: 10px;
+  font-size: x-large;
+  color: #555;
+}
+
+button {
+  padding: 10px;
+  background-color: #ccc;
+  border: none;
+}
+
+button:hover {
+  background-color: #777;
+}
+
+label, label > span   {
+  display: block;
+  margin: 15px auto;
+}
+
+input, textarea {
+  background-color: transparent; /* Remove background fill */
+	border-radius: 0; /* Remove corner curve */
+	border: 2px solid #ccc; /* 2px white border */
+  height: 45px;
+  width: 40%;
+  font-size: 1em;
+}
+
+/*------------------- NAV BAR -------------------*/
+
+.navbar {
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 50px;
+  background-color: #777;
+  color: white;
+  padding: 10px;
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+.navbar > h1 {
+  margin-top: 0px;
+  color: white;
+  display: inline-block;
+}
+
+.navbar h1 a {
+  font-size: x-large;
+  padding: 24px;
+}
+
+
+.navbar a {
+  color: white;
+  margin-left: 40px;
+  text-decoration: none;
+  font-size: large;
+  padding: 25px;
+}
+
+.navbar a:hover {
+  background-color: #555;
+}
+
+/*------------------- PAGE --------------------*/
+
+.page {
+  margin: 2em auto;
+  width: 60%;
+  border: 10px solid #ccc;
+  padding: 15px;
+  background: #f1f1f1;
+}
+
+.page a {
+  color: #555;
+  text-decoration: none;
+  text-align: center;
+}
+
+.page a:hover {
+  color: #ccc;
+}
+
+/*------------- COLLAPSIBLE -------------*/
 
 .collapsible {
   background-color: #777;
@@ -29,6 +107,10 @@ label                 { margin: 15px 0; }
   text-align: left;
   outline: none;
   font-size: 15px;
+}
+
+.collapsible a {
+  color: white;
 }
 
 .active, .collapsible:hover {

@@ -1,25 +1,26 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<br>
+<h2>Sign Up</h2>
+
 <form action="{{ url_for('_signup_post') }}" method="post">
   <label>
-    <input type="text" name="username" id="username" placeholder="username"><br>
+    <span>Username:</span>
+    <input type="text" name="username" id="username" placeholder="Joe Bloggs"><br>
   </label>
   <label>
+    <span>Password:</span>
     <input type="text" name="password" id="password" placeholder="password"><br>
   </label>
   <label>
-    <input type="text" name="is04" id="is04" placeholder="IS-04 Access Rights"><br>
+    <span>IS-04 AccessRights:</span>
+    <input type="text" name="is04" id="is04" placeholder="read / write"><br>
   </label>
   <label>
-    <input type="text" name="is05" id="is05" placeholder="IS-05 Access Rights"><br>
+    <span>IS-05 Access Rights:</span>
+    <input type="text" name="is05" id="is05" placeholder="read / write"><br>
   </label>
   <button type="submit">Signup</button>
 </form>
-
-
-<br />
-
 
 {% endblock %}

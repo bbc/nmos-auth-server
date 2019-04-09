@@ -7,15 +7,19 @@
   </head>
 
   <body>
-    <div class="page">
-      <h1><a href="{{ url_for('_versionindex') }}">R&amp;D Authorisation Server</a></h1>
-
+    <div class="navbar">
+      <h1><a href="{{ url_for('_home') }}">R&amp;D Authorisation Server</a></h1>
+      <a href="{{ url_for('_create_client_get') }}">Register Client</a>
+      <a href="{{ url_for('_fetch_token') }}">Request Token</a>
+      <a href="{{ url_for('_get_cert') }}">Certificates</a>
+    </div>
       <script type="text/javascript"
         src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
       </script>
       <script type="text/javascript">
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
       </script>
+    <div class="page">
       {% block body %}{% endblock %}
     </div>
   </body>

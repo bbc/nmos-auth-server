@@ -2,19 +2,14 @@
 {% block body %}
   {% if user %}
     <div>
-      <span>Logged in as <strong>{{user.username}}</strong> (<a href="{{ url_for('_logout') }}">Log Out</a>)</span>
-      <br>
-
-      <p>
-        <a href="{{ url_for('_create_client_get') }}">Create Client</a> |
-        <a href="{{ url_for('_fetch_token') }}">Request Token</a> |
-        <a href="{{ url_for('_get_cert') }}">Certificates</a></p>
+      <h2>Home</h2>
+      <span>Logged in as <b>{{user.username}}</b> | <a href="{{ url_for('_logout') }}">Log Out</a></span>
     </div>
 
     <hr>
 
     {% for client in clients %}
-    <button class="collapsible"><strong>Client {{ loop.index }} - {{ client.client_name }}</strong>
+    <button class="collapsible"><b>Client {{ loop.index }} - {{ client.client_name }}</b>
     <sup><a href="{{ url_for('_delete_client', client_id=client.client_id) }}"> delete</a></sup></button>
       <div class="content">
         {% for info, data in client.client_info.items() %}
@@ -46,6 +41,7 @@
 
 
   {% else %}
+    <h2>Log In</h2>
     <form action="" method="post">
       <p><input type="text" name="username" placeholder="username"></p>
       <p><input type="password" name="password"  placeholder="password"></p>

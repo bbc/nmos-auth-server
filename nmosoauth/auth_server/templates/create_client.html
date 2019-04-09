@@ -1,27 +1,29 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<h2>Register Client</h2>
+
 <form action="{{ url_for('_create_client_post') }}" method="post">
   <label>
-    <span>Client Name</span>
+    <span>Client Name:</span>
     <input type="text" name="client_name" value="R&amp;D Web Router">
   </label>
   <label>
-    <span>Client URI</span>
+    <span>Client URI:</span>
     <input type="url" name="client_uri"
             value="http://ipstudio-master.rd.bbc.co.uk/ips-web/#/web-router">
   </label>
   <label>
-    <span>Allowed Scope</span>
+    <span>Allowed Scope:</span>
     <input type="text" name="scope" value="is04 is05"
             placeholder="space delimited list of scopes">
   </label>
   <label>
-    <span>Redirect URIs</span>
+    <span>Redirect URIs:</span>
     <textarea name="redirect_uri" cols="30" rows="10" ></textarea>
   </label>
   <label>
-    <span>Allowed Grant Types</span>
+    <span>Allowed Grant Types:</span>
     <textarea name="grant_type" cols="30" rows="10" placeholder="grant name">password</textarea>
   </label>
   <label>
