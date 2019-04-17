@@ -1,16 +1,16 @@
 import os
 from flask import request, session, send_from_directory
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, jsonify
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
 from nmoscommon.webapi import WebAPI, route
 
-from .models import db, User, OAuth2Client, AccessRights
+from .models import db, User, OAuth2Client
 from .oauth2 import authorization
 from .app import config_app
 from .basic_auth import basicAuth
-from .db_utils import getUser, removeClient
+from .db_utils import getUser, removeClient, addUser, addAccessRights
 from .constants import CERT_PATH, CERT_KEY
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -103,15 +103,11 @@ class SecurityAPI(WebAPI):
         password = request.form.get('password', None)
         if not username or not password:
             return redirect(url_for('_signup_get'))
-        user = User(username=username, password=password)
-        db.session.add(user)
-        db.session.commit()
+        user = addUser(username, password)
 
         is04 = request.form.get('is04', None)
         is05 = request.form.get('is05', None)
-        access = AccessRights(user_id=user.id, is04=is04, is05=is05)
-        db.session.add(access)
-        db.session.commit()
+        addAccessRights(user, is04, is05)
 
         session['id'] = user.id
         return redirect(url_for('_home'))
@@ -124,9 +120,9 @@ class SecurityAPI(WebAPI):
     @basicAuth.required
     def create_client_post(self):
         user = self.current_user()
-        client = OAuth2Client(**request.form.to_dict(flat=True))
         if not user and request.authorization:
             user = getUser(request.authorization.username)
+        client = OAuth2Client(**request.form.to_dict(flat=True))
         client.user_id = user.id
         client.client_id = gen_salt(24)
         if client.token_endpoint_auth_method == 'none':
@@ -135,7 +131,12 @@ class SecurityAPI(WebAPI):
             client.client_secret = gen_salt(48)
         db.session.add(client)
         db.session.commit()
-        return redirect(url_for('_home'))
+        if 'id' in session:
+            return redirect(url_for('_home'))
+        else:
+            client_info = client.client_info.copy()
+            client_info.update(client.client_metadata)
+            return jsonify(client_info), 201
 
     @route(VERSION_ROOT + 'register_client/', methods=['GET'], auto_json=False)
     def create_client_get(self):

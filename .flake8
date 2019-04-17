@@ -1,2 +1,8 @@
 [flake8]
 max-line-length = 120
+exclude =
+    .git,
+    .tox,
+    dist,
+    deb_dist,
+    __pycache__

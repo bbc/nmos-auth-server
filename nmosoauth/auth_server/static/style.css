@@ -13,9 +13,10 @@ h2 {
 }
 
 button {
-  padding: 10px;
+  padding: 10px 20px;
   background-color: #ccc;
   border: none;
+  font-size: 1em;
 }
 
 button:hover {

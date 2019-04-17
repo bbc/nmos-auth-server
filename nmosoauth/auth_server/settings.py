@@ -10,7 +10,7 @@ if __package__ is not None:
 class BaseConfig(object):
     DEBUG = True
     TESTING = False
-    SECRET_KEY = 'secret'
+    SECRET_KEY = os.urandom(16)
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=5)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/{}.sqlite'.format(NMOSOAUTH_DIR, DATABASE_NAME)
