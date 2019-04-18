@@ -17,6 +17,11 @@ chown ipstudio:ipstudio $KEYFILE
 chown ipstudio:ipstudio $PUBKEYFILE
 chown ipstudio:ipstudio $CERTFILE
 
+chmod 600 $KEYFILE
+chmod 600 $PUBKEYFILE
+chmod 600 $CERTFILE
+chmod 700 -- "$0"
+
 mv $KEYFILE $NMOSOAUTH_DIR
 mv $CERTFILE $NMOSOAUTH_DIR
 mv $PUBKEYFILE $NMOSOAUTH_DIR
