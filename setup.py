@@ -9,6 +9,13 @@
 from __future__ import print_function
 import os
 from setuptools import setup
+import subprocess
+from setuptools.command.develop import develop
+from setuptools.command.install import install
+
+from nmosoauth.constants import NMOSOAUTH_DIR
+
+GEN_CERT_FILE = os.path.join(NMOSOAUTH_DIR, 'generate_cert.sh')
 
 
 # Basic metadata
@@ -22,11 +29,34 @@ license = 'BSD'
 long_description = "OAuth Server Implementation to produce JWTs for API Access"
 
 
+def gen_certs():
+    try:
+        subprocess.call([GEN_CERT_FILE])
+    except Exception as e:
+        print('Error: {}. Failed to generate certificates.'.format(str(e)))
+        print('Please run "generate_cert.sh" at {}'.format(NMOSOAUTH_DIR))
+        pass
+
+
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+    def run(self):
+        develop.run(self)
+        gen_certs()
+
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        install.run(self)
+        gen_certs()
+
+
 def is_package(path):
     return (
         os.path.isdir(path) and
         os.path.isfile(os.path.join(path, '__init__.py'))
-        )
+    )
 
 
 def find_packages(path, base=""):
@@ -65,23 +95,29 @@ packages_required = [
 
 deps_required = []
 
-setup(name=name,
-      version=version,
-      description=description,
-      url=url,
-      author=author,
-      author_email=author_email,
-      license=license,
-      packages=package_names,
-      package_dir=packages,
-      install_requires=packages_required,
-      include_package_data=True,
-      scripts=[],
-      package_data={
+setup(
+    name=name,
+    version=version,
+    description=description,
+    url=url,
+    author=author,
+    author_email=author_email,
+    license=license,
+    packages=package_names,
+    package_dir=packages,
+    install_requires=packages_required,
+    include_package_data=True,
+    scripts=[],
+    package_data={
         'nmosoauth': ['auth_server/templates/*', 'auth_server/static/*']
-      },
-      data_files=[
+    },
+    data_files=[
         ('/usr/bin', ['bin/nmosoauth']),
-      ],
-      long_description=long_description,
-      )
+        (NMOSOAUTH_DIR, ['nmosoauth/certs/generate_cert.sh'])
+    ],
+    long_description=long_description,
+    cmdclass={
+        'develop': PostDevelopCommand,
+        'install': PostInstallCommand,
+    }
+)
