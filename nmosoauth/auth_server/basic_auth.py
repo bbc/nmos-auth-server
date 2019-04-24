@@ -18,7 +18,7 @@ class BasicAuthorization(BasicAuth):
             status=401,
             headers={'WWW-Authenticate': 'Basic realm="{}"'.format(realm)},
             response=render_template('error.html', code=401, message="Unauthorised")
-            )
+        )
 
 
 basicAuth = BasicAuthorization()

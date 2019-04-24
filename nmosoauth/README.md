@@ -14,7 +14,7 @@ Set Flask and Authlib environment variables:
 
 This can alternatively be added to the `~/.bashrc` script to persist between terminal closures.
 
-Now, you can open your browser with `http://127.0.0.1:4999/`. Click on the `sign-in` link to create an account. 
+Now, you can open your browser with `http://127.0.0.1/x-nmos/auth/v1.0/home/`. Click on the `Signup` link to create an account.
 
 ### Creating a Client
 
@@ -23,33 +23,39 @@ Before testing, a client needs to be created:
 ![create a client](https://user-images.githubusercontent.com/290496/38811988-081814d4-41c6-11e8-88e1-cb6c25a6f82e.png)
 
 Get your `client_id` and `client_secret` for testing. In this example, we
-have enabled `password` grant types, let's try:
+have enabled `password` and `authorization code` grant types.
+
+A token can be obtained using:
 
 ```
-curl -u ${client_id}:${client_secret} -XPOST http://127.0.0.1:4999/oauth/token -F grant_type=password -F username=${username} -F password=valid -F scope=profile
+curl -u ${client_id}:${client_secret} -XPOST http://127.0.0.1:4999/x-nmos/auth/v1.0/token -F grant_type=password -F username=${username} -F password=${password} -F scope=${scope}
 ```
 
 Use the username and password you used when signing up. For now, you
-can read the source in example or follow the long boring tutorial below.
+can read the source in example or follow the tutorial below.
 
-**IMPORTANT**: To test implicit grant, you need to `token_endpoint_auth_method` to `none`.
+**IMPORTANT**: To test implicit grant, you need to set `token_endpoint_auth_method` to `none`.
 
 ### Folder structure
 
-Here is our Flask website structure:
+The file structure of the auth server is:
 
 ```
-app.py                --- FLASK_APP
-oath2_server/
-  app.py              --- Flask App Factory
+auth_server/
+  app.py              --- Flask App Configuration Loader
   models.py           --- SQLAlchemy Models
   oauth2.py           --- OAuth 2.0 Provider Configuration
   security_api.py     --- Routes views
-  security_service.py --- Service file and mdns registration
-  token.py            --- Contains Token Generator class
-  templates/          --- static comment (*.js, *.css)
-resource_server/
-  nmos_security       ---decorator for endpoints
+  security_service.py --- HTTP Server and mdns registration
+  token_generator.py  --- Token Generator class
+  handlers.py         --- error handlers
+  settings.py         --- Flask Configuration classes
+  basic_auth.py       --- Basic Auth Setup
+  db_utils            --- Database Utility Funcs
+  templates/          --- static content (*.html)
+  static/             --- static content (*.js, *.css)
+certs/
+  generate_cert.sh    --- Cert and Key generation script
 ```
 
 ## Define Models
@@ -57,7 +63,7 @@ resource_server/
 SQLAlchemy is used as the Object Relational Mapper (ORM) and SQLite as the database software. You can also use other
 databases and other ORM engines. Authlib has some built-in SQLAlchemy mixins which makes it easier for creating models.
 
-The models are found in `oauth2_server/models.py`. The five models are:
+The models are found in `auth_server/models.py`. The five models are:
 
 - User: you need a user to test and create your application
 - OAuth2Client: the oauth client model
@@ -67,48 +73,37 @@ The models are found in `oauth2_server/models.py`. The five models are:
 
 ## Implement Grants
 
-The source code is in `oauth2_server/oauth2.py`. There are four standard grant types:
+The source code is in `auth_server/oauth2.py`. There are four standard grant types:
 
 - Authorization Code Grant
 - Implicit Grant
 - Client Credentials Grant
 - Resource Owner Password Credentials Grant
 
-And Refresh Token is implemented as a Grant in Authlib. You don't have to do
-any thing on Implicit and Client Credentials grants, but there are missing
-methods to be implemented in other grants, checkout the source code in
-`oauth2_server/oauth2.py`.
+Refresh Token is implemented as a Grant in Authlib. You don't have to do any thing on Implicit and Client Credentials grants, but there are missing methods to be implemented in other grants.
 
 
 ## Secure Endpoints
 
-Securing ednpoints can be achieved by importing the `NmosSecurity` class:
+Securing ednpoints can be achieved by importing the `RequiresAuth` class from [NmosCommon](https://github.com/bbc/nmos-common):
 
 ```bash
-from nmos_oauth/resource_server/nmos_security import NmosSecurity
+from nmoscommon.auth.nmos_auth import RequiresAuth
 
 # apply decorator to endpoint
-@route('/' + APINAME + '/')
-@NmosSecurity(condition=SECURITY)
-  def __nameindex(self):
-    return (200, ["v1.0/"])
+@route('test-route')
+@RequiresAuth(condition=True)
+  def testroute(self):
+    return (200, "Hello World")
 ```
-
 
 ## OAuth Routes
 
-For OAuth server itself, we only need to implement routes for authentication,
-and issuing tokens. Since we have added token revocation feature, we need a
-route for revoking too.
-
-Checkout these routes in `oauth2_server/routes.py`. Their paths begin with `/oauth/`.
+For a full list of endpoints please see `auth_server/security_api.py`. A prefix of `x-nmos/auth/v1.0` is prepended to endpoints:
 
 
-## Other Routes
-
-Other endpoints include:
-
-* /oauth/token - for requesting a token
-* /signup - for adding a user
-* /create_client - creating a client
-* /certs - publicly available certificate containing public key (these can be generated using the `generate_cert.sh` script)
+* */token* - for requesting a token
+* */signup* - for adding a user
+* */register_client* - creating a client
+* */certs* - publicly available certificate containing public key (these can be generated using the `generate_cert.sh` script)
+* */fetch_token* - this is a user interface for fetching tokens from the auth server using the password credentials grant. This endpoint is purely for testing purposes, and uses JQuery HTTP Requests found in `auth_server/static/main.js` to fetch tokens.
