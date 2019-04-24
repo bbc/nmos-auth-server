@@ -50,7 +50,7 @@ class SecurityService:
 
     def start(self):
         if self.running:
-            gevent.signal(signal.SIGINT,  self.sig_handler)
+            gevent.signal(signal.SIGINT, self.sig_handler)
             gevent.signal(signal.SIGTERM, self.sig_handler)
 
         self.mdns.start()
