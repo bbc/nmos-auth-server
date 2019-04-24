@@ -1,4 +1,4 @@
-# Introduction
+## Introduction
 
 This is an example of an OAuth 2.0 server in [Authlib](https://authlib.org/) based on the [Authlib Oauth2 Server Example.](https://github.com/authlib/example-oauth2-server)
 
@@ -7,16 +7,16 @@ This is an example of an OAuth 2.0 server in [Authlib](https://authlib.org/) bas
 
 ## Getting Started
 
-Set Flask and Authlib environment variables:
+If not starting the service via `systemctl` / SystemD, then an Authlib environment variable must be set (if using over plain HTTP):
 
     # disable check https (DO NOT SET THIS IN PRODUCTION)
     $ export AUTHLIB_INSECURE_TRANSPORT=1
 
-This can alternatively be added to the `~/.bashrc` script to persist between terminal closures.
+This can alternatively be added to the `~/.bashrc` script to persist between terminal closures. **NOTE**: This environment variable must be removed when in a production setting.
 
-Now, you can open your browser with `http://127.0.0.1/x-nmos/auth/v1.0/home/`. Click on the `Signup` link to create an account.
+Now, you can open your browser at `http://127.0.0.1/x-nmos/auth/v1.0/home/`. Click on the `Signup` link to create an account.
 
-### Creating a Client
+## Creating a Client
 
 Before testing, a client needs to be created:
 
@@ -36,7 +36,7 @@ can read the source in example or follow the tutorial below.
 
 **IMPORTANT**: To test implicit grant, you need to set `token_endpoint_auth_method` to `none`.
 
-### Folder structure
+## Folder structure
 
 The file structure of the auth server is:
 
