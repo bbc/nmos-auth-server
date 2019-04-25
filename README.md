@@ -34,7 +34,7 @@ For basic setuptools installations:
 # Install Python setuptools
 $ pip install setuptools
 
-# Install the service
+# Install the package
 $ sudo python setup.py install
 ```
 
