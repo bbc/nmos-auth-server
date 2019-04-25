@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta
-from .constants import NMOSOAUTH_DIR, PRIVKEY_FILE, DATABASE_NAME
+from .constants import NMOSOAUTH_DIR, PRIVKEY_PATH, DATABASE_NAME
 
 pkg = ''
 if __package__ is not None:
@@ -21,7 +21,7 @@ class BaseConfig(object):
     OAUTH2_JWT_ISS = 'http://rd.bbc.co.uk/x-nmos/auth/v1.0/'
     OAUTH2_JWT_ALG = 'RS256'
     OAUTH2_JWT_EXP = 60
-    OAUTH2_JWT_KEY_PATH = os.path.join(NMOSOAUTH_DIR, PRIVKEY_FILE)
+    OAUTH2_JWT_KEY_PATH = PRIVKEY_PATH
 
 
 class TestConfig(BaseConfig):

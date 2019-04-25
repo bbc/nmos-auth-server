@@ -13,9 +13,10 @@ import subprocess
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
-from nmosoauth.constants import NMOSOAUTH_DIR
+from nmosoauth.auth_server.constants import NMOSOAUTH_DIR
 
-GEN_CERT_FILE = os.path.join(NMOSOAUTH_DIR, 'generate_cert.sh')
+GEN_CERT_FILE = 'gen_cert.py'
+GEN_CERT_PATH = os.path.join(NMOSOAUTH_DIR, GEN_CERT_FILE)
 
 
 # Basic metadata
@@ -31,10 +32,10 @@ long_description = "OAuth Server Implementation to produce JWTs for API Access"
 
 def gen_certs():
     try:
-        subprocess.call([GEN_CERT_FILE])
+        subprocess.call([GEN_CERT_PATH])
     except Exception as e:
         print('Error: {}. Failed to generate certificates.'.format(str(e)))
-        print('Please run "generate_cert.sh" at {}'.format(NMOSOAUTH_DIR))
+        print('Please run "{}" in {}'.format(GEN_CERT_FILE, NMOSOAUTH_DIR))
         pass
 
 
@@ -113,11 +114,11 @@ setup(
     },
     data_files=[
         ('/usr/bin', ['bin/nmosoauth']),
-        (NMOSOAUTH_DIR, ['nmosoauth/certs/generate_cert.sh'])
+        (NMOSOAUTH_DIR, ['nmosoauth/certs/{}'.format(GEN_CERT_FILE)])
     ],
     long_description=long_description,
     cmdclass={
         'develop': PostDevelopCommand,
-        'install': PostInstallCommand,
+        'install': PostInstallCommand
     }
 )

@@ -18,7 +18,6 @@ import time
 import signal
 from socket import gethostname
 from os import getpid
-from systemd.daemon import notify
 
 from nmoscommon.httpserver import HttpServer
 from nmoscommon.mdns import MDNSEngine
@@ -86,7 +85,6 @@ class SecurityService:
     def run(self):
         self.running = True
         self.start()
-        notify("READY=1")
         while self.running:
             time.sleep(1)
         self._cleanup()

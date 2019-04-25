@@ -18,11 +18,11 @@ The implementation is based on the [Authlib](https://authlib.org/) Library.
 
 ### Python
 
-For pip installations (recommended):
+For pip installations (*recommended*):
 
 ```bash
 # Change to top-level directory
-$ cd <name-of-top-level-package-directory>
+$ cd rd-apmm-python-oauth
 
 # Install via pip
 $ sudo pip install .
@@ -60,11 +60,8 @@ sudo dpkg -i <name of package>.deb
 For pure Python usage:
 
 ```bash
-# Change to top-level directory
-$ cd <name-of-top-level-package-directory>
-
-# Run Service as Python Module
-python -m nmosoauth.auth_server.security_service
+# Execute service file
+$ sudo /usr/bin/nmosoauth
 ```
 If installing via a Debian package (e.g. using apt-get), System V service files should be placed in system directories. The service can be restarted using:
 
