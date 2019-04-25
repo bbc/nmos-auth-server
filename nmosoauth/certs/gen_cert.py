@@ -17,7 +17,7 @@ def create_self_signed_cert():
     cert.get_subject().C = "UK"
     cert.get_subject().ST = "London"
     cert.get_subject().L = "London"
-    cert.get_subject().O = "Dummy Company Ltd"
+    cert.get_subject().O = "Dummy Company Ltd"  # noqa: E741
     cert.get_subject().OU = "Dummy Company Ltd"
     cert.get_subject().CN = "www.example.com"
     cert.set_serial_number(1000)
