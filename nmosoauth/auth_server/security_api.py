@@ -5,6 +5,7 @@ from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
 from authlib.specs.rfc6749 import OAuth2Error
 from nmoscommon.webapi import WebAPI, route
+from nmoscommon.auth.nmos_auth import RequiresAuth
 
 from .models import db, User, OAuth2Client
 from .oauth2 import authorization
@@ -69,6 +70,7 @@ class SecurityAPI(WebAPI):
         return (200, obj)
 
     @route(AUTH_VERSION_ROOT + 'test/', auto_json=True)
+    @RequiresAuth()
     def test(self):
         return (200, "Hello World")
 
