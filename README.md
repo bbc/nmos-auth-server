@@ -4,27 +4,36 @@
 
 A Flask-based implementation of an OAuth2 Authorisation Server
 based on [RFC 6749](https://tools.ietf.org/html/rfc6749) that produces
-access tokens in the form of [JSON Web Tokens](https://tools.ietf.org/html/rfc7519).
+access tokens in the form of [JSON Web Tokens](https://tools.ietf.org/html/rfc7519). Dynamic Client Registration is also supported in line with [RFC 7591](https://tools.ietf.org/html/rfc7591).
 
-The implementation is based on the [Authlib](https://authlib.org/) Library.
+The core of the implementation uses the [Authlib](https://authlib.org/) Library, and is based on the [Authlib Oauth2 Server Example](https://github.com/authlib/example-oauth2-server).
+
+**Please Check the [README.md](https://github.com/bbc/rd-apmm-python-oauth/tree/master/nmosoauth) in the `nmosoauth` directory for more in-depth instructions on starting the NMOS OAuth2 Server and registering a client.**
 
 ## Installation
 
 ### System Requirements
 
 *   Linux (untested on Windows and Mac)
-*   Python 2.7
+*   Python 2.7 and 3.x
 *   Python Pip
 
 ### Python
 
-For pip installations (*recommended*):
+To install from pip:
+
+```bash
+# Install From Pip
+$ sudo pip install nmos-oauth
+```
+
+For pip installations from source:
 
 ```bash
 # Change to top-level directory
 $ cd rd-apmm-python-oauth
 
-# Install via pip
+# Install via pip locally
 $ sudo pip install .
 ```
 
@@ -35,6 +44,7 @@ For basic setuptools installations:
 $ pip install setuptools
 
 # Install the package
+$ cd rd-apmm-python-oauth
 $ sudo python setup.py install
 ```
 
@@ -76,7 +86,7 @@ Please Check the [README.md](https://github.com/bbc/rd-apmm-python-oauth/tree/ma
 
 For information regarding building, testing and packaging this repo, please refer to the [Python Templating Library](https://github.com/bbc/rd-apmm-python-lib-template) for more information.
 
-You can now navigate to `http://127.0.0.1:4999/x-nmos/auth/v1.0/home/` to find the Home Page of the authorization server in order to perform any admin tasks, such as registering users and clients.
+**You can now navigate to `http://127.0.0.1:4999/x-nmos/auth/v1.0/home/` to find the Home Page of the authorization server** in order to perform any admin tasks, such as registering users and clients.
 
 ## Requirements
 

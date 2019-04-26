@@ -7,32 +7,52 @@ This is an example of an OAuth 2.0 server in [Authlib](https://authlib.org/) bas
 
 ## Getting Started
 
-If not starting the service via `systemctl` / SystemD, then an Authlib environment variable must be set (if using over plain HTTP):
+If using over plain HTTP, ensure the following environment variable is set (it is set automatically if using the service via SystemD or using the Python executable):
 
-    # disable check https (DO NOT SET THIS IN PRODUCTION)
-    $ export AUTHLIB_INSECURE_TRANSPORT=1
+```bash
+# disable check https (DO NOT SET THIS IN PRODUCTION)
+$ export AUTHLIB_INSECURE_TRANSPORT=1
+```
 
-This can alternatively be added to the `~/.bashrc` script to persist between terminal closures. **NOTE**: This environment variable must be removed when in a production setting.
+This can alternatively be added to the `~/.bashrc` script to persist between terminal closures.
 
-Now, you can open your browser at `http://127.0.0.1/x-nmos/auth/v1.0/home/`. Click on the `Signup` link to create an account.
+**NOTE**: This environment variable must be removed when in a production setting as JWT's should *always* be sent over a secured channel.
+
+Now, you can open your browser at `http://127.0.0.1/x-nmos/auth/v1.0/home/` to see the home page of the Authorization Server.
+
+## Signing Up
+
+Click on the `Signup` link to create a user account. Enter your `username` and `password`. This username and password will be used when using the `Password Grant` or whenever Basic Authentication is required.
+
+![signup_screenshot](https://user-images.githubusercontent.com/37411379/56799171-4e10cc80-6810-11e9-877b-b9d034622fc1.png)
+
+**NOTE**: IS-04 and IS-05 Access Rights define the scope of the users permissions when accessing those APIs (the names can be altered to suit the needs of the implementation). The value can be set to *None, Read or Write*.
 
 ## Creating a Client
 
-Before testing, a client needs to be created:
+Before testing, a client needs to be created. Click on `Register Client` to register.
 
-![create a client](https://user-images.githubusercontent.com/290496/38811988-081814d4-41c6-11e8-88e1-cb6c25a6f82e.png)
+![register_client_screenshot](https://user-images.githubusercontent.com/37411379/56798671-279e6180-680f-11e9-82f8-b9a1d236655f.png)
 
-Get your `client_id` and `client_secret` for testing. In this example, we
-have enabled `password` and `authorization code` grant types.
+In this example, we have enabled `password` and`authorization code` grant types.
 
-A token can be obtained using:
+Once a client is registered, a `client_id` and `client_secret` is generated and displayed on the home page with other metadata.
 
-```
+![home_screenshot](https://user-images.githubusercontent.com/37411379/56799872-ab594d80-6811-11e9-9a7c-38a2f2d5e28e.png)
+
+## Retrieving a Token
+
+A simple web form can be found by clicking on `Request Token`.
+
+![fetch_token_screenshot](https://user-images.githubusercontent.com/37411379/56798734-48ff4d80-680f-11e9-9b2b-730ffe2235e1.png)
+
+Alternatively, a token can be obtained from the command line using:
+
+```bash
 curl -u ${client_id}:${client_secret} -XPOST http://127.0.0.1:4999/x-nmos/auth/v1.0/token -F grant_type=password -F username=${username} -F password=${password} -F scope=${scope}
 ```
 
-Use the username and password you used when signing up. For now, you
-can read the source in example or follow the tutorial below.
+Use the username and password (and scope if one was supplied) you used when signing up.
 
 **IMPORTANT**: To test implicit grant, you need to set `token_endpoint_auth_method` to `none`.
 
@@ -96,6 +116,8 @@ from nmoscommon.auth.nmos_auth import RequiresAuth
   def testroute(self):
     return (200, "Hello World")
 ```
+
+There is a test route found at `http://localhost:4999/x-nmos/auth/v1.0/test/`
 
 ## OAuth Routes
 
