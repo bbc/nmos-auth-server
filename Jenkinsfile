@@ -46,8 +46,8 @@ pipeline {
                             env.lint_result = "FAILURE"
                         }
                         bbcGithubNotify(context: "lint/flake8", status: "PENDING")
-                        // Run the linter, excluding build directories (this can also go in the .flake8 config file)
-                        sh 'flake8 --exclude .git,.tox,dist,deb_dist,__pycache__'
+                        // Run the linter, excluding build directories
+                        sh 'flake8'
                         script {
                             env.lint_result = "SUCCESS" // This will only run if the sh above succeeded
                         }

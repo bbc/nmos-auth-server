@@ -1,6 +1,16 @@
-'''
-This set of functions can be run from within
-a "flask shell" to give app/database context '''
+# Copyright 2019 British Broadcasting Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from .models import db, User, OAuth2Client, AccessRights
 
@@ -29,68 +39,24 @@ def add(entry):
     db.session.commit()
 
 
-def addAccessRights(IS04Access, IS05Access):
-    entry = AccessRights(is_04_access=IS04Access, is_05_access=IS05Access)
-    add(entry)
+def addAccessRights(user, IS04Access, IS05Access):
+    access = AccessRights(user_id=user.id, is04=IS04Access, is05=IS05Access)
+    add(access)
+    return access
 
 
 def addUser(username, password):
-    entry = User(username=username, password=password)
-    add(entry)
+    user = User(username=username, password=password)
+    add(user)
+    return user
 
-
-# -------------------- UPDATE ------------------------- #
-
-
-def updateField(table, find_field, find_value, change_field, change_value):
-    entry = "table.query.filter_by(" + find_field + "=str(" + find_value + ")).first()"
-    entry = eval(entry)
-    entry.change_field = change_value
-    add(entry)
-    return entry
-
-
-# -------------------- REMOVE ------------------------- #
-
-
-def drop_all():
-    db.session.remove()
-    db.drop_all()
-
-
-def remove(entry):
-    db.session.delete(entry)
-    db.session.commit()
-
-
-def removeUser(user):
-    if isinstance(user, int):
-        entry = User.query.get(user)
-    elif isinstance(user, str):
-        entry = User.query.filter_by(username=user).first()
-    remove(entry)
-
-
-def removeClient(client_id):
-    if isinstance(client_id, int):
-        entry = OAuth2Client.query.get(client_id)
-    else:
-        entry = OAuth2Client.query.filter_by(client_id=client_id).first()
-    remove(entry)
-
-
-def removeAll(table):  # To clear token data
-    for each in table.query.all():
-        db.session.delete(each)
-        remove(each)
-
-
-# -------------------- PRINT ------------------------- #
+# -------------------- READ ------------------------- #
 # from nmosoauth.auth_server.db_utils import *
+
 
 def printTables():
     for table in db.metadata.tables:
-        print("Table: ", table)
+        print("Table: {}".format(table))
 
 
 def printTable(table):
@@ -108,12 +74,58 @@ def printField(table, field):
 
 def getUser(user):
     if isinstance(user, int):
-        entry = User.query.get(user)
+        entry = User.query.get_or_404(user)
     elif isinstance(user, str):
-        entry = User.query.filter_by(username=user).first()
+        entry = User.query.filter_by(username=user).first_or_404()
     return entry
 
 
 def printForeign(table, key, val):  # Key is usually user_id
-    s = "db.session.query(table).filter(table." + key + "==" + str(val) + ").all()"
+    s = "db.session.query(" + table + ").filter(" + table + "." + key + "==" + str(val) + ").all()"
     return eval(s)
+
+# -------------------- UPDATE ------------------------- #
+
+
+# DANGEROUS - DO NOT USE IN PRODUCTION. TESTING PURPOSES ONLY.
+def updateField(table, find_field, find_value, change_field, change_value):
+    entry = table + ".query.filter_by(" + find_field + "=str(" + find_value + ")).first()"
+    entry = eval(entry)
+    entry.change_field = change_value
+    add(entry)
+    return entry
+
+
+# -------------------- DELETE ------------------------- #
+
+
+def drop_all():
+    db.session.remove()
+    db.drop_all()
+
+
+def remove(entry):
+    db.session.delete(entry)
+    db.session.commit()
+
+
+def removeUser(user):
+    if isinstance(user, int):
+        entry = User.query.get_or_404(user)
+    elif isinstance(user, str):
+        entry = User.query.filter_by(username=user).first_or_404()
+    remove(entry)
+
+
+def removeClient(client_id):
+    if isinstance(client_id, int):
+        entry = OAuth2Client.query.get_or_404(client_id)
+    else:
+        entry = OAuth2Client.query.filter_by(client_id=client_id).first_or_404()
+    remove(entry)
+
+
+def removeAll(table):  # To clear token data
+    for each in table.query.all():
+        db.session.delete(each)
+        remove(each)

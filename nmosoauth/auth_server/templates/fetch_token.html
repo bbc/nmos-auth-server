@@ -1,31 +1,46 @@
+<!-- Copyright 2019 British Broadcasting Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
 {% extends "layout.html" %}
 {% block body %}
- <script src="{{ url_for('_style', filename='main.js') }}"></script>
+<script src="{{ url_for('_style', filename='main.js') }}"></script>
 
-<br>
+<h2>Fetch Token</h2>
+
 <form action="" method="post">
-  <span>Client ID</span>
   <label>
+    <span>Client ID:</span>
     <input type="text" name="client_id" id="client_id"
            placeholder="client_id" value="{{client.client_id}}"
            readonly="readonly"><br>
   </label>
   <label>
-    <span>Client Secret</span>
+    <span>Client Secret:</span>
     <input type="text" name="client_secret" id="client_secret"
            placeholder="client_secret" value="{{client.client_secret}}"
            readonly="readonly"><br>
   </label>
   <label>
-    <span>Username</span>
+    <span>Username:</span>
     <input type="text" name="username" id="username"><br>
   </label>
   <label>
-    <span>Password</span>
+    <span>Password:</span>
     <input type="text" name="password" id="password"><br>
   </label>
   <label>
-    <span>Scope</span>
+    <span>Scope:</span>
     <input type="text" name="scope" id="scope"
            placeholder="is04 or is05"><br>
   </label>

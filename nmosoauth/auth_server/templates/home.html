@@ -1,35 +1,65 @@
+<!-- Copyright 2019 British Broadcasting Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
 {% extends "layout.html" %}
 {% block body %}
   {% if user %}
     <div>
-      <span>Logged in as <strong>{{user.username}}</strong> (<a href="{{ url_for('_logout') }}">Log Out</a>)</span>
-      <br>
-
-      <p>
-        <a href="{{ url_for('_create_client_get') }}">Create Client</a> |
-        <a href="{{ url_for('_fetch_token') }}">Request Token</a> |
-        <a href="{{ url_for('_get_cert') }}">Certificates</a></p>
+      <h2>Home</h2>
+      <span>Logged in as <b>{{user.username}}</b> | <a href="{{ url_for('_logout') }}">Log Out</a></span>
     </div>
 
     <hr>
 
     {% for client in clients %}
-    <strong>Client {{ loop.index }}</strong> <sup><a href="{{ url_for('_delete_client', client_id=client.client_id) }}"> delete</a></sup> <br>
-      {% for info, data in client.client_info.items() %}
-        {{ info|string }} : {{ data|string }}<br>
-      {% endfor %}<br>
-      {% for info, data in client.client_metadata.items() %}
-        {{ info|string }} : {{ data|string }}<br>
-      {% endfor %}<br>
+    <button class="collapsible"><b>Client {{ loop.index }} - {{ client.client_name }}</b>
+    <sup><a href="{{ url_for('_delete_client', client_id=client.client_id) }}"> delete</a></sup></button>
+      <div class="content">
+        {% for info, data in client.client_info.items() %}
+          <p>{{ info|string }} : {{ data|string }}</p>
+        {% endfor %}<br>
+        {% for info, data in client.client_metadata.items() %}
+          <p>{{ info|string }} : {{ data|string }}</p>
+        {% endfor %}
+      </div><br>
     {% endfor %}
+
+    <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+          } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
+        });
+      }
+    </script>
 
 
 
   {% else %}
+    <h2>Log In</h2>
     <form action="" method="post">
       <p><input type="text" name="username" placeholder="username"></p>
       <p><input type="password" name="password"  placeholder="password"></p>
-      <button type="submit">Login / Signup</button>
+      <button type="submit">Login</button>
     </form>
     <p><a href="{{ url_for('_signup_get') }}">Signup</a></p>
   {% endif %}
