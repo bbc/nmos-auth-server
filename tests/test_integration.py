@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2019 British Broadcasting Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -106,9 +104,42 @@ class TestNmosAuth(unittest.TestCase):
             mockTemplate.assert_called_with(
                 'home.html', clients=None, message='That username is not recognised. Please signup.', user=None)
 
-    @mock.patch("nmosauth.auth_server.security_api.authorization")
-    def testTokenEndpoint(self, mockAuthServer):
-        mockAuthServer.create_endpoint_response.return_value = BEARER_TOKEN
+    def testEndToEnd(self):
+
+        test_username = 'steve'
+        test_password = 'password'
+
+        # SignUp
+        signup_data = {
+            'username': test_username,
+            'password': test_password,
+            'is04': 'read',
+            'is05': 'write'
+        }
+        with self.client.post(VERSION_ROOT + '/signup', data=signup_data) as rv:
+            self.assertEqual(rv.status_code, 302)
+            with self.app.app_context():
+                self.assertEqual(self.mockUser.username, User.query.get(1).username)
+                self.assertEqual(self.mockUser.password, User.query.get(1).password)
+
+        # Register Client
+        register_data = {
+            'client_name': 'R&D+Web+Router',
+            'client_uri': 'http://ipstudio-master.rd.bbc.co.uk/ips-web/#/web-router',
+            'scope': 'is04+is05',
+            'redirect_uri': 'www.example.com',
+            'grant_type': 'password',
+            'response_type': 'code',
+            'token_endpoint_auth_method': 'client_secret_basic'
+        }
+        headers = self.auth_headers(self.mockUser)
+        with mock.patch("nmosoauth.auth_server.security_api.session") as mock_session:
+            mock_session.__getitem__.return_value = None
+            with self.client.post(VERSION_ROOT + '/register_client', data=register_data,
+                                  headers=headers, follow_redirects=True) as rv:
+                self.assertEqual(rv.status_code, 201)
+                self.assertTrue('client_id' in rv.data)
+                self.assertTrue('client_secret' in rv.data)
 
 
 if __name__ == '__main__':
