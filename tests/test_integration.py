@@ -56,7 +56,10 @@ class TestNmosOauth(unittest.TestCase):
         return tempUser
 
     def auth_headers(self, user):
-        headers = {'Authorization': 'Basic ' + b64encode("{0}:{1}".format(user.username, user.password))}
+        auth_string = "{}:{}".format(user.username, user.password).encode('utf-8')
+        headers = {
+            'Authorization': b'Basic ' + b64encode(auth_string)
+        }
         return headers
 
     def testGetInitialRoutes(self):
@@ -86,7 +89,6 @@ class TestNmosOauth(unittest.TestCase):
 
     @mock.patch("nmosoauth.auth_server.security_api.render_template")
     @mock.patch("nmosoauth.auth_server.security_api.User")
-    # @mock.patch("nmosoauth.auth_server.security_api.request")
     def testHome(self, mockUser, mockTemplate):
 
         mockTemplate.return_value = "test"
