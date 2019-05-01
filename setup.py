@@ -63,8 +63,7 @@ class PostInstallCommand(install):
 
 def is_package(path):
     return (
-        os.path.isdir(path) and
-        os.path.isfile(os.path.join(path, '__init__.py'))
+        os.path.isdir(path) and os.path.isfile(os.path.join(path, '__init__.py'))
     )
 
 
@@ -98,7 +97,7 @@ packages_required = [
     "nmoscommon",
     "pyopenssl",
     "authlib>=0.10",
-    "flask_basicauth"
+    "flask-basicauth"
 ]
 
 deps_required = []
