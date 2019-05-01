@@ -40,21 +40,39 @@ pipeline {
         }
         stage ("Tests") {
             parallel {
-                stage ("Linting Check") {
+                stage ("Py2.7 Linting Check") {
                     steps {
                         script {
-                            env.lint_result = "FAILURE"
+                            env.lint27_result = "FAILURE"
                         }
-                        bbcGithubNotify(context: "lint/flake8", status: "PENDING")
-                        // Run the linter, excluding build directories
-                        sh 'flake8'
+                        bbcGithubNotify(context: "lint/flake8_27", status: "PENDING")
+                        // Run the linter
+                        sh 'python2.7 -m flake8'
                         script {
-                            env.lint_result = "SUCCESS" // This will only run if the sh above succeeded
+                            env.lint27_result = "SUCCESS" // This will only run if the sh above succeeded
                         }
                     }
                     post {
                         always {
-                            bbcGithubNotify(context: "lint/flake8", status: env.lint_result)
+                            bbcGithubNotify(context: "lint/flake8_27", status: env.lint27_result)
+                        }
+                    }
+                }
+                stage ("Py3 Linting Check") {
+                    steps {
+                        script {
+                            env.lint3_result = "FAILURE"
+                        }
+                        bbcGithubNotify(context: "lint/flake8_3", status: "PENDING")
+                        // Run the linter
+                        sh 'python3 -m flake8'
+                        script {
+                            env.lint3_result = "SUCCESS" // This will only run if the sh above succeeded
+                        }
+                    }
+                    post {
+                        always {
+                            bbcGithubNotify(context: "lint/flake8_3", status: env.lint3_result)
                         }
                     }
                 }
@@ -78,24 +96,24 @@ pipeline {
                                 }
                             }
                         }
-                        // stage ("Python 3 Unit Tests") {
-                        //     steps {
-                        //         script {
-                        //             env.py3_result = "FAILURE"
-                        //         }
-                        //         bbcGithubNotify(context: "tests/py3", status: "PENDING")
-                        //         // Use a workdirectory in /tmp to avoid shebang length limitation
-                        //         sh 'tox -e py3 --recreate --workdir /tmp/$(basename ${WORKSPACE})/tox-py3'
-                        //         script {
-                        //             env.py3_result = "SUCCESS" // This will only run if the sh above succeeded
-                        //         }
-                        //     }
-                        //     post {
-                        //         always {
-                        //             bbcGithubNotify(context: "tests/py3", status: env.py3_result)
-                        //         }
-                        //     }
-                        // }
+                        stage ("Python 3 Unit Tests") {
+                            steps {
+                                script {
+                                    env.py3_result = "FAILURE"
+                                }
+                                bbcGithubNotify(context: "tests/py3", status: "PENDING")
+                                // Use a workdirectory in /tmp to avoid shebang length limitation
+                                sh 'tox -e py3 --recreate --workdir /tmp/$(basename ${WORKSPACE})/tox-py3'
+                                script {
+                                    env.py3_result = "SUCCESS" // This will only run if the sh above succeeded
+                                }
+                            }
+                            post {
+                                always {
+                                    bbcGithubNotify(context: "tests/py3", status: env.py3_result)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -213,7 +231,7 @@ pipeline {
                             env.artifactoryUpload_result = "FAILURE"
                         }
                         bbcGithubNotify(context: "artifactory/upload", status: "PENDING")
-                        bbcTwineUpload(toxenv: "py3")
+                        bbcTwineUpload(toxenv: "py3", sdist: true)
                         script {
                             env.artifactoryUpload_result = "SUCCESS" // This will only run if the steps above succeeded
                         }
