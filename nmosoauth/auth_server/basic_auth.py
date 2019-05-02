@@ -12,12 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask_basicauth import BasicAuth
+from functools import wraps
+from flask import Response, request, current_app, render_template
+
 from .models import User
-from flask import Response, current_app, render_template
 
 
-class BasicAuthorization(BasicAuth):
+class BasicAuthorization():
+    """
+    A Flask extension for adding HTTP basic access authentication to the
+    application.
+    """
+
+    def __init__(self, app=None):
+        if app is not None:
+            self.app = app
+            self.init_app(app)
+        else:
+            self.app = None
+
+    def init_app(self, app):
+        app.config.setdefault('BASIC_AUTH_REALM', '')
 
     def check_credentials(self, username, password):
         try:
@@ -26,6 +41,12 @@ class BasicAuthorization(BasicAuth):
         except Exception:
             return False
 
+    def authenticate(self):
+        auth = request.authorization
+        return (
+            auth and auth.type == 'basic' and self.check_credentials(auth.username, auth.password)
+        )
+
     def challenge(self):
         realm = current_app.config['BASIC_AUTH_REALM']
         return Response(
@@ -33,6 +54,15 @@ class BasicAuthorization(BasicAuth):
             headers={'WWW-Authenticate': 'Basic realm="{}"'.format(realm)},
             response=render_template('error.html', code=401, message="Unauthorised")
         )
+
+    def required(self, view_func):
+        @wraps(view_func)
+        def wrapper(*args, **kwargs):
+            if self.authenticate():
+                return view_func(*args, **kwargs)
+            else:
+                return self.challenge()
+        return wrapper
 
 
 basicAuth = BasicAuthorization()

@@ -96,8 +96,7 @@ packages_required = [
     "gevent",
     "nmoscommon",
     "pyopenssl",
-    "authlib>=0.10",
-    "flask-basicauth"
+    "authlib>=0.10"
 ]
 
 deps_required = []
