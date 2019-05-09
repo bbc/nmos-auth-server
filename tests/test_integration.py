@@ -138,8 +138,8 @@ class TestNmosAuth(unittest.TestCase):
             with self.client.post(VERSION_ROOT + '/register_client', data=register_data,
                                   headers=headers, follow_redirects=True) as rv:
                 self.assertEqual(rv.status_code, 201)
-                self.assertTrue('client_id' in rv.data)
-                self.assertTrue('client_secret' in rv.data)
+                self.assertTrue(b'client_id' in rv.data)
+                self.assertTrue(b'client_secret' in rv.data)
 
 
 if __name__ == '__main__':
