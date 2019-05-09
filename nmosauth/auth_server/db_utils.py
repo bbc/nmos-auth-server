@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from six import string_types
 from .models import db, User, OAuth2Client, AccessRights
 
 # -------------------- INIT ------------------------- #
@@ -77,7 +78,7 @@ def getUser(user):
     try:
         if isinstance(user, int):
             entry = User.query.get_or_404(user)
-        elif isinstance(user, str):
+        elif isinstance(user, string_types):
             entry = User.query.filter_by(username=user).first_or_404()
         return entry
     except Exception:
@@ -116,7 +117,7 @@ def remove(entry):
 def removeUser(user):
     if isinstance(user, int):
         entry = User.query.get_or_404(user)
-    elif isinstance(user, str):
+    elif isinstance(user, string_types):
         entry = User.query.filter_by(username=user).first_or_404()
     remove(entry)
 

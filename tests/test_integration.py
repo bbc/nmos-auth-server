@@ -133,6 +133,7 @@ class TestNmosAuth(unittest.TestCase):
             'token_endpoint_auth_method': 'client_secret_basic'
         }
         headers = self.auth_headers(self.mockUser)
+        print(headers)
         with mock.patch("nmosoauth.auth_server.security_api.session") as mock_session:
             mock_session.__getitem__.return_value = None
             with self.client.post(VERSION_ROOT + '/register_client', data=register_data,
