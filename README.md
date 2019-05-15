@@ -78,7 +78,14 @@ The unit tests can then be run with:
 make test
 ```
 
-from the root directory of the repository.
+Testing of the package can be achieved using tox:
+```bash
+# Install tox
+pip install tox
+
+# Run tests using tox environment for Python3
+cd nmos-auth-server
+tox -e py3
 
 ### Debian
 
