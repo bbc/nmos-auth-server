@@ -1,14 +1,15 @@
 <!---NAME--->
-# RD-APMM-PYTHON-OAUTH-SECURITY
+# AMWA NMOS BCP-003-02 Authorisation Server Implementation
 <!---/NAME--->
 
 A Flask-based implementation of an OAuth2 Authorisation Server
-based on [RFC 6749](https://tools.ietf.org/html/rfc6749) that produces
-access tokens in the form of [JSON Web Tokens](https://tools.ietf.org/html/rfc7519). Dynamic Client Registration is also supported in line with [RFC 7591](https://tools.ietf.org/html/rfc7591).
+based on [AMWA NMOS BCP-003-02](https://amwa-tv.github.io/nmos-api-security/best-practice-authorisation.html) using [RFC 6749](https://tools.ietf.org/html/rfc6749). The API implemented here is a candidate to become the proposed specification AMWA NMOS IS-10.
+
+The server produces access tokens in the form of [JSON Web Tokens](https://tools.ietf.org/html/rfc7519). Dynamic Client Registration is also supported in line with [RFC 7591](https://tools.ietf.org/html/rfc7591).
 
 The core of the implementation uses the [Authlib](https://authlib.org/) Library, and is based on the [Authlib Oauth2 Server Example](https://github.com/authlib/example-oauth2-server).
 
-**Please Check the [README.md](https://github.com/bbc/rd-apmm-python-oauth/tree/master/nmosoauth) in the `nmosoauth` directory for more in-depth instructions on starting the NMOS OAuth2 Server and registering a client.**
+**Please Check the [README.md](https://github.com/bbc/nmos-auth-server/tree/master/nmosoauth) in the `nmosoauth` directory for more in-depth instructions on starting the AMWA NMOS OAuth2 Server and registering a client.**
 
 ## Installation
 
@@ -18,7 +19,22 @@ The core of the implementation uses the [Authlib](https://authlib.org/) Library,
 *   Python 2.7 and 3.x
 *   Python Pip
 
-### Python
+### Python Requirements
+These should be installed automatically as part of the install process.
+
+* six
+* nmoscommon
+* Flask
+* sqlalchemy
+* Flask-SQLAlchemy
+* Authlib>=1.1
+* Flask-Cors
+* requests
+* gevent
+* systemd
+* pyopenssl
+
+### Python Installation
 
 To install from pip:
 
@@ -31,7 +47,7 @@ For pip installations from source:
 
 ```bash
 # Change to top-level directory
-$ cd rd-apmm-python-oauth
+$ cd nmos-auth-server
 
 # Install via pip locally
 $ sudo pip install .
@@ -44,9 +60,25 @@ For basic setuptools installations:
 $ pip install setuptools
 
 # Install the package
-$ cd rd-apmm-python-oauth
+$ cd nmos-auth-server
 $ sudo python setup.py install
 ```
+
+### Testing
+
+The test tooling requires the tox package. To install run:
+
+```bash
+pip install tox
+```
+
+The unit tests can then be run with:
+
+```bash
+make test
+```
+
+from the root directory of the repository.
 
 ### Debian
 
@@ -82,22 +114,6 @@ sudo systemctl restart python-nmos-oauth
 
 ### Getting Started
 
-Please Check the [README.md](https://github.com/bbc/rd-apmm-python-oauth/tree/master/nmosoauth) in the `nmosoauth` directory for more in-depth instructions on starting the NMOS OAuth2 Server and registering a client.
-
-For information regarding building, testing and packaging this repo, please refer to the [Python Templating Library](https://github.com/bbc/rd-apmm-python-lib-template) for more information.
+Please Check the [README.md](https://github.com/bbc/nmos-auth-server/tree/master/nmosoauth) in the `nmosoauth` directory for more in-depth instructions on starting the NMOS OAuth2 Server and registering a client.
 
 **You can now navigate to `http://127.0.0.1:4999/x-nmos/auth/v1.0/home/` to find the Home Page of the authorization server** in order to perform any admin tasks, such as registering users and clients.
-
-## Requirements
-
-* six
-* nmoscommon
-* Flask
-* sqlalchemy
-* Flask-SQLAlchemy
-* Authlib>=1.1
-* Flask-Cors
-* requests
-* gevent
-* systemd
-* pyopenssl
