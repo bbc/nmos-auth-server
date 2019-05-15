@@ -66,18 +66,6 @@ $ sudo python setup.py install
 
 ### Testing
 
-The test tooling requires the tox package. To install run:
-
-```bash
-pip install tox
-```
-
-The unit tests can then be run with:
-
-```bash
-make test
-```
-
 Testing of the package can be achieved using tox:
 ```bash
 # Install tox
@@ -86,6 +74,7 @@ pip install tox
 # Run tests using tox environment for Python3
 cd nmos-auth-server
 tox -e py3
+```
 
 ### Debian
 
