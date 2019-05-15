@@ -29,7 +29,7 @@ GEN_CERT_PATH = os.path.join(NMOSOAUTH_DIR, GEN_CERT_FILE)
 
 # Basic metadata
 name = "nmos-oauth"
-version = "0.0.5"
+version = "1.0.0"
 description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/rd-apmm-python-oauth'
 author = 'Danny Meloy'

@@ -3,5 +3,5 @@ include tox.ini
 include stdeb.cfg
 recursive-include nmosoauth/auth_server/static *
 recursive-include nmosoauth/auth_server/templates *
-include nmosoauth/certs/generate_cert.sh
+include nmosoauth/certs/gen*
 recursive-include tests *.py

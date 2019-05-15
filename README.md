@@ -73,11 +73,11 @@ For pure Python usage:
 # Execute service file
 $ sudo /usr/bin/nmosoauth
 ```
-If installing via a Debian package (e.g. using apt-get), System V service files should be placed in system directories. The service can be restarted using:
+If installing via a Debian package (e.g. using apt-get), Systemd service files should be placed in system directories. The service can be restarted using:
 
 ```bash
 # Run Service using SystemD
-`sudo systemctl restart python-nmos-oauth`
+sudo systemctl restart python-nmos-oauth
 ```
 
 ### Getting Started
