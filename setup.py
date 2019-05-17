@@ -34,7 +34,7 @@ description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/nmos-auth-server'
 author = 'Danny Meloy'
 author_email = 'danny.meloy@bbc.co.uk'
-license = 'BSD'
+license = 'Apache2'
 long_description = "OAuth2 Server Implementation to produce JWTs for API Access"
 
 
