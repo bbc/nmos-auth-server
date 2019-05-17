@@ -16,7 +16,7 @@ set -e
 
 case "$1" in
     purge)
-	     rm -rf /var/nmosoauth
+	     rm -rf /var/nmosauth
     ;;
 
     remove|upgrade|failed-upgrade)

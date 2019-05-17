@@ -21,16 +21,16 @@ import mock
 
 
 from nmoscommon.logger import Logger
-from nmosoauth.auth_server.db_utils import drop_all
-from nmosoauth.auth_server.security_api import SecurityAPI
-from nmosoauth.auth_server.security_api import User
-from nmos_auth_data import BEARER_TOKEN, TEST_PRIV_KEY
+from nmosauth.auth_server.db_utils import drop_all
+from nmosauth.auth_server.security_api import SecurityAPI
+from nmosauth.auth_server.security_api import User
+from .nmos_auth_data import BEARER_TOKEN, TEST_PRIV_KEY
 from base64 import b64encode
 
 VERSION_ROOT = '/x-nmos/auth/v1.0'
 
 
-class TestNmosOauth(unittest.TestCase):
+class TestNmosAuth(unittest.TestCase):
 
     def setUp(self):
         self.api = SecurityAPI(logger=Logger("testing"), nmosConfig=None,
@@ -40,7 +40,7 @@ class TestNmosOauth(unittest.TestCase):
         self.client = self.app.test_client()
 
         self.mockUser = self.createMockUser("steve", "password")
-        patcher = mock.patch("nmosoauth.auth_server.basic_auth.User")
+        patcher = mock.patch("nmosauth.auth_server.basic_auth.User")
         self.mockBasicUser = patcher.start()
         self.mockBasicUser.query.filter_by.return_value.first.return_value = self.mockUser
         self.addCleanup(patcher.stop)
@@ -87,8 +87,8 @@ class TestNmosOauth(unittest.TestCase):
             rv = client.post(VERSION_ROOT + '/register_client', headers=headers)
             self.assertEqual(rv.status_code, 401)
 
-    @mock.patch("nmosoauth.auth_server.security_api.render_template")
-    @mock.patch("nmosoauth.auth_server.security_api.User")
+    @mock.patch("nmosauth.auth_server.security_api.render_template")
+    @mock.patch("nmosauth.auth_server.security_api.User")
     def testHome(self, mockUser, mockTemplate):
 
         mockTemplate.return_value = "test"
@@ -106,7 +106,7 @@ class TestNmosOauth(unittest.TestCase):
             mockTemplate.assert_called_with(
                 'home.html', clients=None, message='That username is not recognised. Please signup.', user=None)
 
-    @mock.patch("nmosoauth.auth_server.security_api.authorization")
+    @mock.patch("nmosauth.auth_server.security_api.authorization")
     def testTokenEndpoint(self, mockAuthServer):
         mockAuthServer.create_endpoint_response.return_value = BEARER_TOKEN
 

@@ -51,7 +51,7 @@ def addUser(username, password):
     return user
 
 # -------------------- READ ------------------------- #
-# from nmosoauth.auth_server.db_utils import *
+# from nmosauth.auth_server.db_utils import *
 
 
 def printTables():

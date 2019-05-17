@@ -21,21 +21,21 @@ import subprocess
 from setuptools.command.develop import develop
 from setuptools.command.install import install
 
-from nmosoauth.auth_server.constants import NMOSOAUTH_DIR
+from nmosauth.auth_server.constants import NMOSAUTH_DIR
 
 GEN_CERT_FILE = 'gen_cert.py'
-GEN_CERT_PATH = os.path.join(NMOSOAUTH_DIR, GEN_CERT_FILE)
+GEN_CERT_PATH = os.path.join(NMOSAUTH_DIR, GEN_CERT_FILE)
 
 
 # Basic metadata
-name = "nmos-oauth"
+name = "nmos-auth"
 version = "1.0.0"
 description = "OAuth2 Server Implementation"
-url = 'https://github.com/bbc/rd-apmm-python-oauth'
+url = 'https://github.com/bbc/nmos-auth-server'
 author = 'Danny Meloy'
 author_email = 'danny.meloy@bbc.co.uk'
 license = 'BSD'
-long_description = "OAuth Server Implementation to produce JWTs for API Access"
+long_description = "OAuth2 Server Implementation to produce JWTs for API Access"
 
 
 def gen_certs():
@@ -43,7 +43,7 @@ def gen_certs():
         subprocess.call([GEN_CERT_PATH])
     except Exception as e:
         print('Error: {}. Failed to generate certificates.'.format(str(e)))
-        print('Please run "{}" in {}'.format(GEN_CERT_FILE, NMOSOAUTH_DIR))
+        print('Please run "{}" in {}'.format(GEN_CERT_FILE, NMOSAUTH_DIR))
         pass
 
 
@@ -96,7 +96,7 @@ packages_required = [
     "gevent",
     "nmoscommon",
     "pyopenssl",
-    "authlib>=0.10"
+    "authlib>=0.11"
 ]
 
 deps_required = []
@@ -115,11 +115,11 @@ setup(
     include_package_data=True,
     scripts=[],
     package_data={
-        'nmosoauth': ['auth_server/templates/*', 'auth_server/static/*']
+        'nmosauth': ['auth_server/templates/*', 'auth_server/static/*']
     },
     data_files=[
-        ('/usr/bin', ['bin/nmosoauth']),
-        (NMOSOAUTH_DIR, ['nmosoauth/certs/{}'.format(GEN_CERT_FILE)])
+        ('/usr/bin', ['bin/nmosauth']),
+        (NMOSAUTH_DIR, ['nmosauth/certs/{}'.format(GEN_CERT_FILE)])
     ],
     long_description=long_description,
     cmdclass={

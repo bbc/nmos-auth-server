@@ -3,7 +3,7 @@
 from OpenSSL import crypto
 import os
 
-from nmosoauth.auth_server.constants import CERT_PATH, PRIVKEY_PATH
+from nmosauth.auth_server.constants import CERT_PATH, PRIVKEY_PATH
 
 
 def create_self_signed_cert():

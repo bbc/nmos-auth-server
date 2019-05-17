@@ -1,1 +1,1 @@
-nmosoauth/certs/generate_cert.sh /var/nmosoauth
+nmosauth/certs/generate_cert.sh /var/nmosauth

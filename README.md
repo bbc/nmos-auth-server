@@ -40,7 +40,7 @@ To install from pip:
 
 ```bash
 # Install From Pip
-$ sudo pip install nmos-oauth
+$ sudo pip install nmos-auth
 ```
 
 For pip installations from source:

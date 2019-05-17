@@ -17,7 +17,7 @@ from authlib.specs.rfc7519 import jwt
 import datetime
 from .oauth2 import authorization
 from .models import AccessRights
-from .constants import NMOSOAUTH_DIR
+from .constants import NMOSAUTH_DIR
 
 
 class TokenGenerator():
@@ -91,7 +91,7 @@ class TokenGenerator():
             key = config['jwt_key']
         except Exception as e:
             print("Error: " + e)
-            abs_key_path = os.path.join(NMOSOAUTH_DIR, "privkey.pem")
+            abs_key_path = os.path.join(NMOSAUTH_DIR, "privkey.pem")
             with open(abs_key_path, 'r') as myfile:
                 key = myfile.read()
 

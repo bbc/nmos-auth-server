@@ -1,5 +1,5 @@
 #!/bin/sh
-# postinst script for nmos-oauth
+# postinst script for nmos-auth
 #
 # see: dh_installdeb(1)
 
@@ -23,12 +23,12 @@ set -e
 
 case "$1" in
     configure)
-      if [ ! -d /var/nmosoauth/ ]; then
-        mkdir /var/nmosoauth/
+      if [ ! -d /var/nmosauth/ ]; then
+        mkdir /var/nmosauth/
       fi
-      chown ipstudio:ipstudio /var/nmosoauth
-      if [ -f  /var/nmosoauth/generate_cert.sh ]; then
-        /var/nmosoauth/generate_cert.sh
+      chown ipstudio:ipstudio /var/nmosauth
+      if [ -f  /var/nmosauth/generate_cert.sh ]; then
+        /var/nmosauth/generate_cert.sh
       fi
     ;;
 

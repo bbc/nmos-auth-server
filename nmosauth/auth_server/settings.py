@@ -14,7 +14,7 @@
 
 import os
 from datetime import timedelta
-from .constants import NMOSOAUTH_DIR, PRIVKEY_PATH, DATABASE_NAME
+from .constants import NMOSAUTH_DIR, PRIVKEY_PATH, DATABASE_NAME
 
 pkg = ''
 if __package__ is not None:
@@ -27,7 +27,7 @@ class BaseConfig(object):
     SECRET_KEY = os.urandom(16)
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=5)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/{}.sqlite'.format(NMOSOAUTH_DIR, DATABASE_NAME)
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/{}.sqlite'.format(NMOSAUTH_DIR, DATABASE_NAME)
     BASIC_AUTH_REALM = "NMOS Auth Server Login Required"
     OAUTH2_ACCESS_TOKEN_GENERATOR = pkg + 'token_generator.gen_token'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True

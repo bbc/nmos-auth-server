@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Constants for nmos-oauth defining filenames and directory locations"""
+"""Constants for nmos-auth defining filenames and directory locations"""
 
 import os
 
-NMOSOAUTH_DIR = '/var/nmosoauth'
+NMOSAUTH_DIR = '/var/nmosauth'
 CERT_FILE = 'certificate.pem'
-CERT_PATH = os.path.join(NMOSOAUTH_DIR, CERT_FILE)
+CERT_PATH = os.path.join(NMOSAUTH_DIR, CERT_FILE)
 PRIVKEY_FILE = 'privkey.pem'
-PRIVKEY_PATH = os.path.join(NMOSOAUTH_DIR, PRIVKEY_FILE)
+PRIVKEY_PATH = os.path.join(NMOSAUTH_DIR, PRIVKEY_FILE)
 CERT_ENDPOINT = '/certs'
 CERT_KEY = 'default'
-DATABASE_NAME = 'oauth_db'
+DATABASE_NAME = 'auth_db'

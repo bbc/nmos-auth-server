@@ -1,5 +1,5 @@
 [Unit]
-Description=nmos-oauth
+Description=nmos-auth
 Wants=network-online.target apache2.service
 After=network.target network-online.target apache2.service
 
@@ -8,8 +8,8 @@ Environment="AUTHLIB_INSECURE_TRANSPORT=1"
 User=ipstudio
 Restart=always
 RestartSec=3
-ExecStart=/usr/bin/nmosoauth
+ExecStart=/usr/bin/nmosauth
 
 [Install]
 WantedBy=multi-user.target
-Alias=nmos-oauth.service ips-oauth.service
+Alias=nmos-auth.service ips-auth.service

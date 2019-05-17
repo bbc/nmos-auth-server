@@ -3,7 +3,7 @@
 KEYFILE="privkey.pem";
 CERTFILE="certificate.pem";
 PUBKEYFILE="pubkey.pem";
-NMOSOAUTH_DIR="/var/nmosoauth"
+NMOSAUTH_DIR="/var/nmosauth"
 subinfo='/C=UK/L=London/O=Example/CN=www.example.co.uk';
 
 [ -e $CERTFILE ] && rm $CERTFILE;
@@ -22,6 +22,6 @@ chmod 600 $PUBKEYFILE
 chmod 600 $CERTFILE
 chmod 700 -- "$0"
 
-mv $KEYFILE $NMOSOAUTH_DIR
-mv $CERTFILE $NMOSOAUTH_DIR
-mv $PUBKEYFILE $NMOSOAUTH_DIR
+mv $KEYFILE $NMOSAUTH_DIR
+mv $CERTFILE $NMOSAUTH_DIR
+mv $PUBKEYFILE $NMOSAUTH_DIR
