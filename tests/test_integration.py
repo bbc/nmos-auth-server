@@ -24,7 +24,7 @@ from nmoscommon.logger import Logger
 from nmosauth.auth_server.db_utils import drop_all
 from nmosauth.auth_server.security_api import SecurityAPI
 from nmosauth.auth_server.security_api import User
-from .nmos_auth_data import BEARER_TOKEN, TEST_PRIV_KEY
+from nmos_auth_data import BEARER_TOKEN, TEST_PRIV_KEY
 from base64 import b64encode
 
 VERSION_ROOT = '/x-nmos/auth/v1.0'
