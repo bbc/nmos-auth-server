@@ -13,21 +13,21 @@
 # limitations under the License.
 
 from __future__ import print_function, absolute_import
-
-import time
-import signal
-from socket import gethostname
-from os import getpid
-
-from nmoscommon.httpserver import HttpServer
-from nmoscommon.mdns import MDNSEngine
-from nmoscommon.logger import Logger
-from nmoscommon.nmoscommonconfig import config as _config
-from .security_api import SecurityAPI
-
-import gevent
 from gevent import monkey
 monkey.patch_all()
+
+import gevent  # noqa E402
+import time  # noqa E402
+import signal  # noqa E402
+from socket import gethostname  # noqa E402
+from os import getpid  # noqa E402
+
+from nmoscommon.httpserver import HttpServer  # noqa E402
+from nmoscommon.mdns import MDNSEngine  # noqa E402
+from nmoscommon.logger import Logger  # noqa E402
+from nmoscommon.nmoscommonconfig import config as _config  # noqa E402
+from .security_api import SecurityAPI  # noqa E402
+
 
 PORT = 4999
 HOSTNAME = gethostname().split(".", 1)[0]

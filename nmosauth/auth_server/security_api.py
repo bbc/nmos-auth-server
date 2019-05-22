@@ -26,7 +26,7 @@ from .oauth2 import authorization
 from .app import config_app
 from .basic_auth import basicAuth
 from .db_utils import getUser, removeClient, addUser, addAccessRights
-from .constants import CERT_PATH, CERT_KEY
+from .constants import CERT_PATH
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -84,7 +84,7 @@ class SecurityAPI(WebAPI):
         return (200, obj)
 
     @route(AUTH_VERSION_ROOT + 'test/', auto_json=True)
-    @RequiresAuth()
+    @RequiresAuth(condition=True)
     def test(self):
         return (200, "Hello World")
 
@@ -214,7 +214,7 @@ class SecurityAPI(WebAPI):
         try:
             with open(CERT_PATH, 'r') as myfile:
                 cert = myfile.read()
-            return (200, {CERT_KEY: cert})
+            return (200, [cert])
         except OSError as e:
             self.logger.writeError("Error: {}\nFile at {} doesn't exist".format(e, CERT_PATH))
             raise
