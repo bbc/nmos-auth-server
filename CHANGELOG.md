@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.0.3
+- Update install instructions in README
+
 ## 1.0.2
 - Decode bytes objects as string objects for python3 compatibility
 

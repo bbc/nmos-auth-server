@@ -20,6 +20,7 @@ The core of the implementation uses the [Authlib](https://authlib.org/) Library,
 *   Python Pip
 
 ### Python Requirements
+
 These should be installed automatically as part of the install process.
 
 * six
@@ -36,11 +37,12 @@ These should be installed automatically as part of the install process.
 
 ### Python Installation
 
+Due to the installation needing to install files into system directories (`/var/nmosauth` for system files and `/usr/bin` for executable files) the `--no-binary` flag must be set in order to pull the source distribution from PyPi and not a Wheel (built) distribution.
 To install from pip:
 
 ```bash
 # Install From Pip
-$ sudo pip install nmos-auth
+$ sudo pip install nmos-auth --no-binary :all:
 ```
 
 For pip installations from source:
@@ -50,7 +52,7 @@ For pip installations from source:
 $ cd nmos-auth-server
 
 # Install via pip locally
-$ sudo pip install .
+$ sudo pip install .  --no-binary :all:
 ```
 
 For basic setuptools installations:
