@@ -25,13 +25,15 @@ def create_self_signed_cert():
     cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
     cert.set_issuer(cert.get_subject())
     cert.set_pubkey(k)
-    cert.sign(k, b'sha256')
+    cert.sign(k, 'sha256')
 
     # Write Cert and Private Key to File
     open(CERT_PATH, "wt").write(
-        crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
+        (crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8'))
+    )
     open(PRIVKEY_PATH, "wt").write(
-        crypto.dump_privatekey(crypto.FILETYPE_PEM, k))
+        crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode('utf-8')
+    )
 
     # Change permissions to Read-Only for security
     os.chmod(CERT_PATH, 0o400)

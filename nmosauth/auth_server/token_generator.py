@@ -17,7 +17,7 @@ from authlib.specs.rfc7519 import jwt
 import datetime
 from .oauth2 import authorization
 from .models import AccessRights
-from .constants import NMOSAUTH_DIR
+from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
 
 class TokenGenerator():
@@ -83,15 +83,17 @@ class TokenGenerator():
             'sub': user.username,
             'scope': new_scope,
             'aud': audience,
-            'x-nmos-api': {'name': new_scope,
-                           'access': access}
+            'x-nmos-api': {
+                'name': new_scope,
+                'access': access
+            }
         }
 
         try:
             key = config['jwt_key']
         except Exception as e:
             print("Error: " + e)
-            abs_key_path = os.path.join(NMOSAUTH_DIR, "privkey.pem")
+            abs_key_path = os.path.join(NMOSAUTH_DIR, PRIVKEY_FILE)
             with open(abs_key_path, 'r') as myfile:
                 key = myfile.read()
 
@@ -99,7 +101,7 @@ class TokenGenerator():
             header,
             payload,
             key
-        )
+        ).decode('utf-8')
 
 
 # Needed for access_token path in Flask config
