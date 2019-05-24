@@ -42,7 +42,7 @@ To install from pip:
 
 ```bash
 # Install From Pip
-$ sudo pip install nmos-auth --no-binary :all:
+$ sudo pip install nmos-auth --no-binary nmos-auth
 ```
 
 For pip installations from source:
@@ -52,7 +52,7 @@ For pip installations from source:
 $ cd nmos-auth-server
 
 # Install via pip locally
-$ sudo pip install .  --no-binary :all:
+$ sudo pip install . --no-binary nmos-auth
 ```
 
 For basic setuptools installations:
