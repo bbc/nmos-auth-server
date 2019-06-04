@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.0.4
+- Move NMOS packages from recommends to depends
+
 ## 1.0.3
 - Update install instructions in README
 
