@@ -37,6 +37,7 @@ class TokenGenerator():
         return access
 
     def get_audience(self, user, scope, access):
+        audience = ''
         if access is None:
             return None
         if scope == "is04":
@@ -49,8 +50,6 @@ class TokenGenerator():
                 audience = "IS-05 Write Access".split(" ")
             if access == "read":
                 audience = "IS-04 Read Access".split(" ")
-        else:
-            audience = None
         return audience
 
     def get_scope(self, user, client, scope):
