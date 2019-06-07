@@ -20,12 +20,12 @@ import gevent  # noqa E402
 import time  # noqa E402
 import signal  # noqa E402
 from socket import gethostname  # noqa E402
-from os import getpid  # noqa E402
+from os import getpid, path   # noqa E402
+import json  # noqa E402
 
 from nmoscommon.httpserver import HttpServer  # noqa E402
 from nmoscommon.mdns import MDNSEngine  # noqa E402
 from nmoscommon.logger import Logger  # noqa E402
-from nmoscommon.nmoscommonconfig import config as _config  # noqa E402
 from .security_api import SecurityAPI  # noqa E402
 
 
@@ -41,11 +41,22 @@ DNS_SD_TYPE = '_nmos-auth._tcp'
 
 class SecurityService:
     def __init__(self, logger=None):
-        self.config = _config
+        self.config = {"priority": 100, "https_mode": "disabled", "enable_mdns": True}
+        self._load_config()
         self.logger = Logger("nmosauth", logger)
         self.running = False
         self.httpServer = None
         self.mdns = MDNSEngine()
+
+    def _load_config(self):
+        try:
+            config_file = "/etc/nmosauth/config.json"
+            if path.isfile(config_file):
+                f = open(config_file, 'r')
+                extra_config = json.loads(f.read())
+                self.config.update(extra_config)
+        except Exception as e:
+            self.logger.writeDebug("Exception loading config: {}".format(e))
 
     def start(self):
         if self.running:
