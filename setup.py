@@ -96,7 +96,8 @@ packages_required = [
     "gevent",
     "nmoscommon",
     "pyopenssl",
-    "authlib>=0.11"
+    "authlib>=0.11",
+    "werkzeug>=0.13"
 ]
 
 deps_required = []

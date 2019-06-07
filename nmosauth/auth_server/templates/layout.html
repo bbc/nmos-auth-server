@@ -17,7 +17,7 @@ limitations under the License. -->
   <head>
     <title>BBC R&amp;D Auth Server</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('_style', filename='style.css') }}">
-    <link rel="icon" href="http://newsvote.bbc.co.uk/favicon.ico">
+    <link rel="icon" href="{{ url_for('_style', filename='bbc_favicon.ico') }}">
   </head>
 
   <body>
@@ -27,9 +27,11 @@ limitations under the License. -->
       <a href="{{ url_for('_fetch_token') }}">Request Token</a>
       <a href="{{ url_for('_get_cert') }}">Certificates</a>
     </div>
-      <script type="text/javascript"
-        src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
-      </script>
+    <script>
+      window.jQuery || document.write(
+        '<script src="{{ url_for('_style', filename='jquery.js') }}">\x3C/script>'
+      )
+    </script>
       <script type="text/javascript">
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
       </script>
