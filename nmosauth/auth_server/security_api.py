@@ -102,7 +102,10 @@ class SecurityAPI(WebAPI):
                 return render_template('home.html', user=None, clients=None, message=message)
             if user.password == password:
                 session['id'] = user.id
-                return redirect(url_for('_home'))
+                if "redirect" in session:
+                    return redirect(session['redirect'])
+                else:
+                    return redirect(url_for('_home'))
             else:
                 message = "Invalid Password. Try Again."
                 return render_template('home.html', user=None, clients=None, message=message)
@@ -195,7 +198,8 @@ class SecurityAPI(WebAPI):
         user = self.current_user()
         if not user and request.authorization:
             user = getUser(request.authorization.username)
-        elif not user:
+        if not user:
+            session["redirect"] = request.url
             return redirect(url_for('_home'))
         try:
             grant = authorization.validate_consent_request(end_user=user, request=request)
