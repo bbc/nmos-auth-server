@@ -120,7 +120,8 @@ class SecurityAPI(WebAPI):
         if not username or not password:
             return redirect(url_for('_signup_get'))
         user = addUser(username, password)
-
+        if user is None:
+            return render_template('signup.html', message="Invalid Username. Please choose another one.")
         is04 = request.form.get('is04', None)
         is05 = request.form.get('is05', None)
         addAccessRights(user, is04, is05)
@@ -183,7 +184,7 @@ class SecurityAPI(WebAPI):
         if not user and 'username' in request.form:
             username = request.form.get('username')
             user = User.query.filter_by(username=username).first()
-        if request.form['confirm']:
+        if "confirm" in request.form.keys() and request.form['confirm'] == "true":
             grant_user = user
         else:
             grant_user = None
@@ -194,6 +195,8 @@ class SecurityAPI(WebAPI):
         user = self.current_user()
         if not user and request.authorization:
             user = getUser(request.authorization.username)
+        elif not user:
+            return redirect(url_for('_home'))
         try:
             grant = authorization.validate_consent_request(end_user=user, request=request)
         except OAuth2Error as error:
