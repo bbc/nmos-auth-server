@@ -234,7 +234,7 @@ pipeline {
                         sh 'rm -rf dist/*'
                         bbcMakeGlobalWheel("py27")
                         bbcMakeGlobalWheel("py3")
-                        bbcTwineUpload(toxenv: "py3", sdist: true, pypi: true)
+                        bbcTwineUpload(toxenv: "py3", pypi: true)
                         script {
                             env.pypiUpload_result = "SUCCESS" // This will only run if the steps above succeeded
                         }
