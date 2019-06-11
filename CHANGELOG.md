@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.0.6
+- Fix Authorization endpoint.
+
 ## 1.0.5
 - Add ability to load external config. Load static elements locally for running offline.
 

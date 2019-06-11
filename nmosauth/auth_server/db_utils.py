@@ -46,9 +46,10 @@ def addAccessRights(user, IS04Access, IS05Access):
 
 
 def addUser(username, password):
-    user = User(username=username, password=password)
-    add(user)
-    return user
+    if User.query.filter_by(username=username).scalar() is None:
+        user = User(username=username, password=password)
+        add(user)
+        return user
 
 # -------------------- READ ------------------------- #
 # from nmosauth.auth_server.db_utils import *
