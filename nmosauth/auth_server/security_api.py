@@ -230,6 +230,7 @@ class SecurityAPI(WebAPI):
     def logout(self):
         try:
             del session['id']
+            del session['redirect']
         except Exception as e:
-            self.logger.writeDebug("Error: {}. Couldn't delete session ID".format(str(e)))
+            self.logger.writeDebug("Error: {}. Couldn't delete session ID or Redirect string".format(str(e)))
         return redirect(url_for('_home'))

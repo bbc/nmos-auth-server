@@ -24,7 +24,11 @@ limitations under the License. -->
 
     {% for client in clients %}
     <button class="collapsible"><b>Client {{ loop.index }} - {{ client.client_name }}</b>
-    <sup><a href="{{ url_for('_delete_client', client_id=client.client_id) }}"> delete</a></sup></button>
+      <sup>
+        <a href="{{ url_for('_delete_client', client_id=client.client_id) }}">delete</a>
+      </sup>
+      <a href="{{ url_for('_authorization_get', response_type='code', client_id=client.client_id, redirect_uri=client.redirect_uri) }}">Authorize</a>
+    </button>
       <div class="content">
         {% for info, data in client.client_info.items() %}
           <p>{{ info|string }} : {{ data|string }}</p>
