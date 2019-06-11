@@ -80,7 +80,7 @@ class SecurityAPI(WebAPI):
 
     @route(AUTH_VERSION_ROOT)
     def versionindex(self):
-        obj = ["home/", "signup/", "register_client/", "fetch_token/", "revoke/", "authorize/", "token/", "certs/"]
+        obj = ["register_client/", "revoke/", "authorize/", "token/", "certs/"]
         return (200, obj)
 
     @route(AUTH_VERSION_ROOT + 'test/', auto_json=True)
