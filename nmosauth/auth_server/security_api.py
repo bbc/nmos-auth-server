@@ -80,7 +80,7 @@ class SecurityAPI(WebAPI):
 
     @route(AUTH_VERSION_ROOT)
     def versionindex(self):
-        obj = ["home/", "signup/", "register_client/", "fetch_token/", "revoke/", "authorize/", "token/", "certs/"]
+        obj = ["register_client/", "revoke/", "authorize/", "token/", "certs/"]
         return (200, obj)
 
     @route(AUTH_VERSION_ROOT + 'test/', auto_json=True)
@@ -230,6 +230,7 @@ class SecurityAPI(WebAPI):
     def logout(self):
         try:
             del session['id']
+            del session['redirect']
         except Exception as e:
-            self.logger.writeDebug("Error: {}. Couldn't delete session ID".format(str(e)))
+            self.logger.writeDebug("Error: {}. Couldn't delete session ID or Redirect string".format(str(e)))
         return redirect(url_for('_home'))

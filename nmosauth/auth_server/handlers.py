@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
-from flask import jsonify, render_template
+from flask import jsonify, render_template, request
 
 
 def register_handlers(app):
@@ -38,7 +38,10 @@ def register_handlers(app):
     @app.errorhandler(404)
     def page_not_found(e):
         code = 404
-        return render_template('error.html', code=code, message="Not Found"), code
+        if "text/html" in request.headers.get("Accept"):
+            return render_template('error.html', code=code, message="Not Found"), code
+        else:
+            raise e
 
     @app.errorhandler(403)
     def page_forbiddon(e):

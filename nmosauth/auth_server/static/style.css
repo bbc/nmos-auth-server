@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-body {
+body, textarea, input, select {
   font-family: sans-serif;
   background: #eee;
   margin: 0;
@@ -37,6 +37,10 @@ button:hover {
   background-color: #777;
 }
 
+button > a {
+  float: right;
+}
+
 label, label > span   {
   display: block;
   margin: 15px auto;
@@ -49,10 +53,6 @@ input, textarea, select {
   height: 45px;
   width: 40%;
   font-size: 1em;
-}
-
-textarea {
-  font-family: sans-serif;
 }
 
 /*------------------- NAV BAR -------------------*/
@@ -76,18 +76,35 @@ textarea {
   display: inline-block;
 }
 
-.navbar h1 a {
-  font-size: x-large;
-  padding: 24px;
+/* Desktop Styles */
+@media only screen and (min-width: 1100px) {
+  .navbar h1 a {
+    font-size: x-large;
+    padding: 24px;
+  }
+
+
+  .navbar a {
+    color: white;
+    margin-left: 40px;
+    text-decoration: none;
+    font-size: large;
+    padding: 25px;
+  }
 }
 
+/* Small-Screen Styles */
+@media only screen and (max-width: 1100px) {
 
-.navbar a {
-  color: white;
-  margin-left: 40px;
-  text-decoration: none;
-  font-size: large;
-  padding: 25px;
+  .navbar a {
+    color: white;
+    margin-left: 0px;
+    text-decoration: none;
+    font-size: medium;
+    padding: 10px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
 }
 
 .navbar a:hover {
