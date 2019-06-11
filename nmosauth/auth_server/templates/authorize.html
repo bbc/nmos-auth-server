@@ -15,7 +15,7 @@ limitations under the License. -->
 {% extends "layout.html" %}
 {% block body %}
 <h2>Authorization</h2>
-<p>{{grant.client.client_name}} is requesting with a scope of:
+<p>{{ grant.client.client_name }} is requesting with a scope of:
 <b>{{ grant.request.scope }}</b>
 </p>
 
@@ -25,6 +25,7 @@ limitations under the License. -->
     <input type="hidden" name="response_type" value="code">
     <input type="hidden" name="client_id" value="{{ grant.client.client_id }}">
     <input type="hidden" name="redirect_uri" value="{{ request.args.get('redirect_uri') }}">
+    <input type="hidden" name="state" value="{{ request.args.get('state') }}">
     <input type="checkbox" name="confirm" value="true">
   </label>
   <br>
