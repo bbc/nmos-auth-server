@@ -92,6 +92,8 @@ sudo dpkg -i <name of package>.deb
 
 `sudo apt-get install python-sqlalchemy=1.0.11+ds1-1ubuntu2`
 
+**NOTE WHEN INSTALLING VIA DEBIAN PACKAGE**: The version of cryptography and pyOpenSSL on the Ubuntu Xenial mirrors are out-of-date. Please install both Cryptography and PyOpenSSL via Pip for compatible versions.
+
 
 ## Usage
 
