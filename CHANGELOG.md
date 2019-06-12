@@ -1,7 +1,10 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.0.8
+- Pin versions of PyOpenSSL and Cryptography to force package upgrades.
+
 ## 1.0.7
-- Add "authorize" button per client to lead to user authorization page. Alter styling. 
+- Add "authorize" button per client to lead to user authorization page. Alter styling.
 
 ## 1.0.6
 - Fix Authorization endpoint.
