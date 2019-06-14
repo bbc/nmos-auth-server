@@ -19,7 +19,7 @@ from authlib.flask.oauth2.sqla import (
     OAuth2AuthorizationCodeMixin,
     OAuth2TokenMixin,
 )
-from authlib.specs.rfc6749.errors import OAuth2Error
+from authlib.oauth2 import OAuth2Error
 
 __all__ = ['db', 'User', 'OAuth2Client',
            'OAuth2AuthorizationCode', 'OAuth2Token', 'AccessRights']

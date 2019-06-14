@@ -17,7 +17,7 @@ from flask import request, session, send_from_directory
 from flask import render_template, redirect, url_for, jsonify
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
-from authlib.specs.rfc6749 import OAuth2Error
+from authlib.oauth2.rfc6749 import OAuth2Error, InvalidRequestError
 from nmoscommon.webapi import WebAPI, route
 from nmoscommon.auth.nmos_auth import RequiresAuth
 
@@ -142,7 +142,12 @@ class SecurityAPI(WebAPI):
         user = self.current_user()
         if not user and request.authorization:
             user = getUser(request.authorization.username)
-        client = OAuth2Client(**request.form.to_dict(flat=True))
+        if request.is_json:
+            client = OAuth2Client(**request.get_json())
+        elif request.headers["Content-Type"] == "application/x-www-form-urlencoded":
+            client = OAuth2Client(**request.form.to_dict(flat=True))
+        else:
+            raise InvalidRequestError
         client.user_id = user.id
         client.client_id = gen_salt(24)
         if client.token_endpoint_auth_method == 'none':

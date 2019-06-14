@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-from authlib.specs.rfc7519 import jwt
+from authlib.jose import jwt
 import datetime
 from .oauth2 import authorization
 from .models import AccessRights

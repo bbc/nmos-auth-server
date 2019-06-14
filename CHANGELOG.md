@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.0.9
+- Allow clients to register using JSON in-line with RFC7591. Change imports in-line with Authlib v0.11 release.
+
 ## 1.0.8
 - Pin versions of PyOpenSSL and Cryptography to force package upgrades.
 
