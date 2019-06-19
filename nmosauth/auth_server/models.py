@@ -75,6 +75,7 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     user_id = db.Column(
         db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship('User')
+    access_token = db.Column(db.String(255), nullable=False, unique=False)
 
     def is_refresh_token_expired(self):
         expires_at = self.issued_at + self.expires_in * 2

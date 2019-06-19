@@ -33,7 +33,7 @@ class BaseConfig(object):
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_JWT_ENABLED = True
     OAUTH2_JWT_ISS = 'http://rd.bbc.co.uk/x-nmos/auth/v1.0/'
-    OAUTH2_JWT_ALG = 'RS256'
+    OAUTH2_JWT_ALG = 'RS512'
     OAUTH2_JWT_EXP = 60
     OAUTH2_JWT_KEY_PATH = PRIVKEY_PATH
 
