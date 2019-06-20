@@ -100,7 +100,7 @@ class SecurityAPI(WebAPI):
             if not user:
                 message = "That username is not recognised. Please signup."
                 return render_template('home.html', user=None, clients=None, message=message)
-            if user.password == password:
+            if user.check_password(password):
                 session['id'] = user.id
                 if "redirect" in session:
                     return redirect(session['redirect'])
@@ -142,7 +142,7 @@ class SecurityAPI(WebAPI):
         user = self.current_user()
         if not user and request.authorization:
             user = getUser(request.authorization.username)
-        if request.is_json:
+        if request.headers["Content-Type"] == "application/json":
             client = OAuth2Client(**request.get_json())
         elif request.headers["Content-Type"] == "application/x-www-form-urlencoded":
             client = OAuth2Client(**request.form.to_dict(flat=True))
@@ -189,9 +189,8 @@ class SecurityAPI(WebAPI):
         user = self.current_user()
         if not user and request.authorization:
             user = getUser(request.authorization.username)
-        if not user and 'username' in request.form:
-            username = request.form.get('username')
-            user = User.query.filter_by(username=username).first()
+        if not user or not user.check_password(request.authorization.password):
+            raise InvalidRequestError
         if "confirm" in request.form.keys() and request.form['confirm'] == "true":
             grant_user = user
         else:

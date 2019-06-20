@@ -74,11 +74,14 @@ def printField(table, field):
 
 
 def getUser(user):
-    if isinstance(user, int):
-        entry = User.query.get_or_404(user)
-    elif isinstance(user, str):
-        entry = User.query.filter_by(username=user).first_or_404()
-    return entry
+    try:
+        if isinstance(user, int):
+            entry = User.query.get_or_404(user)
+        elif isinstance(user, str):
+            entry = User.query.filter_by(username=user).first_or_404()
+        return entry
+    except Exception:
+        return None
 
 
 def printForeign(table, key, val):  # Key is usually user_id

@@ -57,15 +57,14 @@ limitations under the License. -->
     </script>
 
 
-
   {% else %}
     <h2>Log In</h2>
     <form action="" method="post">
       <p><input type="text" name="username" placeholder="username"></p>
       <p><input type="password" name="password"  placeholder="password"></p>
-      <button type="submit">Login</button>
+      <button type="submit">Log-in</button>
     </form>
-    <p><a href="{{ url_for('_signup_get') }}">Signup</a></p>
+    <p><a class="button" href="{{ url_for('_signup_get') }}">Signup</a></p>
   {% endif %}
 
   <div><p>{{ message }}</p></div>

@@ -26,14 +26,14 @@ h2 {
   color: #555;
 }
 
-button {
+button, .button {
   padding: 10px 20px;
   background-color: #ccc;
   border: none;
   font-size: 1em;
 }
 
-button:hover {
+button:hover, .button:hover {
   background-color: #777;
 }
 
