@@ -25,7 +25,7 @@ def create_self_signed_cert():
     cert.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
     cert.set_issuer(cert.get_subject())
     cert.set_pubkey(k)
-    cert.sign(k, 'sha256')
+    cert.sign(k, 'sha512')
 
     # Write Cert and Private Key to File
     open(CERT_PATH, "wt").write(

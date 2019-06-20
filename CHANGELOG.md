@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.0.10
+- Change JWT signing algorithm to RS512 in line with BCP-001-02. Alter default scope for Bearer token to be same as in access token.
+
 ## 1.0.9
 - Allow clients to register using JSON in-line with RFC7591. Change imports in-line with Authlib v0.11 release.
 

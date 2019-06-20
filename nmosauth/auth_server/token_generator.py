@@ -26,10 +26,10 @@ class TokenGenerator():
         pass
 
     def get_access_rights(self, user, scope):
-        if scope == "is04":
+        if scope == "is-04":
             user_access = AccessRights.query.filter_by(user_id=user.id).first()
             access = user_access.is04
-        elif scope == "is05":
+        elif scope == "is-05":
             user_access = AccessRights.query.filter_by(user_id=user.id).first()
             access = user_access.is05
         else:
@@ -40,12 +40,12 @@ class TokenGenerator():
         audience = ''
         if access is None:
             return None
-        if scope == "is04":
+        if scope == "is-04":
             if access == "write":
                 audience = "IS-04 Write Access".split(" ")
             if access == "read":
                 audience = "IS-04 Read Access".split(" ")
-        elif scope == "is05":
+        elif scope == "is-05":
             if access == "write":
                 audience = "IS-05 Write Access".split(" ")
             if access == "read":
