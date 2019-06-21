@@ -189,8 +189,8 @@ class SecurityAPI(WebAPI):
         user = self.current_user()
         if not user and request.authorization:
             user = getUser(request.authorization.username)
-        if not user or not user.check_password(request.authorization.password):
-            raise InvalidRequestError
+            if not user or not user.check_password(request.authorization.password):
+                raise InvalidRequestError
         if "confirm" in request.form.keys() and request.form['confirm'] == "true":
             grant_user = user
         else:
