@@ -26,15 +26,18 @@ class TokenGenerator():
         pass
 
     def get_access_rights(self, user, scope):
-        if scope == "is-04":
-            user_access = AccessRights.query.filter_by(user_id=user.id).first()
-            access = user_access.is04
-        elif scope == "is-05":
-            user_access = AccessRights.query.filter_by(user_id=user.id).first()
-            access = user_access.is05
+        if user is None:
+            return "client_credentials"
         else:
-            access = None
-        return access
+            if scope == "is-04":
+                user_access = AccessRights.query.filter_by(user_id=user.id).first()
+                access = user_access.is04
+            elif scope == "is-05":
+                user_access = AccessRights.query.filter_by(user_id=user.id).first()
+                access = user_access.is05
+            else:
+                access = None
+            return access
 
     def get_audience(self, user, scope, access):
         audience = ''
@@ -68,6 +71,7 @@ class TokenGenerator():
         current_time = datetime.datetime.utcnow()
         access = self.get_access_rights(user, scope)
         audience = self.get_audience(user, scope, access)
+        subject = user.username if user is not None else None
         new_scope = self.get_scope(user, client, scope)
 
         header = {
@@ -79,7 +83,7 @@ class TokenGenerator():
             'exp': current_time + datetime.timedelta(seconds=config['jwt_exp']),
             'nbf': current_time,
             'iss': config['jwt_iss'],
-            'sub': user.username,
+            'sub': subject,
             'scope': new_scope,
             'aud': audience,
             'x-nmos-api': {
