@@ -1,11 +1,7 @@
 #!/usr/bin/python3
 
-import os
-
 if __name__ == "__main__":
     from nmosauth.auth_server.security_service import SecurityService
-
-    os.environ["AUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     service = SecurityService()
     service.run()
