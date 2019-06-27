@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.0.11
+- Change scripts to run using Python3. Change 'iss' and 'aud' JWT claim generation.
+
 ## 1.0.10
 - Change JWT signing algorithm to RS512 in line with BCP-001-02. Alter default scope for Bearer token to be same as in access token.
 
