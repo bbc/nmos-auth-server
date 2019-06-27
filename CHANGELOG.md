@@ -1,6 +1,6 @@
 # NMOS Authorization API Implementation Changelog
 
-## 1.0.11
+## 1.1.0
 - Change scripts to run using Python3. Change 'iss' and 'aud' JWT claim generation.
 
 ## 1.0.10
