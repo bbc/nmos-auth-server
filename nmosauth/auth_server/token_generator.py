@@ -26,33 +26,35 @@ class TokenGenerator():
         pass
 
     def get_access_rights(self, user, scope):
-        if scope == "is-04":
-            user_access = AccessRights.query.filter_by(user_id=user.id).first()
-            access = user_access.is04
-        elif scope == "is-05":
-            user_access = AccessRights.query.filter_by(user_id=user.id).first()
-            access = user_access.is05
+        if user is None:
+            return "client_credentials"
         else:
-            access = None
-        return access
+            if scope == "is-04":
+                user_access = AccessRights.query.filter_by(user_id=user.id).first()
+                access = user_access.is04
+            elif scope == "is-05":
+                user_access = AccessRights.query.filter_by(user_id=user.id).first()
+                access = user_access.is05
+            else:
+                access = None
+            return access
 
-    def get_audience(self, user, scope, access):
-        audience = ''
-        if access is None:
-            return None
-        if scope == "is-04":
-            if access == "write":
-                audience = "IS-04 Write Access".split(" ")
-            if access == "read":
-                audience = "IS-04 Read Access".split(" ")
-        elif scope == "is-05":
-            if access == "write":
-                audience = "IS-05 Write Access".split(" ")
-            if access == "read":
-                audience = "IS-04 Read Access".split(" ")
+    def get_audience(self, scope, access):
+        audience = []
+        if access is not None:
+            if scope == "is-04":
+                audience = [
+                    "registry",
+                    "query"
+                ]
+            elif scope == "is-05":
+                audience = [
+                    "senders",
+                    "receivers"
+                ]
         return audience
 
-    def get_scope(self, user, client, scope):
+    def get_scope(self, scope):
 
         if scope in ["is04", "IS04", "is-04", "IS-04"]:
             new_scope = "is-04"
@@ -67,8 +69,9 @@ class TokenGenerator():
         config = authorization.config
         current_time = datetime.datetime.utcnow()
         access = self.get_access_rights(user, scope)
-        audience = self.get_audience(user, scope, access)
-        new_scope = self.get_scope(user, client, scope)
+        audience = self.get_audience(scope, access)
+        subject = user.username if user is not None else None
+        new_scope = self.get_scope(scope)
 
         header = {
             "alg": config["jwt_alg"],
@@ -79,7 +82,7 @@ class TokenGenerator():
             'exp': current_time + datetime.timedelta(seconds=config['jwt_exp']),
             'nbf': current_time,
             'iss': config['jwt_iss'],
-            'sub': user.username,
+            'sub': subject,
             'scope': new_scope,
             'aud': audience,
             'x-nmos-api': {

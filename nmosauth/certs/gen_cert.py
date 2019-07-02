@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 from OpenSSL import crypto
 import os
@@ -29,7 +29,7 @@ def create_self_signed_cert():
 
     # Write Cert and Private Key to File
     open(CERT_PATH, "wt").write(
-        (crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8'))
+        crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode('utf-8')
     )
     open(PRIVKEY_PATH, "wt").write(
         crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode('utf-8')

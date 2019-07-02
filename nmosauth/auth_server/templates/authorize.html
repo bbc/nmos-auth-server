@@ -19,13 +19,16 @@ limitations under the License. -->
 <b>{{ grant.request.scope }}</b>
 </p>
 
-<form action="{{ url_for('_authorization_post') }}" method="post">
+<form action="{{ url_for(
+                  '_authorization_post',
+                  response_type=request.args.get('response_type'),
+                  client_id=request.args.get('client_id'),
+                  scope=request.args.get('scope'),
+                  redirect_uri=request.args.get('redirect_uri'),
+                  state=request.args.get('state')
+              ) }}" method="post">
   <label>
     <span>Do You Approve This Access?</span>
-    <input type="hidden" name="response_type" value="code">
-    <input type="hidden" name="client_id" value="{{ grant.client.client_id }}">
-    <input type="hidden" name="redirect_uri" value="{{ request.args.get('redirect_uri') }}">
-    <input type="hidden" name="state" value="{{ request.args.get('state') }}">
     <input type="checkbox" name="confirm" value="true">
   </label>
   <br>

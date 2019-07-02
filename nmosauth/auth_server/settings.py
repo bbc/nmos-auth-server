@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import socket
 from datetime import timedelta
 from .constants import NMOSAUTH_DIR, PRIVKEY_PATH, DATABASE_NAME
 
@@ -32,7 +33,7 @@ class BaseConfig(object):
     OAUTH2_ACCESS_TOKEN_GENERATOR = pkg + 'token_generator.gen_token'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_JWT_ENABLED = True
-    OAUTH2_JWT_ISS = 'http://rd.bbc.co.uk/x-nmos/auth/v1.0/'
+    OAUTH2_JWT_ISS = socket.getfqdn()
     OAUTH2_JWT_ALG = 'RS512'
     OAUTH2_JWT_EXP = 60
     OAUTH2_JWT_KEY_PATH = PRIVKEY_PATH

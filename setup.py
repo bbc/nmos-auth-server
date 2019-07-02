@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 #
 # Copyright 2019 British Broadcasting Corporation
 #
@@ -29,7 +29,7 @@ GEN_CERT_PATH = os.path.join(NMOSAUTH_DIR, GEN_CERT_FILE)
 
 # Basic metadata
 name = "nmos-auth"
-version = "1.0.10"
+version = "1.1.0"
 description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/nmos-auth-server'
 author = 'Danny Meloy'
@@ -115,7 +115,9 @@ setup(
     package_dir=packages,
     install_requires=packages_required,
     include_package_data=True,
-    scripts=[],
+    scripts=[
+        'bin/nmosauth'
+    ],
     package_data={
         'nmosauth': ['auth_server/templates/*', 'auth_server/static/*']
     },
