@@ -32,6 +32,12 @@ class BaseConfig(object):
     BASIC_AUTH_REALM = "NMOS Auth Server Login Required"
     OAUTH2_ACCESS_TOKEN_GENERATOR = pkg + 'token_generator.gen_token'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
+    OAUTH2_TOKEN_EXPIRES_IN = {
+        'authorization_code': 60,
+        'implicit': 60,
+        'password': 60,
+        'client_credentials': 60
+    }
     OAUTH2_JWT_ENABLED = True
     OAUTH2_JWT_ISS = socket.getfqdn()
     OAUTH2_JWT_ALG = 'RS512'

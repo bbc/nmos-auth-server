@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.1.1
+- Alter Jenkinsfile to build Python 3 package. Add "expires_in" config dict.
+
 ## 1.1.0
 - Change scripts to run using Python3. Change 'iss' and 'aud' JWT claim generation.
 
