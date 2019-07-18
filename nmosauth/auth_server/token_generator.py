@@ -18,57 +18,62 @@ import datetime
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
+IS04_SCOPES = ["is04", "IS04", "is-04", "IS-04"]
+IS05_SCOPES = ["is05", "IS05", "is-05", "IS-05"]
+
 
 class TokenGenerator():
 
     def __init__(self):
         pass
 
-    def get_access_rights(self, user, scope):
+    def get_access_rights(self, user, scope_list):
         if user is None:
             return "client_credentials"
         else:
-            if scope == "is-04":
-                access = user.is04
-            elif scope == "is-05":
-                access = user.is05
-            else:
-                access = None
+            for scope in scope_list:
+                if scope in IS04_SCOPES:
+                    access = user.is04
+                elif scope == "is-05":
+                    access = user.is05
+                else:
+                    access = None
             return access
 
-    def get_audience(self, scope, access):
+    def get_audience(self, scope_list, access):
         audience = []
         if access is not None:
-            if scope == "is-04":
-                audience = [
-                    "registry",
-                    "query"
-                ]
-            elif scope == "is-05":
-                audience = [
-                    "senders",
-                    "receivers"
-                ]
+            for scope in scope_list:
+                if scope in IS04_SCOPES:
+                    audience.extend([
+                        "registry",
+                        "query"
+                    ])
+                elif scope in IS05_SCOPES:
+                    audience.extend([
+                        "senders",
+                        "receivers"
+                    ])
         return audience
 
-    def get_scope(self, scope):
-
-        if scope in ["is04", "IS04", "is-04", "IS-04"]:
-            new_scope = "is-04"
-        elif scope in ["is05", "IS05", "is-05", "IS-05"]:
-            new_scope = "is-05"
-        else:
-            new_scope = None
+    def get_scope(self, scope_list):
+        new_scope = ""
+        for scope in scope_list:
+            if scope in ["is04", "IS04", "is-04", "IS-04"]:
+                new_scope += "is-04 "
+            elif scope in ["is05", "IS05", "is-05", "IS-05"]:
+                new_scope += "is-05 "
         return new_scope
 
     def gen_access_token(self, client, grant_type, user, scope):
 
+        scope_list = scope.split(' ')
         config = authorization.config
         current_time = datetime.datetime.utcnow()
-        access = self.get_access_rights(user, scope)
-        audience = self.get_audience(scope, access)
+        access = self.get_access_rights(user, scope_list)
+        audience = self.get_audience(scope_list, access)
         subject = user.username if user is not None else None
-        new_scope = self.get_scope(scope)
+        new_scope = self.get_scope(scope_list)
 
         header = {
             "alg": config["jwt_alg"],
