@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.1.2
+- Add loading of external config file.
+
 ## 1.1.1
 - Alter Jenkinsfile to build Python 3 package. Add "expires_in" config dict.
 

@@ -27,6 +27,7 @@ from nmoscommon.httpserver import HttpServer  # noqa E402
 from nmoscommon.mdns import MDNSEngine  # noqa E402
 from nmoscommon.logger import Logger  # noqa E402
 from .security_api import SecurityAPI  # noqa E402
+from .config import config # noqa E402
 
 environ["AUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -42,22 +43,11 @@ DNS_SD_TYPE = '_nmos-auth._tcp'
 
 class SecurityService:
     def __init__(self, logger=None):
-        self.config = {"priority": 100, "https_mode": "disabled", "enable_mdns": True}
         self.logger = Logger("nmosauth", logger)
-        self._load_config()
+        self.config = config
         self.running = False
         self.httpServer = None
         self.mdns = MDNSEngine()
-
-    def _load_config(self):
-        try:
-            config_file = "/etc/nmosauth/config.json"
-            if path.isfile(config_file):
-                f = open(config_file, 'r')
-                extra_config = json.loads(f.read())
-                self.config.update(extra_config)
-        except Exception as e:
-            self.logger.writeDebug("Exception loading config: {}".format(e))
 
     def start(self):
         if self.running:
@@ -119,6 +109,7 @@ class SecurityService:
 
     def stop(self):
         self.running = False
+        self._cleanup()
 
 
 if __name__ == '__main__':
