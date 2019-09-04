@@ -32,7 +32,16 @@ class BasicAuthorization():
             self.app = None
 
     def init_app(self, app):
+        self.app = app
         app.config.setdefault('BASIC_AUTH_REALM', '')
+        app.config.setdefault('BASIC_AUTH_FORCE', False)
+
+        @app.before_request
+        def require_basic_auth():
+            if not current_app.config['BASIC_AUTH_FORCE']:
+                return
+            if not self.authenticate():
+                return self.challenge()
 
     def check_credentials(self, username, password):
         try:

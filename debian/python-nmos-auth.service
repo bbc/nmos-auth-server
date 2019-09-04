@@ -8,7 +8,7 @@ Environment="AUTHLIB_INSECURE_TRANSPORT=1"
 User=ipstudio
 Restart=always
 RestartSec=3
-ExecStart=/usr/bin/nmosauth
+ExecStart=/usr/bin/python2 /usr/bin/nmosauth
 
 [Install]
 WantedBy=multi-user.target

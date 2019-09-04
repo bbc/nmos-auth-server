@@ -14,7 +14,6 @@ limitations under the License. -->
 
 {% extends "layout.html" %}
 {% block body %}
-  {% if user %}
     <div>
       <h2>Home</h2>
       <span>Logged in as <b>{{user.username}}</b> | <a href="{{ url_for('_logout') }}">Log Out</a></span>
@@ -56,16 +55,4 @@ limitations under the License. -->
       }
     </script>
 
-
-  {% else %}
-    <h2>Log In</h2>
-    <form action="" method="post">
-      <p><input type="text" name="username" placeholder="username"></p>
-      <p><input type="password" name="password"  placeholder="password"></p>
-      <button type="submit">Log-in</button>
-    </form>
-    <p><a class="button" href="{{ url_for('_signup_get') }}">Signup</a></p>
-  {% endif %}
-
-  <div><p>{{ message }}</p></div>
 {% endblock %}

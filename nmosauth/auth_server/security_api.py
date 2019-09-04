@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import os
-from flask import request, session, send_from_directory
-from flask import render_template, redirect, url_for, jsonify
+from flask import request, session, send_from_directory, g
+from flask import render_template, redirect, url_for, jsonify, abort
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
+from functools import wraps
 from authlib.oauth2.rfc6749 import OAuth2Error, InvalidRequestError
 from nmoscommon.webapi import WebAPI, route
 from nmoscommon.auth.nmos_auth import RequiresAuth
@@ -55,11 +56,25 @@ class SecurityAPI(WebAPI):
         ])
         self.app.jinja_loader = my_loader
 
-    def current_user(self):
-        if 'id' in session:
-            uid = session['id']
-            return User.query.get(uid)
-        return None
+    def login_required(view_func):
+        @wraps(view_func)
+        def wrapper(*args, **kwargs):
+            user = None
+            if 'id' in session:
+                uid = session['id']
+                user = getUser(uid)
+            elif request.authorization:
+                username = request.authorization.username
+                user = getUser(username)
+                if not user or not user.check_password(request.authorization.password):
+                    abort(401)
+            g.user = user
+            if not user:
+                session["redirect"] = request.url
+                return redirect(url_for('_login'))
+            else:
+                return view_func(*args, **kwargs)
+        return wrapper
 
     # Custom function to serve CSS and Javascript files
     @route(AUTH_VERSION_ROOT + 'static/<filename>', auto_json=False)
@@ -88,18 +103,20 @@ class SecurityAPI(WebAPI):
     def test(self):
         return (200, "Hello World")
 
-    @route(AUTH_VERSION_ROOT + 'home/', methods=['GET', 'POST'], auto_json=False)
-    def home(self):
+    @route(AUTH_VERSION_ROOT + 'login/', methods=['GET', 'POST'], auto_json=False)
+    def login(self):
         if request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')
             if not username or not password:
                 message = "Please Fill In Both Username and Password."
-                return render_template('home.html', user=None, clients=None, message=message)
+                print(message)
+                return render_template('login.html', message=message)
             user = User.query.filter_by(username=username).first()
             if not user:
                 message = "That username is not recognised. Please signup."
-                return render_template('home.html', user=None, clients=None, message=message)
+                print(message)
+                return render_template('login.html', message=message)
             if user.check_password(password):
                 session['id'] = user.id
                 if "redirect" in session:
@@ -108,13 +125,19 @@ class SecurityAPI(WebAPI):
                     return redirect(url_for('_home'))
             else:
                 message = "Invalid Password. Try Again."
-                return render_template('home.html', user=None, clients=None, message=message)
-        user = self.current_user()
+                print(message)
+                return render_template('login.html', message=message)
+        return render_template('login.html')
+
+    @route(AUTH_VERSION_ROOT + 'home/', methods=['GET'], auto_json=False)
+    @login_required
+    def home(self):
+        user = g.user
         if user:
             clients = OAuth2Client.query.filter_by(user_id=user.id).all()
         else:
             clients = []
-        return render_template('home.html', user=user, clients=clients, message="")
+        return render_template('home.html', user=user, clients=clients)
 
     @route(AUTH_VERSION_ROOT + 'signup', methods=['POST'], auto_json=False)
     def signup_post(self):
@@ -133,15 +156,14 @@ class SecurityAPI(WebAPI):
         return redirect(url_for('_home'))
 
     @route(AUTH_VERSION_ROOT + 'signup/', methods=['GET'], auto_json=False)
+    @login_required
     def signup_get(self):
         return render_template('signup.html')
 
     @route(AUTH_VERSION_ROOT + 'register_client', methods=['POST'], auto_json=False)
-    @basicAuth.required
+    @login_required
     def create_client_post(self):
-        user = self.current_user()
-        if not user and request.authorization:
-            user = getUser(request.authorization.username)
+        user = g.user
         if request.headers["Content-Type"] == "application/json":
             client = OAuth2Client(**request.get_json())
         elif request.headers["Content-Type"] == "application/x-www-form-urlencoded":
@@ -164,8 +186,9 @@ class SecurityAPI(WebAPI):
             return jsonify(client_info), 201
 
     @route(AUTH_VERSION_ROOT + 'register_client/', methods=['GET'], auto_json=False)
+    @login_required
     def create_client_get(self):
-        user = self.current_user()
+        user = g.user
         if not user:
             return redirect(url_for('_home'))
         return render_template('create_client.html')
@@ -176,8 +199,9 @@ class SecurityAPI(WebAPI):
         return redirect(url_for('_home'))
 
     @route(AUTH_VERSION_ROOT + 'fetch_token/', auto_json=False)
+    @login_required
     def fetch_token(self):
-        user = self.current_user()
+        user = g.user
         if not user:
             return redirect(url_for('_home'))
         # TODO - drop-down select box
@@ -185,12 +209,9 @@ class SecurityAPI(WebAPI):
         return render_template('fetch_token.html', client=client)
 
     @route(AUTH_VERSION_ROOT + 'authorize', methods=['POST'], auto_json=False)
+    @login_required
     def authorization_post(self):
-        user = self.current_user()
-        if not user and request.authorization:
-            user = getUser(request.authorization.username)
-            if not user or not user.check_password(request.authorization.password):
-                raise InvalidRequestError
+        user = g.user
         if "confirm" in request.form.keys() and request.form['confirm'] == "true":
             grant_user = user
         else:
@@ -198,13 +219,9 @@ class SecurityAPI(WebAPI):
         return authorization.create_authorization_response(grant_user=grant_user)
 
     @route(AUTH_VERSION_ROOT + 'authorize/', methods=['GET'], auto_json=False)
+    @login_required
     def authorization_get(self):
-        user = self.current_user()
-        if not user and request.authorization:
-            user = getUser(request.authorization.username)
-        if not user:
-            session["redirect"] = request.url
-            return redirect(url_for('_home'))
+        user = g.user
         try:
             grant = authorization.validate_consent_request(end_user=user, request=request)
         except OAuth2Error as error:
