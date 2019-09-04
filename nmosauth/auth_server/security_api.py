@@ -110,12 +110,10 @@ class SecurityAPI(WebAPI):
             password = request.form.get('password')
             if not username or not password:
                 message = "Please Fill In Both Username and Password."
-                print(message)
                 return render_template('login.html', message=message)
             user = User.query.filter_by(username=username).first()
             if not user:
                 message = "That username is not recognised. Please signup."
-                print(message)
                 return render_template('login.html', message=message)
             if user.check_password(password):
                 session['id'] = user.id
@@ -125,7 +123,6 @@ class SecurityAPI(WebAPI):
                     return redirect(url_for('_home'))
             else:
                 message = "Invalid Password. Try Again."
-                print(message)
                 return render_template('login.html', message=message)
         return render_template('login.html')
 
@@ -156,7 +153,6 @@ class SecurityAPI(WebAPI):
         return redirect(url_for('_home'))
 
     @route(AUTH_VERSION_ROOT + 'signup/', methods=['GET'], auto_json=False)
-    @login_required
     def signup_get(self):
         return render_template('signup.html')
 
@@ -194,6 +190,7 @@ class SecurityAPI(WebAPI):
         return render_template('create_client.html')
 
     @route(AUTH_VERSION_ROOT + 'delete_client/<client_id>', auto_json=False)
+    @login_required
     def delete_client(self, client_id):
         removeClient(client_id)
         return redirect(url_for('_home'))
@@ -254,4 +251,4 @@ class SecurityAPI(WebAPI):
             del session['redirect']
         except Exception as e:
             self.logger.writeDebug("Error: {}. Couldn't delete session ID or Redirect string".format(str(e)))
-        return redirect(url_for('_home'))
+        return redirect(url_for('_login'))
