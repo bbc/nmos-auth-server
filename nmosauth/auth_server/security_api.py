@@ -25,7 +25,6 @@ from nmoscommon.auth.nmos_auth import RequiresAuth
 from .models import db, User, OAuth2Client
 from .oauth2 import authorization
 from .app import config_app
-from .basic_auth import basicAuth
 from .db_utils import getUser, removeClient, addUser, addAccessRights
 from .constants import CERT_PATH
 
@@ -70,8 +69,11 @@ class SecurityAPI(WebAPI):
                     abort(401)
             g.user = user
             if not user:
-                session["redirect"] = request.url
-                return redirect(url_for('_login'))
+                if "text/html" in request.headers.get("Accept"):
+                    session["redirect"] = request.url
+                    return redirect(url_for('_login'))
+                else:
+                    abort(401)
             else:
                 return view_func(*args, **kwargs)
         return wrapper
@@ -184,9 +186,6 @@ class SecurityAPI(WebAPI):
     @route(AUTH_VERSION_ROOT + 'register_client/', methods=['GET'], auto_json=False)
     @login_required
     def create_client_get(self):
-        user = g.user
-        if not user:
-            return redirect(url_for('_home'))
         return render_template('create_client.html')
 
     @route(AUTH_VERSION_ROOT + 'delete_client/<client_id>', auto_json=False)
@@ -199,8 +198,6 @@ class SecurityAPI(WebAPI):
     @login_required
     def fetch_token(self):
         user = g.user
-        if not user:
-            return redirect(url_for('_home'))
         # TODO - drop-down select box
         client = OAuth2Client.query.filter_by(user_id=user.id).first()
         return render_template('fetch_token.html', client=client)

@@ -33,7 +33,10 @@ def register_handlers(app):
     @app.errorhandler(401)
     def page_unauthorised(e):
         code = 401
-        return render_template('error.html', code=code, message="Unauthorised"), code
+        if "text/html" in request.headers.get("Accept"):
+            return render_template('error.html', code=code, message="Unauthorised"), code
+        else:
+            raise e
 
     @app.errorhandler(404)
     def page_not_found(e):
@@ -46,4 +49,7 @@ def register_handlers(app):
     @app.errorhandler(403)
     def page_forbiddon(e):
         code = 403
-        return render_template('error.html', code=code, message="Forbiddon"), code
+        if "text/html" in request.headers.get("Accept"):
+            return render_template('error.html', code=code, message="Forbiddon"), code
+        else:
+            raise e
