@@ -40,40 +40,47 @@ class TokenGenerator():
                     access = None
             return access
 
-    def get_audience(self, scope_list, access):
+    def get_audience(self, scope_list):
         audience = []
-        if access is not None:
-            for scope in scope_list:
-                if scope in IS04_SCOPES:
-                    audience.extend([
-                        "registry",
-                        "query"
-                    ])
-                elif scope in IS05_SCOPES:
-                    audience.extend([
-                        "senders",
-                        "receivers"
-                    ])
+        for scope in scope_list:
+            if scope in IS04_SCOPES:
+                audience.extend([
+                    "registry",
+                    "query"
+                ])
+            elif scope in IS05_SCOPES:
+                audience.extend([
+                    "senders",
+                    "receivers"
+                ])
         return audience
 
-    def get_scope(self, scope_list):
-        new_scope = ""
-        for scope in scope_list:
-            if scope in ["is04", "IS04", "is-04", "IS-04"]:
-                new_scope += "is-04 "
-            elif scope in ["is05", "IS05", "is-05", "IS-05"]:
-                new_scope += "is-05 "
-        return new_scope
+    def populate_nmos_claim(self, user, scope_list):
+        nmos_claim = {}
+        user_access = AccessRights.query.filter_by(user_id=user.id).first()
+        if user_access:
+            for scope in scope_list:
+                nmos_claim[scope] = {}
+                try:
+                    api_access = getattr(user_access, scope.replace('-', ''))
+                    nmos_claim[scope][api_access] = {"resources": "*"}
+                except Exception:
+                    pass
+        return nmos_claim
 
     def gen_access_token(self, client, grant_type, user, scope):
-
+        # Scope is space-delimited so convert to list
         scope_list = scope.split(' ')
+        # Get Auth Config (set in ./settings)
         config = authorization.config
+        # Current time set in `iat` and `nbf` claims
         current_time = datetime.datetime.utcnow()
-        access = self.get_access_rights(user, scope_list)
-        audience = self.get_audience(scope_list, access)
+        # Use username of user or `None` for when client_credentials is used
         subject = user.username if user is not None else None
-        new_scope = self.get_scope(scope_list)
+        # Populate audience claim
+        audience = self.get_audience(scope_list)
+        # Populate NMOS claims
+        x_nmos_claim = self.populate_nmos_claim(user, scope_list)
 
         header = {
             "alg": config["jwt_alg"],
@@ -85,12 +92,8 @@ class TokenGenerator():
             'nbf': current_time,
             'iss': config['jwt_iss'],
             'sub': subject,
-            'scope': new_scope,
             'aud': audience,
-            'x-nmos-api': {
-                'name': new_scope,
-                'access': access
-            }
+            'x-nmos-api': x_nmos_claim
         }
 
         try:
