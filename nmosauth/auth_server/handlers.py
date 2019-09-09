@@ -32,24 +32,18 @@ def register_handlers(app):
 
     @app.errorhandler(401)
     def page_unauthorised(e):
-        code = 401
-        if "text/html" in request.headers.get("Accept"):
-            return render_template('error.html', code=code, message="Unauthorised"), code
-        else:
-            raise e
+        return error_return(e, 401, "Unauthorised")
 
     @app.errorhandler(404)
     def page_not_found(e):
-        code = 404
-        if "text/html" in request.headers.get("Accept"):
-            return render_template('error.html', code=code, message="Not Found"), code
-        else:
-            raise e
+        return error_return(e, 404, "Page Not Found")
 
     @app.errorhandler(403)
     def page_forbiddon(e):
-        code = 403
-        if "text/html" in request.headers.get("Accept"):
-            return render_template('error.html', code=code, message="Forbiddon"), code
+        return error_return(e, 403, "Forbidden")
+
+    def error_return(e, code, message):
+        if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
+            return render_template('error.html', code=code, message=message), code
         else:
             raise e

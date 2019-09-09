@@ -69,7 +69,7 @@ class SecurityAPI(WebAPI):
                     abort(401)
             g.user = user
             if not user:
-                if "text/html" in request.headers.get("Accept"):
+                if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
                     session["redirect"] = request.url
                     return redirect(url_for('_login'))
                 else:

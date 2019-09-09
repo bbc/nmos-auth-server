@@ -16,7 +16,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import unittest
 import mock
-
+from werkzeug.exceptions import HTTPException
 
 from nmoscommon.logger import Logger
 from nmosauth.auth_server.db_utils import drop_all
@@ -67,55 +67,64 @@ class TestNmosAuth(unittest.TestCase):
 
     def testGetInitialRoutes(self):
 
+        headers = {"Accept": "text/html"}
         with self.client as client:
             # Correctly go to Home Page
             rv = client.get(VERSION_ROOT + '/', follow_redirects=True)
             self.assertEqual(rv.status_code, 200)
-            # Fetch Token redirects to login page
-            rv = client.get(VERSION_ROOT + '/fetch_token/')
+            # Authorize endpoint redirects to login
+            rv = client.post(VERSION_ROOT + '/authorize', headers=headers)
             self.assertEqual(rv.status_code, 302)
-            # Logout page redirects to login page
-            rv = client.get(VERSION_ROOT + '/logout/')
+            # Register client redirects to login page
+            rv = client.get(VERSION_ROOT + '/register_client/', headers=headers)
             self.assertEqual(rv.status_code, 302)
+            # Posting to Register client returns 401 if not expecting html
+            with self.assertRaises(HTTPException) as http_error:
+                rv = client.post(VERSION_ROOT + '/register_client')
+                self.assertEqual(http_error.exception.code, 401)
+                rv = client.post(VERSION_ROOT + '/authorize')
+                self.assertEqual(http_error.exception.code, 401)
 
-    def testBasicAuthRoutes(self):
+    @mock.patch("nmosauth.auth_server.security_api.getUser")
+    def testBasicAuthRoutes(self, mockGetUser):
 
+        mockGetUser.return_value = self.testUser
         headers = self.auth_headers(self.testUser)
         with self.client as client:
-            # Getting Register client redirects to login page
-            rv = client.get(VERSION_ROOT + '/register_client/')
-            self.assertEqual(rv.status_code, 302)
-            # Posting to Register client returns Basic Auth prompt
-            rv = client.post(VERSION_ROOT + '/register_client')
-            self.assertEqual(rv.status_code, 401)
+            # Posting to Register client returns 200 status code
+            rv = client.get(VERSION_ROOT + '/register_client/', headers=headers)
+            self.assertEqual(rv.status_code, 200)
+            mockGetUser.assert_called_with(self.testUser.username)
+
             # Posting to register client with incorrect credentials returns Unauthorized
             wrongUser = self.createUser("bob", "pass")
             headers = self.auth_headers(wrongUser)
-            rv = client.post(VERSION_ROOT + '/register_client', headers=headers)
-            self.assertEqual(rv.status_code, 401)
+            with self.assertRaises(HTTPException) as http_error:
+                client.get(VERSION_ROOT + '/register_client/', headers=headers)
+                self.assertEqual(http_error.exception.code, 401)
 
     @mock.patch("nmosauth.auth_server.security_api.render_template")
     @mock.patch("nmosauth.auth_server.security_api.User")
-    def testHome(self, mockUser, mockTemplate):
+    def testLogin(self, mockUser, mockTemplate):
 
         mockTemplate.return_value = "test"
         mockUser.query.filter_by.return_value.first.return_value = self.testUser
 
-        with self.client.post(VERSION_ROOT + '/home/', data=dict(username="", password="")):
+        with self.client.post(VERSION_ROOT + '/login/', data=dict(username="", password="")):
             mockTemplate.assert_called_with(
-                'home.html', clients=None, message='Please Fill In Both Username and Password.', user=None)
+                'login.html', message='Please Fill In Both Username and Password.')
 
-        with self.client.post(VERSION_ROOT + '/home/', data=dict(username="steve", password="wrongpassword")):
+        with self.client.post(VERSION_ROOT + '/login/', data=dict(username="steve", password="wrongpassword")):
             mockTemplate.assert_called_with(
-                'home.html', clients=None, message='Invalid Password. Try Again.', user=None)
+                'login.html', message='Invalid Password. Try Again.')
 
-        with self.client.post(VERSION_ROOT + '/home/', data=dict(username="steve", password="password")) as rv:
+        with self.client.post(VERSION_ROOT + '/login/', data=dict(username="steve", password="password")) as rv:
             self.assertEqual(rv.status_code, 302)
 
         mockUser.query.filter_by.return_value.first.return_value = None
-        with self.client.post(VERSION_ROOT + '/home/', data=dict(username="steve", password="password")):
+        with self.client.post(VERSION_ROOT + '/login/', data=dict(username="steve", password="password")):
             mockTemplate.assert_called_with(
-                'home.html', clients=None, message='That username is not recognised. Please signup.', user=None)
+                'login.html', message='That username is not recognised. Please signup.')
 
     def testRegisterClient(self):
 
