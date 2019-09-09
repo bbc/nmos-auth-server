@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.1.3
+- Add PKCE Support.
+
 ## 1.1.2
 - Add loading of external config file.
 

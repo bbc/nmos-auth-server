@@ -21,19 +21,25 @@ from authlib.flask.oauth2.sqla import (
 )
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc6749.errors import InvalidRequestError
+from authlib.oauth2.rfc7636 import CodeChallenge
 from werkzeug.security import gen_salt
+
 from .models import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def create_authorization_code(self, client, user, request):
         code = gen_salt(48)
+        code_challenge = request.data.get('code_challenge', None)
+        code_challenge_method = request.data.get('code_challenge_method', None)
         item = OAuth2AuthorizationCode(
             code=code,
             client_id=client.client_id,
             redirect_uri=request.redirect_uri,
             scope=request.scope,
             user_id=user.id,
+            code_challenge=code_challenge,
+            code_challenge_method=code_challenge_method
         )
         db.session.add(item)
         db.session.commit()
@@ -74,7 +80,7 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 
 query_client = create_query_client_func(db.session, OAuth2Client)
 save_token = create_save_token_func(db.session, OAuth2Token)
-# Authlib 0.8 has a bug in init_app
+
 authorization = AuthorizationServer(
     query_client=query_client,
     save_token=save_token,
@@ -88,7 +94,7 @@ def config_oauth(app):
     # support all grants
     authorization.register_grant(grants.ImplicitGrant)
     authorization.register_grant(grants.ClientCredentialsGrant)
-    authorization.register_grant(AuthorizationCodeGrant)
+    authorization.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=False)])
     authorization.register_grant(PasswordGrant)
     authorization.register_grant(RefreshTokenGrant)
 
