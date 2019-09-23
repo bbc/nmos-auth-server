@@ -15,7 +15,7 @@
 from functools import wraps
 from flask import Response, request, current_app, render_template
 
-from .models import User
+from .models import AdminUser
 
 
 class BasicAuthorization():
@@ -45,7 +45,7 @@ class BasicAuthorization():
 
     def check_credentials(self, username, password):
         try:
-            user = User.query.filter_by(username=username).first()
+            user = AdminUser.query.filter_by(username=username).first()
             return username == user.username and password == user.password
         except Exception:
             return False

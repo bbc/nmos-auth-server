@@ -20,13 +20,13 @@ from authlib.flask.oauth2.sqla import (
     OAuth2TokenMixin,
 )
 
-__all__ = ['db', 'User', 'OAuth2Client',
-           'OAuth2AuthorizationCode', 'OAuth2Token', 'AccessRights']
+__all__ = ['db', 'AdminUser', 'OAuth2Client',
+           'OAuth2AuthorizationCode', 'OAuth2Token', 'ResourceOwner']
 
 db = SQLAlchemy()
 
 
-class User(db.Model):
+class AdminUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(40), unique=True)
     password = db.Column(db.String(20))
@@ -49,8 +49,8 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User')
+        db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin_user = db.relationship('AdminUser')
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
@@ -58,8 +58,8 @@ class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User')
+        db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin_user = db.relationship('AdminUser')
     code_challenge = db.Column(db.String(48))
     code_challenge_method = db.Column(db.String(5))
 
@@ -69,8 +69,8 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User')
+        db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin_user = db.relationship('AdminUser')
     access_token = db.Column(db.String(255), nullable=False, unique=False)
 
     def is_refresh_token_expired(self):
@@ -78,15 +78,24 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
         return expires_at < time.time()
 
 
-class AccessRights(db.Model):
-    __tablename__ = 'access_rights'
+class ResourceOwner(db.Model):
+    __tablename__ = 'resource_owner'
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
-    user = db.relationship('User')
+        db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
+    admin_user = db.relationship('AdminUser')
+
+    username = db.Column(db.String(40), unique=True)
+    password = db.Column(db.String(20))
     is04 = db.Column(db.String(25))
     is05 = db.Column(db.String(25))
+
+    def get_user_id(self):
+        return self.id
+
+    def check_password(self, password):
+        return password == self.password
 
     def __str__(self):
         output = ''

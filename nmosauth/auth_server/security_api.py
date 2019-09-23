@@ -22,10 +22,10 @@ from authlib.oauth2.rfc6749 import OAuth2Error, InvalidRequestError
 from nmoscommon.webapi import WebAPI, route
 from nmoscommon.auth.nmos_auth import RequiresAuth
 
-from .models import db, User, OAuth2Client
+from .models import db, AdminUser, OAuth2Client, ResourceOwner
 from .oauth2 import authorization
 from .app import config_app
-from .db_utils import getUser, removeClient, addUser, addAccessRights
+from .db_utils import getAdminUser, removeClient, addAdminUser, addResourceOwner, getResourceOwner
 from .constants import CERT_PATH
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,20 +55,40 @@ class SecurityAPI(WebAPI):
         ])
         self.app.jinja_loader = my_loader
 
-    def login_required(view_func):
+    def admin_required(view_func):
         @wraps(view_func)
         def wrapper(*args, **kwargs):
             user = None
             if 'id' in session:
                 uid = session['id']
-                user = getUser(uid)
+                user = getAdminUser(uid)
             elif request.authorization:
                 username = request.authorization.username
-                user = getUser(username)
+                user = getAdminUser(username)
                 if not user or not user.check_password(request.authorization.password):
                     abort(401)
             g.user = user
             if not user:
+                if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
+                    session["redirect"] = request.url
+                    return redirect(url_for('_login'))
+                else:
+                    abort(401)
+            else:
+                return view_func(*args, **kwargs)
+        return wrapper
+
+    def owner_required(view_func):
+        @wraps(view_func)
+        def wrapper(*args, **kwargs):
+            owner = None
+            if request.authorization:
+                username = request.authorization.username
+                owner = getResourceOwner(username)
+                if not owner or not owner.check_password(request.authorization.password):
+                    abort(401)
+            g.owner = owner
+            if not owner:
                 if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
                     session["redirect"] = request.url
                     return redirect(url_for('_login'))
@@ -113,7 +133,10 @@ class SecurityAPI(WebAPI):
             if not username or not password:
                 message = "Please Fill In Both Username and Password."
                 return render_template('login.html', message=message)
-            user = User.query.filter_by(username=username).first()
+            if "owner" in g:
+                user = getResourceOwner(username)
+            else:
+                user = getAdminUser(username)
             if not user:
                 message = "That username is not recognised. Please signup."
                 return render_template('login.html', message=message)
@@ -129,7 +152,7 @@ class SecurityAPI(WebAPI):
         return render_template('login.html')
 
     @route(AUTH_VERSION_ROOT + 'home/', methods=['GET'], auto_json=False)
-    @login_required
+    @admin_required
     def home(self):
         user = g.user
         if user:
@@ -144,13 +167,11 @@ class SecurityAPI(WebAPI):
         password = request.form.get('password', None)
         if not username or not password:
             return redirect(url_for('_signup_get'))
-        user = addUser(username, password)
+        user = addAdminUser(username, password)
         if user is None:
             return render_template('signup.html', message="Invalid Username. Please choose another one.")
-        is04 = request.form.get('is04', None)
-        is05 = request.form.get('is05', None)
-        addAccessRights(user, is04, is05)
-
+        # Create Resource Owner account for Admin with full Write privileges
+        addResourceOwner(user, username=username, password=password, is04_access="write", is05_access="write")
         session['id'] = user.id
         return redirect(url_for('_home'))
 
@@ -159,7 +180,7 @@ class SecurityAPI(WebAPI):
         return render_template('signup.html')
 
     @route(AUTH_VERSION_ROOT + 'register_client', methods=['POST'], auto_json=False)
-    @login_required
+    @admin_required
     def create_client_post(self):
         user = g.user
         if request.headers["Content-Type"] == "application/json":
@@ -184,18 +205,18 @@ class SecurityAPI(WebAPI):
             return jsonify(client_info), 201
 
     @route(AUTH_VERSION_ROOT + 'register_client/', methods=['GET'], auto_json=False)
-    @login_required
+    @admin_required
     def create_client_get(self):
         return render_template('create_client.html')
 
     @route(AUTH_VERSION_ROOT + 'delete_client/<client_id>', auto_json=False)
-    @login_required
+    @admin_required
     def delete_client(self, client_id):
         removeClient(client_id)
         return redirect(url_for('_home'))
 
     @route(AUTH_VERSION_ROOT + 'fetch_token/', auto_json=False)
-    @login_required
+    @admin_required
     def fetch_token(self):
         user = g.user
         # TODO - drop-down select box
@@ -203,7 +224,7 @@ class SecurityAPI(WebAPI):
         return render_template('fetch_token.html', client=client)
 
     @route(AUTH_VERSION_ROOT + 'authorize', methods=['POST'], auto_json=False)
-    @login_required
+    @owner_required
     def authorization_post(self):
         user = g.user
         if "confirm" in request.form.keys() and request.form['confirm'] == "true":
@@ -213,7 +234,7 @@ class SecurityAPI(WebAPI):
         return authorization.create_authorization_response(grant_user=grant_user)
 
     @route(AUTH_VERSION_ROOT + 'authorize/', methods=['GET'], auto_json=False)
-    @login_required
+    @owner_required
     def authorization_get(self):
         user = g.user
         try:

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from six import string_types
-from .models import db, User, OAuth2Client, AccessRights
+from .models import db, AdminUser, OAuth2Client, ResourceOwner
 
 # -------------------- INIT ------------------------- #
 
@@ -40,15 +40,15 @@ def add(entry):
     db.session.commit()
 
 
-def addAccessRights(user, IS04Access, IS05Access):
-    access = AccessRights(user_id=user.id, is04=IS04Access, is05=IS05Access)
+def addResourceOwner(user, username, password, is04_access, is05_access):
+    access = ResourceOwner(user_id=user.id, username=username, password=password, is04=is04_access, is05=is05_access)
     add(access)
     return access
 
 
-def addUser(username, password):
-    if User.query.filter_by(username=username).scalar() is None:
-        user = User(username=username, password=password)
+def addAdminUser(username, password):
+    if AdminUser.query.filter_by(username=username).scalar() is None:
+        user = AdminUser(username=username, password=password)
         add(user)
         return user
 
@@ -74,12 +74,23 @@ def printField(table, field):
     return eval(s)
 
 
-def getUser(user):
+def getAdminUser(user):
     try:
         if isinstance(user, int):
-            entry = User.query.get_or_404(user)
+            entry = AdminUser.query.get_or_404(user)
         elif isinstance(user, string_types):
-            entry = User.query.filter_by(username=user).first_or_404()
+            entry = AdminUser.query.filter_by(username=user).first_or_404()
+        return entry
+    except Exception:
+        return None
+
+
+def getResourceOwner(user):
+    try:
+        if isinstance(user, int):
+            entry = ResourceOwner.query.get_or_404(user)
+        elif isinstance(user, string_types):
+            entry = ResourceOwner.query.filter_by(username=user).first_or_404()
         return entry
     except Exception:
         return None
@@ -114,20 +125,37 @@ def remove(entry):
     db.session.commit()
 
 
-def removeUser(user):
-    if isinstance(user, int):
-        entry = User.query.get_or_404(user)
-    elif isinstance(user, string_types):
-        entry = User.query.filter_by(username=user).first_or_404()
-    remove(entry)
+def removeAdminUser(user):
+    try:
+        if isinstance(user, int):
+            entry = AdminUser.query.get_or_404(user)
+        elif isinstance(user, string_types):
+            entry = AdminUser.query.filter_by(username=user).first_or_404()
+            remove(entry)
+    except Exception:
+        return None
+
+
+def removeResourceOwner(user):
+    try:
+        if isinstance(user, int):
+            entry = ResourceOwner.query.get_or_404(user)
+        elif isinstance(user, string_types):
+            entry = ResourceOwner.query.filter_by(username=user).first_or_404()
+            remove(entry)
+    except Exception:
+        return None
 
 
 def removeClient(client_id):
-    if isinstance(client_id, int):
-        entry = OAuth2Client.query.get_or_404(client_id)
-    else:
-        entry = OAuth2Client.query.filter_by(client_id=client_id).first_or_404()
-    remove(entry)
+    try:
+        if isinstance(client_id, int):
+            entry = OAuth2Client.query.get_or_404(client_id)
+        else:
+            entry = OAuth2Client.query.filter_by(client_id=client_id).first_or_404()
+        remove(entry)
+    except Exception:
+        return None
 
 
 def removeAll(table):  # To clear token data
