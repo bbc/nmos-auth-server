@@ -86,7 +86,7 @@ class ResourceOwner(db.Model):
         db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
     admin_user = db.relationship('AdminUser')
 
-    username = db.Column(db.String(40), unique=True)
+    username = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(20))
     is04 = db.Column(db.String(25))
     is05 = db.Column(db.String(25))

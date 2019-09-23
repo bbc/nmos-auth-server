@@ -22,10 +22,11 @@ from authlib.oauth2.rfc6749 import OAuth2Error, InvalidRequestError
 from nmoscommon.webapi import WebAPI, route
 from nmoscommon.auth.nmos_auth import RequiresAuth
 
-from .models import db, AdminUser, OAuth2Client, ResourceOwner
+from .models import db, OAuth2Client, ResourceOwner
 from .oauth2 import authorization
 from .app import config_app
-from .db_utils import getAdminUser, removeClient, addAdminUser, addResourceOwner, getResourceOwner
+from .db_utils import addAdminUser, addResourceOwner, getAdminUser, getResourceOwner
+from .db_utils import removeClient, removeResourceOwner
 from .constants import CERT_PATH
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -250,6 +251,28 @@ class SecurityAPI(WebAPI):
     @route(AUTH_VERSION_ROOT + 'revoke', methods=['POST'], auto_json=False)
     def revoke_token_post(self):
         return authorization.create_endpoint_response('revocation')
+
+    @route(AUTH_VERSION_ROOT + 'users', methods=['GET', 'POST'], auto_json=False)
+    @admin_required
+    def get_users(self):
+        user = getAdminUser(session['id'])
+        resource_owners = ResourceOwner.query.filter_by(user_id=user.id).all()
+        return render_template('users.html', user=user, owners=resource_owners)
+
+    @route(AUTH_VERSION_ROOT + 'add_user', methods=['POST'], auto_json=False)
+    def add_user(self):
+        user = getAdminUser(session['id'])
+        username = request.form.get("username")
+        password = request.form.get("password")
+        is04 = request.form.get("is04")
+        is05 = request.form.get("is05")
+        addResourceOwner(user, username, password, is04, is05)
+        return redirect(url_for('_get_users'))
+
+    @route(AUTH_VERSION_ROOT + 'users/<username>', methods=['GET'], auto_json=False)
+    def delete_user(self, username):
+        removeResourceOwner(username)
+        return redirect(url_for('_get_users'))
 
     # route for certificate with public key
     @route(AUTH_VERSION_ROOT + 'certs/', methods=['GET'], auto_json=True)

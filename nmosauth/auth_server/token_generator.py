@@ -30,11 +30,9 @@ class TokenGenerator():
             return "client_credentials"
         else:
             if scope == "is-04":
-                user_access = ResourceOwner.query.filter_by(user_id=user.id).first()
-                access = user_access.is04
+                access = user.is04
             elif scope == "is-05":
-                user_access = ResourceOwner.query.filter_by(user_id=user.id).first()
-                access = user_access.is05
+                access = user.is05
             else:
                 access = None
             return access

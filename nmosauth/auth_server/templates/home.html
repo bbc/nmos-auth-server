@@ -39,20 +39,19 @@ limitations under the License. -->
     {% endfor %}
 
     <script>
-      var coll = document.getElementsByClassName("collapsible");
-      var i;
+      var collapsibles = document.getElementsByClassName("collapsible");
 
-      for (i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-          this.classList.toggle("active");
-          var content = this.nextElementSibling;
+      Object.values(collapsibles).forEach(function(collapsible) {
+        collapsible.addEventListener("click", function() {
+          collapsible.classList.toggle("active");
+          var content = collapsible.nextElementSibling
           if (content.style.maxHeight) {
-            content.style.maxHeight = null;
+            content.style.maxHeight = null
           } else {
             content.style.maxHeight = content.scrollHeight + "px";
           }
-        });
-      }
+        })
+      })
     </script>
 
 {% endblock %}
