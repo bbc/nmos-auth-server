@@ -34,7 +34,7 @@ class AdminUser(db.Model):
     def __str__(self):
         output = ''
         for c in self.__table__.columns:
-            output += '{}: {},  '.format(c.name, getattr(self, c.name))
+            output[c.name] = getattr(self, c.name)
         return output
 
     def get_user_id(self):
@@ -98,7 +98,7 @@ class ResourceOwner(db.Model):
         return password == self.password
 
     def __str__(self):
-        output = ''
+        output = {}
         for c in self.__table__.columns:
-            output += '{}: {},  '.format(c.name, getattr(self, c.name))
+            output[c.name] = getattr(self, c.name)
         return output
