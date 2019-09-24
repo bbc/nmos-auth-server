@@ -83,11 +83,15 @@ class SecurityAPI(WebAPI):
         @wraps(view_func)
         def wrapper(*args, **kwargs):
             owner = None
-            if request.authorization:
+            if 'owner' in session:
+                uid = session['owner']
+                owner = getResourceOwner(uid)
+            elif request.authorization:
                 username = request.authorization.username
                 owner = getResourceOwner(username)
                 if not owner or not owner.check_password(request.authorization.password):
                     abort(401)
+            g.owner = owner
             if not owner:
                 if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
                     session["owner"] = True
@@ -136,14 +140,16 @@ class SecurityAPI(WebAPI):
                 return render_template('login.html', message=message)
             if "owner" in session and session["owner"] is True:
                 user = getResourceOwner(username)
-                del session["owner"]
             else:
                 user = getAdminUser(username)
             if not user:
                 message = "That username is not recognised. Please signup."
                 return render_template('login.html', message=message)
             if user.check_password(password):
-                session['id'] = user.id
+                if isinstance(user, ResourceOwner):
+                    session["owner"] = user.id
+                else:
+                    session['id'] = user.id
                 if "redirect" in session:
                     return redirect(session['redirect'])
                 else:
@@ -228,9 +234,9 @@ class SecurityAPI(WebAPI):
     @route(AUTH_VERSION_ROOT + 'authorize', methods=['POST'], auto_json=False)
     @owner_required
     def authorization_post(self):
-        user = g.user
+        owner = g.owner
         if "confirm" in request.form.keys() and request.form['confirm'] == "true":
-            grant_user = user
+            grant_user = owner
         else:
             grant_user = None
         return authorization.create_authorization_response(grant_user=grant_user)
@@ -238,12 +244,12 @@ class SecurityAPI(WebAPI):
     @route(AUTH_VERSION_ROOT + 'authorize/', methods=['GET'], auto_json=False)
     @owner_required
     def authorization_get(self):
-        user = g.user
+        owner = g.owner
         try:
-            grant = authorization.validate_consent_request(end_user=user, request=request)
+            grant = authorization.validate_consent_request(end_user=owner, request=request)
         except OAuth2Error as error:
             return error.error
-        return render_template('authorize.html', user=user, grant=grant)
+        return render_template('authorize.html', user=owner, grant=grant)
 
     @route(AUTH_VERSION_ROOT + 'token', methods=['POST'], auto_json=False)
     def issue_token_post(self):
