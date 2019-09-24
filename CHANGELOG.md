@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.3.0
+- Add Resource Owner database to allow one-to-many mapping between clients and end users. Add User page to UI.
+
 ## 1.2.0
 - Add separate login_required decorator to decorate endpoints.
 
