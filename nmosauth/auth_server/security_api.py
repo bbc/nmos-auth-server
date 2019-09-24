@@ -261,6 +261,7 @@ class SecurityAPI(WebAPI):
         return render_template('users.html', user=user, owners=resource_owners)
 
     @route(AUTH_VERSION_ROOT + 'add_user', methods=['POST'], auto_json=False)
+    @admin_required
     def add_user(self):
         user = getAdminUser(session['id'])
         username = request.form.get("username")
@@ -271,6 +272,7 @@ class SecurityAPI(WebAPI):
         return redirect(url_for('_get_users'))
 
     @route(AUTH_VERSION_ROOT + 'users/<username>', methods=['GET'], auto_json=False)
+    @admin_required
     def delete_user(self, username):
         removeResourceOwner(username)
         return redirect(url_for('_get_users'))
