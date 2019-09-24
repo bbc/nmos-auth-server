@@ -28,16 +28,13 @@ limitations under the License. -->
       <a href="{{ url_for('_get_cert') }}">Certificates</a>
       <a href="{{ url_for('_get_users') }}">Users</a>
     </div>
-    <script>
-      window.jQuery || document.write(
-        '<script src="{{ url_for('_style', filename='jquery.js') }}">\x3C/script>'
-      )
-    </script>
-      <script type="text/javascript">
-        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-      </script>
     <div class="page">
       {% block body %}{% endblock %}
     </div>
+    <script type="text/javascript">
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+    <script src="{{ url_for('_style', filename='jquery.js') }}"></script>
+    <script src="{{ url_for('_style', filename='main.js') }}"></script>
   </body>
 </html>
