@@ -19,6 +19,8 @@ from authlib.flask.oauth2.sqla import (
     OAuth2AuthorizationCodeMixin,
     OAuth2TokenMixin,
 )
+from werkzeug.security import check_password_hash
+
 
 __all__ = ['db', 'AdminUser', 'OAuth2Client',
            'OAuth2AuthorizationCode', 'OAuth2Token', 'ResourceOwner']
@@ -41,7 +43,7 @@ class AdminUser(db.Model):
         return self.id
 
     def check_password(self, password):
-        return password == self.password
+        return check_password_hash(self.password, password)
 
 
 class OAuth2Client(db.Model, OAuth2ClientMixin):
@@ -95,7 +97,7 @@ class ResourceOwner(db.Model):
         return self.id
 
     def check_password(self, password):
-        return password == self.password
+        return check_password_hash(self.password, password)
 
     def __str__(self):
         output = {}

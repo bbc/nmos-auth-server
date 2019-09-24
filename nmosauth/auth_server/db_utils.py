@@ -14,6 +14,7 @@
 
 from six import string_types
 from .models import db, AdminUser, OAuth2Client, ResourceOwner
+from werkzeug.security import generate_password_hash
 
 # -------------------- INIT ------------------------- #
 
@@ -41,14 +42,18 @@ def add(entry):
 
 
 def addResourceOwner(user, username, password, is04_access, is05_access):
-    access = ResourceOwner(user_id=user.id, username=username, password=password, is04=is04_access, is05=is05_access)
-    add(access)
-    return access
+    password_hash = generate_password_hash(password)
+    if ResourceOwner.query.filter_by(username=username).scalar() is None:
+        access = ResourceOwner(
+            user_id=user.id, username=username, password=password_hash, is04=is04_access, is05=is05_access)
+        add(access)
+        return access
 
 
 def addAdminUser(username, password):
+    password_hash = generate_password_hash(password)
     if AdminUser.query.filter_by(username=username).scalar() is None:
-        user = AdminUser(username=username, password=password)
+        user = AdminUser(username=username, password=password_hash)
         add(user)
         return user
 
