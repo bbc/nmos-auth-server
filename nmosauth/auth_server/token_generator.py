@@ -16,7 +16,6 @@ import os
 from authlib.jose import jwt
 import datetime
 from .oauth2 import authorization
-from .models import ResourceOwner
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
 
