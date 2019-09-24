@@ -274,7 +274,10 @@ class SecurityAPI(WebAPI):
         password = request.form.get("password")
         is04 = request.form.get("is04")
         is05 = request.form.get("is05")
-        addResourceOwner(user, username, password, is04, is05)
+        if any(i in [None, ''] for i in (user, username, password)):
+            return redirect(url_for('_get_users'))
+        else:
+            addResourceOwner(user, username, password, is04, is05)
         return redirect(url_for('_get_users'))
 
     @route(AUTH_VERSION_ROOT + 'users/<username>', methods=['GET'], auto_json=False)
