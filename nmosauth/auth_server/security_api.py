@@ -88,9 +88,9 @@ class SecurityAPI(WebAPI):
                 owner = getResourceOwner(username)
                 if not owner or not owner.check_password(request.authorization.password):
                     abort(401)
-            g.owner = owner
             if not owner:
                 if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
+                    session["owner"] = True
                     session["redirect"] = request.url
                     return redirect(url_for('_login'))
                 else:
@@ -134,8 +134,9 @@ class SecurityAPI(WebAPI):
             if not username or not password:
                 message = "Please Fill In Both Username and Password."
                 return render_template('login.html', message=message)
-            if "owner" in g:
+            if "owner" in session and session["owner"] is True:
                 user = getResourceOwner(username)
+                del session["owner"]
             else:
                 user = getAdminUser(username)
             if not user:
