@@ -30,19 +30,20 @@ class BaseConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/{}.sqlite'.format(NMOSAUTH_DIR, DATABASE_NAME)
     BASIC_AUTH_REALM = "NMOS Auth Server Login Required"
+    BASIC_AUTH_FORCE = False
     OAUTH2_ACCESS_TOKEN_GENERATOR = pkg + 'token_generator.gen_token'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
-    OAUTH2_TOKEN_EXPIRES_IN = {
-        'authorization_code': 60,
-        'implicit': 60,
-        'password': 60,
-        'client_credentials': 60
-    }
+    OAUTH2_JWT_EXP = 60
     OAUTH2_JWT_ENABLED = True
     OAUTH2_JWT_ISS = socket.getfqdn()
     OAUTH2_JWT_ALG = 'RS512'
-    OAUTH2_JWT_EXP = 60
     OAUTH2_JWT_KEY_PATH = PRIVKEY_PATH
+    OAUTH2_TOKEN_EXPIRES_IN = {
+        'authorization_code': OAUTH2_JWT_EXP,
+        'implicit': OAUTH2_JWT_EXP,
+        'password': OAUTH2_JWT_EXP,
+        'client_credentials': OAUTH2_JWT_EXP
+    }
 
 
 class TestConfig(BaseConfig):

@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.2.0
+- Add separate login_required decorator to decorate endpoints.
+
 ## 1.1.3
 - Add PKCE Support.
 

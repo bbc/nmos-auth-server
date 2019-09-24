@@ -19,7 +19,6 @@ from authlib.flask.oauth2.sqla import (
     OAuth2AuthorizationCodeMixin,
     OAuth2TokenMixin,
 )
-from authlib.oauth2 import OAuth2Error
 
 __all__ = ['db', 'User', 'OAuth2Client',
            'OAuth2AuthorizationCode', 'OAuth2Token', 'AccessRights']
@@ -52,11 +51,6 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
     user_id = db.Column(
         db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship('User')
-
-    def check_requested_scopes(self, scopes):  # Just for testing purposes
-        if len(set(scopes)) != 1:
-            raise OAuth2Error("Must list a single scope", None, 400)
-        return super(OAuth2Client, self).check_requested_scopes(scopes)
 
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
