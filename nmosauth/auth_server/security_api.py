@@ -191,9 +191,9 @@ class SecurityAPI(WebAPI):
     @admin_required
     def create_client_post(self):
         user = g.user
-        if request.headers["Content-Type"] == "application/json":
+        if "application/json" in request.headers["Content-Type"]:
             client = OAuth2Client(**request.get_json())
-        elif request.headers["Content-Type"] == "application/x-www-form-urlencoded":
+        elif "application/x-www-form-urlencoded" in request.headers["Content-Type"]:
             client = OAuth2Client(**request.form.to_dict(flat=True))
         else:
             raise InvalidRequestError
