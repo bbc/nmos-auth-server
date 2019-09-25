@@ -16,6 +16,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 import unittest
 import mock
+import json
 from base64 import b64encode
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -42,6 +43,8 @@ class TestNmosAuthServer(unittest.TestCase):
 
         self.user_id = 0
         self.testUser = self.createUser(TEST_USERNAME, TEST_PASSWORD)
+        self.client_metadata = None
+
         # Boilerplate for mocking out Basic Auth user for the whole class
         patcher = mock.patch("nmosauth.auth_server.basic_auth.AdminUser")
         self.mockBasicUser = patcher.start()
@@ -146,19 +149,56 @@ class TestNmosAuthServer(unittest.TestCase):
             'client_name': 'R&D Web Router',
             'client_uri': 'http://ipstudio-master.rd.bbc.co.uk/ips-web/#/web-router',
             'scope': 'is04 is05',
-            'redirect_uri': 'www.example.com',
+            'redirect_uri': 'http://www.example.com',
             'grant_type': 'password',
             'response_type': 'code',
             'token_endpoint_auth_method': 'client_secret_basic'
         }
-        headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
+        user_headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
         with mock.patch("nmosauth.auth_server.security_api.session") as mock_session:
             mock_session.__getitem__.return_value = None
             with self.client.post(VERSION_ROOT + '/register_client', data=register_data,
-                                  headers=headers, follow_redirects=True) as rv:
+                                  headers=user_headers, follow_redirects=True) as rv:
+                self.client_metadata = json.loads(rv.get_data(as_text=True))
                 self.assertEqual(rv.status_code, 201)
                 self.assertTrue(b'client_id' in rv.data)
                 self.assertTrue(b'client_secret' in rv.data)
+
+        password_request_data = {
+            "username": TEST_USERNAME,
+            "password": TEST_PASSWORD,
+            "grant_type": "password",
+            "scope": "is04"
+        }
+        self.assertTrue(self.client_metadata)  # Check client data is available
+        client_headers = self.auth_headers(self.client_metadata["client_id"], self.client_metadata["client_secret"])
+
+        with self.client.post(VERSION_ROOT + '/token', data=password_request_data, headers=client_headers) as rv:
+            password_response = json.loads(rv.get_data(as_text=True))
+            self.assertEqual(rv.status_code, 200)
+            self.assertTrue(
+                all(i in password_response for i in (
+                    "access_token", "refresh_token", "expires_in", "scope", "token_type"
+                ))
+            )
+            self.assertEqual(password_response["token_type"].lower(), "bearer")
+
+        auth_code_request_params = {
+            "response_type": "code",
+            "client_id": self.client_metadata["client_id"],
+            "redirect_uri": self.client_metadata["redirect_uris"][0],
+            "scope": "is-04",
+            "state": "xyz"
+        }
+
+        with self.client.post(
+            VERSION_ROOT + '/authorize',
+            data=password_request_data,
+            headers=user_headers,
+            query_string=auth_code_request_params
+        ) as rv:
+            print(rv.data)
+            self.assertEqual(rv.status_code, 302)
 
 
 if __name__ == '__main__':
