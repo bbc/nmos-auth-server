@@ -34,10 +34,10 @@ class AdminUser(db.Model):
     password = db.Column(db.String(20))
 
     def __str__(self):
-        output = ''
+        output = {}
         for c in self.__table__.columns:
             output[c.name] = getattr(self, c.name)
-        return output
+        return str(output)
 
     def get_user_id(self):
         return self.id
@@ -103,4 +103,4 @@ class ResourceOwner(db.Model):
         output = {}
         for c in self.__table__.columns:
             output[c.name] = getattr(self, c.name)
-        return output
+        return str(output)
