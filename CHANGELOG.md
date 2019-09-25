@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.3.2
+- Added further integration tests.
+
 ## 1.3.1
 - Hash passwords and verify users against password hashes.
 
