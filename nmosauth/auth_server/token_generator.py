@@ -27,25 +27,12 @@ class TokenGenerator():
     def __init__(self):
         pass
 
-    def get_access_rights(self, user, scope_list):
-        if user is None:
-            return "client_credentials"
-        else:
-            for scope in scope_list:
-                if scope in IS04_SCOPES:
-                    access = user.is04
-                elif scope == "is-05":
-                    access = user.is05
-                else:
-                    access = None
-            return access
-
     def get_audience(self, scope_list):
         audience = []
         for scope in scope_list:
             if scope in IS04_SCOPES:
                 audience.extend([
-                    "registry",
+                    "registration",
                     "query"
                 ])
             elif scope in IS05_SCOPES:
@@ -57,12 +44,11 @@ class TokenGenerator():
 
     def populate_nmos_claim(self, user, scope_list):
         nmos_claim = {}
-        user_access = AccessRights.query.filter_by(user_id=user.id).first()
-        if user_access:
+        if user:
             for scope in scope_list:
                 nmos_claim[scope] = {}
                 try:
-                    api_access = getattr(user_access, scope.replace('-', ''))
+                    api_access = getattr(user, scope.replace('-', ''))
                     nmos_claim[scope][api_access] = {"resources": "*"}
                 except Exception:
                     pass
@@ -79,7 +65,7 @@ class TokenGenerator():
         subject = user.username if user is not None else None
         # Populate audience claim
         audience = self.get_audience(scope_list)
-        # Populate NMOS claims
+        # Populate NMOS claim
         x_nmos_claim = self.populate_nmos_claim(user, scope_list)
 
         header = {
