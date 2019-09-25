@@ -17,18 +17,20 @@ from __future__ import absolute_import
 import unittest
 import mock
 import json
+from os import environ
 from base64 import b64encode
 from six.moves.urllib.parse import parse_qs
 from six import string_types
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 
-
 from nmoscommon.logger import Logger
 from nmosauth.auth_server.db_utils import drop_all
 from nmosauth.auth_server.models import AdminUser
 from nmosauth.auth_server.security_api import SecurityAPI
 from nmos_auth_data import TEST_PRIV_KEY
+
+environ["AUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 VERSION_ROOT = '/x-nmos/auth/v1.0'
 TEST_USERNAME = 'steve'
