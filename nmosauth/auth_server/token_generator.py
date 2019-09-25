@@ -16,7 +16,6 @@ import os
 from authlib.jose import jwt
 import datetime
 from .oauth2 import authorization
-from .models import AccessRights
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
 
@@ -30,11 +29,9 @@ class TokenGenerator():
             return "client_credentials"
         else:
             if scope == "is-04":
-                user_access = AccessRights.query.filter_by(user_id=user.id).first()
-                access = user_access.is04
+                access = user.is04
             elif scope == "is-05":
-                user_access = AccessRights.query.filter_by(user_id=user.id).first()
-                access = user_access.is05
+                access = user.is05
             else:
                 access = None
             return access

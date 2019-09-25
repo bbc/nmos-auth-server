@@ -83,3 +83,16 @@ $(function getResource() {
     });
   });
 });
+
+var collapsibles = document.getElementsByClassName("collapsible");
+Object.values(collapsibles).forEach(function(collapsible) {
+  collapsible.addEventListener("click", function() {
+    collapsible.classList.toggle("active");
+    var content = collapsible.nextElementSibling
+    if (content.style.maxHeight) {
+      content.style.maxHeight = null
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+  })
+})

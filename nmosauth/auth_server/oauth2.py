@@ -24,7 +24,8 @@ from authlib.oauth2.rfc6749.errors import InvalidRequestError
 from authlib.oauth2.rfc7636 import CodeChallenge
 from werkzeug.security import gen_salt
 
-from .models import db, User, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+from .models import db, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+from .db_utils import getResourceOwner
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
@@ -56,12 +57,12 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
         db.session.commit()
 
     def authenticate_user(self, authorization_code):
-        return User.query.get(authorization_code.user_id)
+        return getResourceOwner(authorization_code.user_id)
 
 
 class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
     def authenticate_user(self, username, password):
-        user = User.query.filter_by(username=username).first()
+        user = getResourceOwner(username)
         if user is None:
             raise InvalidRequestError("User Not Found")
         if user.check_password(password):
@@ -75,7 +76,7 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
             return item
 
     def authenticate_user(self, credential):
-        return User.query.get(credential.user_id)
+        return getResourceOwner(credential.user_id)
 
 
 query_client = create_query_client_func(db.session, OAuth2Client)

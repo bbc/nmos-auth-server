@@ -1,0 +1,63 @@
+<!-- Copyright 2019 British Broadcasting Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+{% extends "layout.html" %}
+{% block body %}
+
+<button class="collapsible title"><b>Add User</b></button>
+<div class="content">
+  <form action="{{ url_for('_add_user') }}" method="post">
+    <label>
+      <span>Username:</span>
+      <input type="text" name="username" id="username" placeholder="Joe Bloggs"><br>
+    </label>
+    <label>
+      <span>Password:</span>
+      <input type="text" name="password" id="password" placeholder="password"><br>
+    </label>
+    <label>
+      <span>IS-04 Access Rights:</span>
+      <select name="is04" id="is04">
+        <option value="read">Read</option>
+        <option value="write">Write</option>
+      </select>
+    </label>
+    <label>
+      <span>IS-05 Access Rights:</span>
+      <select name="is05" id="is05">
+        <option value="read">Read</option>
+        <option value="write">Write</option>
+      </select>
+      <br>
+    </label>
+    <button type="submit">Add User</button>
+  </form>
+</div>
+<br>
+
+{% for owner in owners %}
+<button class="collapsible"><b>Owner {{ loop.index }} - {{ owner.username }}</b>
+  <sup>
+    <a href="{{ url_for('_delete_user', username=owner.username) }}">delete</a>
+  </sup>
+</button>
+  <div class="content">
+    <p>Username: {{ owner.username }}</p>
+    <p>Password: {{ owner.password }}</p>
+    <p>IS-04 Access Rights: {{ owner.is04 }}</p>
+    <p>IS-05 Access Rights: {{ owner.is05 }}</p>
+  </div><br>
+{% endfor %}
+
+{% endblock %}
