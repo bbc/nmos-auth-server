@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.3.1
+- Hash passwords and verify users against password hashes.
+
 ## 1.3.0
 - Add Resource Owner database to allow one-to-many mapping between clients and end users. Add User page to UI.
 
