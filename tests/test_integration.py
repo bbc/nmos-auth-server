@@ -132,7 +132,7 @@ class TestNmosAuthServer(unittest.TestCase):
             mockTemplate.assert_called_with(
                 'login.html', message='That username is not recognised. Please signup.')
 
-    def testRegisterClient(self):
+    def testRegisteringClientAndTokenEndpoint(self):
 
         # TEST SIGNING UP ADMIN USER
         signup_data = {
@@ -162,7 +162,7 @@ class TestNmosAuthServer(unittest.TestCase):
             mock_session.__getitem__.return_value = None
             with self.client.post(VERSION_ROOT + '/register_client', data=register_data,
                                   headers=user_headers, follow_redirects=True) as rv:
-                self.assertEqual(rv.status_code, 201)
+                self.assertEqual(rv.status_code, 201, rv.data)
                 self.client_metadata = json.loads(rv.get_data(as_text=True))
                 self.assertTrue(b'client_id' in rv.data)
                 self.assertTrue(b'client_secret' in rv.data)
@@ -179,7 +179,7 @@ class TestNmosAuthServer(unittest.TestCase):
 
         with self.client.post(VERSION_ROOT + '/token', data=password_request_data, headers=client_headers) as rv:
             password_response = json.loads(rv.get_data(as_text=True))
-            self.assertEqual(rv.status_code, 200)
+            self.assertEqual(rv.status_code, 200, rv.data)
             self.assertTrue(
                 all(i in password_response for i in (
                     "access_token", "refresh_token", "expires_in", "scope", "token_type"
@@ -205,7 +205,7 @@ class TestNmosAuthServer(unittest.TestCase):
             headers=user_headers, query_string=auth_code_request_params
         ) as rv:
             authorize_headers = rv.headers
-            self.assertEqual(rv.status_code, 302)
+            self.assertEqual(rv.status_code, 302, rv.data)
             self.assertTrue("location" in authorize_headers)
             self.assertTrue("error" not in authorize_headers["location"] and "code" in authorize_headers["location"])
 
@@ -226,7 +226,7 @@ class TestNmosAuthServer(unittest.TestCase):
         }
 
         with self.client.post(VERSION_ROOT + '/token', data=auth_grant_request_data, headers=client_headers) as rv:
-            self.assertEqual(rv.status_code, 200)
+            self.assertEqual(rv.status_code, 200, rv.data)
             self.assertTrue(
                 all(i in password_response for i in (
                     "access_token", "refresh_token", "expires_in", "scope", "token_type"
