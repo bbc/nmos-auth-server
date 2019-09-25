@@ -16,14 +16,15 @@ from __future__ import print_function
 from __future__ import absolute_import
 import unittest
 import mock
+from base64 import b64encode
 from werkzeug.exceptions import HTTPException
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from nmoscommon.logger import Logger
 from nmosauth.auth_server.db_utils import drop_all
 from nmosauth.auth_server.models import AdminUser
 from nmosauth.auth_server.security_api import SecurityAPI
 from nmos_auth_data import TEST_PRIV_KEY
-from base64 import b64encode
 
 VERSION_ROOT = '/x-nmos/auth/v1.0'
 TEST_USERNAME = 'steve'
@@ -54,12 +55,12 @@ class TestNmosAuthServer(unittest.TestCase):
     def createUser(self, username, password):
         user = AdminUser()
         user.username = username
-        user.password = password
+        user.password = generate_password_hash(password)
         user.id = self.user_id = self.user_id + 1
         return user
 
-    def auth_headers(self, user):
-        auth_string = "{}:{}".format(user.username, user.password).encode('utf-8')
+    def auth_headers(self, username, password):
+        auth_string = "{}:{}".format(username, password).encode('utf-8')
         headers = {
             'Authorization': b'Basic ' + b64encode(auth_string)
         }
@@ -89,7 +90,7 @@ class TestNmosAuthServer(unittest.TestCase):
     def testBasicAuthRoutes(self, mockGetAdminUser):
 
         mockGetAdminUser.return_value = self.testUser
-        headers = self.auth_headers(self.testUser)
+        headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
         with self.client as client:
             # Get /register_client returns 200 status code
             rv = client.get(VERSION_ROOT + '/register_client/', headers=headers)
@@ -97,8 +98,7 @@ class TestNmosAuthServer(unittest.TestCase):
             mockGetAdminUser.assert_called_with(self.testUser.username)
 
             # Get /register_client with incorrect credentials returns Unauthorized
-            wrongUser = self.createUser("bob", "pass")
-            headers = self.auth_headers(wrongUser)
+            headers = self.auth_headers("bob", "wrong_password")
             with self.assertRaises(HTTPException) as http_error:
                 client.get(VERSION_ROOT + '/register_client/', headers=headers)
                 self.assertEqual(http_error.exception.code, 401)
@@ -139,7 +139,7 @@ class TestNmosAuthServer(unittest.TestCase):
             self.assertEqual(rv.status_code, 302)
             with self.app.app_context():
                 self.assertEqual(self.testUser.username, AdminUser.query.get(1).username)
-                self.assertEqual(self.testUser.password, AdminUser.query.get(1).password)
+                self.assertTrue(check_password_hash(AdminUser.query.get(1).password, TEST_PASSWORD))
 
         # Register Client
         register_data = {
@@ -151,7 +151,7 @@ class TestNmosAuthServer(unittest.TestCase):
             'response_type': 'code',
             'token_endpoint_auth_method': 'client_secret_basic'
         }
-        headers = self.auth_headers(self.testUser)
+        headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
         with mock.patch("nmosauth.auth_server.security_api.session") as mock_session:
             mock_session.__getitem__.return_value = None
             with self.client.post(VERSION_ROOT + '/register_client', data=register_data,
