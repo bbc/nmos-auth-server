@@ -16,7 +16,11 @@ from __future__ import print_function
 from __future__ import absolute_import
 import unittest
 import mock
+import json
+from os import environ
 from base64 import b64encode
+from six.moves.urllib.parse import parse_qs
+from six import string_types
 from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -25,6 +29,8 @@ from nmosauth.auth_server.db_utils import drop_all
 from nmosauth.auth_server.models import AdminUser
 from nmosauth.auth_server.security_api import SecurityAPI
 from nmos_auth_data import TEST_PRIV_KEY
+
+environ["AUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 VERSION_ROOT = '/x-nmos/auth/v1.0'
 TEST_USERNAME = 'steve'
@@ -42,6 +48,8 @@ class TestNmosAuthServer(unittest.TestCase):
 
         self.user_id = 0
         self.testUser = self.createUser(TEST_USERNAME, TEST_PASSWORD)
+        self.client_metadata = None
+
         # Boilerplate for mocking out Basic Auth user for the whole class
         patcher = mock.patch("nmosauth.auth_server.basic_auth.AdminUser")
         self.mockBasicUser = patcher.start()
@@ -126,9 +134,9 @@ class TestNmosAuthServer(unittest.TestCase):
             mockTemplate.assert_called_with(
                 'login.html', message='That username is not recognised. Please signup.')
 
-    def testRegisterClient(self):
+    def testRegisteringClientAndTokenEndpoint(self):
 
-        # SignUp
+        # TEST SIGNING UP ADMIN USER
         signup_data = {
             'username': TEST_USERNAME,
             'password': TEST_PASSWORD,
@@ -141,24 +149,91 @@ class TestNmosAuthServer(unittest.TestCase):
                 self.assertEqual(self.testUser.username, AdminUser.query.get(1).username)
                 self.assertTrue(check_password_hash(AdminUser.query.get(1).password, TEST_PASSWORD))
 
-        # Register Client
+        # TEST REGISTERING CLIENT
         register_data = {
             'client_name': 'R&D Web Router',
             'client_uri': 'http://ipstudio-master.rd.bbc.co.uk/ips-web/#/web-router',
-            'scope': 'is04 is05',
-            'redirect_uri': 'www.example.com',
-            'grant_type': 'password',
+            'scope': 'is-04 is-05',
+            'redirect_uri': 'http://www.example.com',
+            'grant_type': 'password\nauthorization_code',
             'response_type': 'code',
             'token_endpoint_auth_method': 'client_secret_basic'
         }
-        headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
+        user_headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
         with mock.patch("nmosauth.auth_server.security_api.session") as mock_session:
             mock_session.__getitem__.return_value = None
             with self.client.post(VERSION_ROOT + '/register_client', data=register_data,
-                                  headers=headers, follow_redirects=True) as rv:
-                self.assertEqual(rv.status_code, 201)
+                                  headers=user_headers, follow_redirects=True) as rv:
+                self.assertEqual(rv.status_code, 201, rv.data)
+                self.client_metadata = json.loads(rv.get_data(as_text=True))
                 self.assertTrue(b'client_id' in rv.data)
                 self.assertTrue(b'client_secret' in rv.data)
+
+        # TEST PASSWORD GRANT
+        password_request_data = {
+            "username": TEST_USERNAME,
+            "password": TEST_PASSWORD,
+            "grant_type": "password",
+            "scope": "is-04"
+        }
+        self.assertTrue(self.client_metadata)  # Check client data is available
+        client_headers = self.auth_headers(self.client_metadata["client_id"], self.client_metadata["client_secret"])
+
+        with self.client.post(VERSION_ROOT + '/token', data=password_request_data, headers=client_headers) as rv:
+            password_response = json.loads(rv.get_data(as_text=True))
+            self.assertEqual(rv.status_code, 200, rv.data)
+            self.assertTrue(
+                all(i in password_response for i in (
+                    "access_token", "refresh_token", "expires_in", "scope", "token_type"
+                ))
+            )
+            self.assertEqual(password_response["token_type"].lower(), "bearer")
+
+        # TEST AUTH CODE GRANT - AUTHORIZE ENDPOINT
+        auth_code_request_params = {
+            "response_type": "code",
+            "client_id": self.client_metadata["client_id"],
+            "redirect_uri": self.client_metadata["redirect_uris"][0],
+            "scope": "is-04",
+            "state": "xyz"
+        }
+
+        auth_code_request_data = {
+            "confirm": "true"
+        }
+
+        with self.client.post(
+            VERSION_ROOT + '/authorize', data=auth_code_request_data,
+            headers=user_headers, query_string=auth_code_request_params
+        ) as rv:
+            authorize_headers = rv.headers
+            self.assertEqual(rv.status_code, 302, rv.data)
+            self.assertTrue("location" in authorize_headers)
+            self.assertTrue("error" not in authorize_headers["location"] and "code" in authorize_headers["location"])
+
+            redirect_uri, query_string = rv.headers["location"].split('?')
+            self.assertEqual(redirect_uri, register_data["redirect_uri"])
+
+            parsed_query = parse_qs(query_string)
+            auth_code = parsed_query["code"][0]
+            self.assertTrue(isinstance(auth_code, string_types))
+            state = parsed_query["state"][0]
+            self.assertTrue(state, auth_code_request_params["state"])
+
+        # TEST AUTH CODE GRANT - TOKEN ENDPOINT
+        auth_grant_request_data = {
+            "grant_type": "authorization_code",
+            "redirect_uri": self.client_metadata["redirect_uris"][0],
+            "code": auth_code
+        }
+
+        with self.client.post(VERSION_ROOT + '/token', data=auth_grant_request_data, headers=client_headers) as rv:
+            self.assertEqual(rv.status_code, 200, rv.data)
+            self.assertTrue(
+                all(i in password_response for i in (
+                    "access_token", "refresh_token", "expires_in", "scope", "token_type"
+                ))
+            )
 
 
 if __name__ == '__main__':
