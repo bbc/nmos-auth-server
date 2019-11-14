@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.3.3
+- Use Python script to generate certs during debian install.
+
 ## 1.3.2
 - Added further integration tests.
 

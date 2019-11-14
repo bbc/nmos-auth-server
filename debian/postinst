@@ -28,7 +28,7 @@ case "$1" in
       fi
       chown ipstudio:ipstudio /var/nmosauth
       if [ -f  /var/nmosauth/generate_cert.sh ]; then
-        /var/nmosauth/generate_cert.sh
+        /var/nmosauth/gen_cert.py
       fi
     ;;
 
