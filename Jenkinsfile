@@ -121,7 +121,7 @@ pipeline {
                 }
                 bbcGithubNotify(context: "deb/sourceBuild", status: "PENDING")
 
-                sh 'python ./setup.py sdist'
+                sh 'python3 ./setup.py sdist'
                 sh 'make dsc'
                 bbcPrepareDsc()
                 stash(name: "deb_dist", includes: "deb_dist/*")

@@ -1,1 +1,1 @@
-nmosauth/certs/generate_cert.sh /var/nmosauth
+nmosauth/certs/gen_cert.py /var/nmosauth
