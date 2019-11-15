@@ -23,13 +23,10 @@ set -e
 
 case "$1" in
     configure)
-      if [ ! -d /var/nmosauth/ ]; then
-        mkdir /var/nmosauth/
-      fi
-      chown ipstudio:ipstudio /var/nmosauth
       if [ -f  /var/nmosauth/gen_cert.py ]; then
         /var/nmosauth/gen_cert.py
       fi
+      chown ipstudio:ipstudio -R /var/nmosauth
     ;;
 
     triggered)
