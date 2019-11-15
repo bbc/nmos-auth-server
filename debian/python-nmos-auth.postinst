@@ -27,7 +27,7 @@ case "$1" in
         mkdir /var/nmosauth/
       fi
       chown ipstudio:ipstudio /var/nmosauth
-      if [ -f  /var/nmosauth/generate_cert.sh ]; then
+      if [ -f  /var/nmosauth/gen_cert.py ]; then
         /var/nmosauth/gen_cert.py
       fi
     ;;
