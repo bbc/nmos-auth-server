@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.3.4
+- Change from /certs endpoint to serving JSON Web Keys at /jwks
+
 ## 1.3.3
 - Use Python script to generate certs during debian install.
 
