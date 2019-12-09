@@ -21,5 +21,8 @@ CERT_FILE = 'certificate.pem'
 CERT_PATH = os.path.join(NMOSAUTH_DIR, CERT_FILE)
 PRIVKEY_FILE = 'privkey.pem'
 PRIVKEY_PATH = os.path.join(NMOSAUTH_DIR, PRIVKEY_FILE)
+PUBKEY_FILE = 'pubkey.pem'
+PUBKEY_PATH = os.path.join(NMOSAUTH_DIR, PUBKEY_FILE)
+
 CERT_ENDPOINT = '/certs'
 DATABASE_NAME = 'auth_db'

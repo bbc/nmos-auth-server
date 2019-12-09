@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-from OpenSSL import crypto
 import os
-
-from nmosauth.auth_server.constants import CERT_PATH, PRIVKEY_PATH
+from OpenSSL import crypto
+from nmosauth.auth_server.constants import CERT_PATH, PRIVKEY_PATH, PUBKEY_PATH
 
 
 def create_self_signed_cert():
@@ -34,9 +33,10 @@ def create_self_signed_cert():
     open(PRIVKEY_PATH, "wt").write(
         crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode('utf-8')
     )
-
+    open(PUBKEY_PATH, "wt").write(
+        crypto.dump_publickey(crypto.FILETYPE_PEM, k).decode('utf-8')
+    )
     # Change permissions to Read-Only for security
-    os.chmod(CERT_PATH, 0o400)
     os.chmod(PRIVKEY_PATH, 0o400)
 
 

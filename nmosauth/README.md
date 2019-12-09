@@ -63,19 +63,20 @@ The file structure of the auth server is:
 ```
 auth_server/
   app.py              --- Flask App Configuration Loader
+  basic_auth.py       --- Basic Auth Setup
+  config.py           --- NMOS specific configuration
+  db_utils            --- Database Utility Funcs
+  handlers.py         --- error handlers
   models.py           --- SQLAlchemy Models
   oauth2.py           --- OAuth 2.0 Provider Configuration
   security_api.py     --- Routes views
   security_service.py --- HTTP Server and mdns registration
-  token_generator.py  --- Token Generator class
-  handlers.py         --- error handlers
   settings.py         --- Flask Configuration classes
-  basic_auth.py       --- Basic Auth Setup
-  db_utils            --- Database Utility Funcs
+  token_generator.py  --- Token Generator class
   templates/          --- static content (*.html)
   static/             --- static content (*.js, *.css)
 certs/
-  generate_cert.sh    --- Cert and Key generation script
+  gen_cert.py         --- Cert and Key generation script
 ```
 
 ## Define Models
@@ -127,5 +128,5 @@ For a full list of endpoints please see `auth_server/security_api.py`. A prefix 
 * */token* - for requesting a token
 * */signup* - for adding a user
 * */register_client* - creating a client
-* */certs* - publicly available certificate containing public key (these can be generated using the `generate_cert.sh` script)
+* */jwks* - contains cryptographic information about public keys to authenticate tokens (these can be generated using the `gen_cert.py` script)
 * */fetch_token* - this is a user interface for fetching tokens from the auth server using the password credentials grant. This endpoint is purely for testing purposes, and uses JQuery HTTP Requests found in `auth_server/static/main.js` to fetch tokens.

@@ -13,11 +13,13 @@
 # limitations under the License.
 
 import os
+from datetime import date
 from flask import request, session, send_from_directory, g
 from flask import render_template, redirect, url_for, jsonify, abort
 from werkzeug.security import gen_salt
 from jinja2 import FileSystemLoader, ChoiceLoader
 from functools import wraps
+from authlib.jose import jwk
 from authlib.oauth2.rfc6749 import OAuth2Error, InvalidRequestError
 from nmoscommon.webapi import WebAPI, route
 from nmoscommon.auth.nmos_auth import RequiresAuth
@@ -27,7 +29,7 @@ from .oauth2 import authorization
 from .app import config_app
 from .db_utils import addAdminUser, addResourceOwner, getAdminUser, getResourceOwner
 from .db_utils import removeClient, removeResourceOwner
-from .constants import CERT_PATH
+from .constants import PUBKEY_PATH
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -286,15 +288,19 @@ class SecurityAPI(WebAPI):
         removeResourceOwner(username)
         return redirect(url_for('_get_users'))
 
-    # route for certificate with public key
-    @route(AUTH_VERSION_ROOT + 'certs/', methods=['GET'], auto_json=True)
-    def get_cert(self):
+    # route for JSON Web Key
+    @route(AUTH_VERSION_ROOT + 'jwks/', methods=['GET'], auto_json=True)
+    def get_key(self):
         try:
-            with open(CERT_PATH, 'r') as myfile:
-                cert = myfile.read()
-            return (200, [cert])
+            with open(PUBKEY_PATH, 'r') as myfile:
+                pub_key = myfile.read()
+            obj = jwk.dumps(
+                pub_key, kty='RSA', use="sig", key_ops="verify",
+                alg="RS512", kid=date.today().strftime("%d-%m-%y")
+            )
+            return (200, obj)
         except OSError as e:
-            self.logger.writeError("Error: {}\nFile at {} doesn't exist".format(e, CERT_PATH))
+            self.logger.writeError("Error: {}\nFile at {} doesn't exist".format(e, PUBKEY_PATH))
             raise
 
     @route(AUTH_VERSION_ROOT + 'logout/', auto_json=False)
