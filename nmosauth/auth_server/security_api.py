@@ -290,7 +290,7 @@ class SecurityAPI(WebAPI):
 
     # route for JSON Web Key
     @route(AUTH_VERSION_ROOT + 'jwks/', methods=['GET'], auto_json=True)
-    def get_key(self):
+    def get_jwk(self):
         try:
             with open(PUBKEY_PATH, 'r') as myfile:
                 pub_key = myfile.read()
