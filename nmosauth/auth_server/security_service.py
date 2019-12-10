@@ -80,6 +80,7 @@ class SecurityService:
             self.httpServer.started.wait()
 
         if self.httpServer.failed is not None:
+            self._cleanup()
             raise self.httpServer.failed
 
         self.logger.writeInfo("Running on port: {}".format(self.httpServer.port))
@@ -89,7 +90,6 @@ class SecurityService:
         self.start()
         while self.running:
             time.sleep(1)
-        self._cleanup()
 
     def _cleanup(self):
         if self.mdns:
@@ -108,8 +108,8 @@ class SecurityService:
         self.stop()
 
     def stop(self):
-        self.running = False
         self._cleanup()
+        self.running = False
 
 
 if __name__ == '__main__':
