@@ -14,6 +14,7 @@
 
 import os
 from datetime import date
+from socket import getfqdn
 from flask import request, session, send_from_directory, g
 from flask import render_template, redirect, url_for, jsonify, abort
 from werkzeug.security import gen_salt
@@ -29,7 +30,10 @@ from .oauth2 import authorization
 from .app import config_app
 from .db_utils import addAdminUser, addResourceOwner, getAdminUser, getResourceOwner
 from .db_utils import removeClient, removeResourceOwner
-from .constants import PUBKEY_PATH
+from .constants import (
+    PUBKEY_PATH, JWK_ENDPOINT, TOKEN_ENDPOINT, REGISTER_ENDPOINT,
+    AUTHORIZATION_ENDPOINT, REVOCATION_ENDPOINT
+)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -124,13 +128,37 @@ class SecurityAPI(WebAPI):
 
     @route(AUTH_VERSION_ROOT)
     def versionindex(self):
-        obj = ["register_client/", "revoke/", "authorize/", "token/", "certs/"]
+        obj = [
+            REGISTER_ENDPOINT + "/",
+            AUTHORIZATION_ENDPOINT + "/",
+            JWK_ENDPOINT + "/",
+            REVOCATION_ENDPOINT,
+            TOKEN_ENDPOINT
+        ]
         return (200, obj)
 
     @route(AUTH_VERSION_ROOT + 'test/', auto_json=True)
     @RequiresAuth(condition=True)
     def test(self):
         return (200, "Hello World")
+
+    @route('/.well-known/oauth-authorization-server/', methods=['GET'])
+    def server_metadata(self):
+        hostname = 'https://' + getfqdn()
+        namespace = hostname + AUTH_VERSION_ROOT
+        metadata = {
+            "issuer": hostname,
+            "authorization_endpoint": namespace + AUTHORIZATION_ENDPOINT,
+            "token_endpoint": namespace + TOKEN_ENDPOINT,
+            "token_endpoint_auth_methods_supported": ["client_secret_basic"],
+            "token_endpoint_auth_signing_alg_values_supported": [self.app.config["OAUTH2_JWT_ALG"]],
+            "jwks_uri": namespace + JWK_ENDPOINT,
+            "registration_endpoint": namespace + REGISTER_ENDPOINT,
+            "revocation_endpoint": namespace + REVOCATION_ENDPOINT,
+            "scopes_supported": ["is-04", "is-05"],
+            "response_types_supported": ["code"],
+        }
+        return (200, metadata)
 
     @route(AUTH_VERSION_ROOT + 'login/', methods=['GET', 'POST'], auto_json=False)
     def login(self):
@@ -189,7 +217,7 @@ class SecurityAPI(WebAPI):
     def signup_get(self):
         return render_template('signup.html')
 
-    @route(AUTH_VERSION_ROOT + 'register_client', methods=['POST'], auto_json=False)
+    @route(AUTH_VERSION_ROOT + REGISTER_ENDPOINT, methods=['POST'], auto_json=False)
     @admin_required
     def create_client_post(self):
         user = g.user
@@ -214,7 +242,7 @@ class SecurityAPI(WebAPI):
             client_info.update(client.client_metadata)
             return jsonify(client_info), 201
 
-    @route(AUTH_VERSION_ROOT + 'register_client/', methods=['GET'], auto_json=False)
+    @route(AUTH_VERSION_ROOT + REGISTER_ENDPOINT + '/', methods=['GET'], auto_json=False)
     @admin_required
     def create_client_get(self):
         return render_template('create_client.html')
@@ -233,7 +261,7 @@ class SecurityAPI(WebAPI):
         client = OAuth2Client.query.filter_by(user_id=user.id).first()
         return render_template('fetch_token.html', client=client)
 
-    @route(AUTH_VERSION_ROOT + 'authorize', methods=['POST'], auto_json=False)
+    @route(AUTH_VERSION_ROOT + AUTHORIZATION_ENDPOINT, methods=['POST'], auto_json=False)
     @owner_required
     def authorization_post(self):
         owner = g.owner
@@ -243,7 +271,7 @@ class SecurityAPI(WebAPI):
             grant_user = None
         return authorization.create_authorization_response(grant_user=grant_user)
 
-    @route(AUTH_VERSION_ROOT + 'authorize/', methods=['GET'], auto_json=False)
+    @route(AUTH_VERSION_ROOT + AUTHORIZATION_ENDPOINT + '/', methods=['GET'], auto_json=False)
     @owner_required
     def authorization_get(self):
         owner = g.owner
@@ -253,11 +281,11 @@ class SecurityAPI(WebAPI):
             return error.error
         return render_template('authorize.html', user=owner, grant=grant)
 
-    @route(AUTH_VERSION_ROOT + 'token', methods=['POST'], auto_json=False)
+    @route(AUTH_VERSION_ROOT + TOKEN_ENDPOINT, methods=['POST'], auto_json=False)
     def issue_token_post(self):
         return authorization.create_token_response()
 
-    @route(AUTH_VERSION_ROOT + 'revoke', methods=['POST'], auto_json=False)
+    @route(AUTH_VERSION_ROOT + REVOCATION_ENDPOINT, methods=['POST'], auto_json=False)
     def revoke_token_post(self):
         return authorization.create_endpoint_response('revocation')
 
@@ -289,7 +317,7 @@ class SecurityAPI(WebAPI):
         return redirect(url_for('_get_users'))
 
     # route for JSON Web Key
-    @route(AUTH_VERSION_ROOT + 'jwks/', methods=['GET'], auto_json=True)
+    @route(AUTH_VERSION_ROOT + JWK_ENDPOINT + '/', methods=['GET'], auto_json=True)
     def get_jwk(self):
         try:
             with open(PUBKEY_PATH, 'r') as myfile:
