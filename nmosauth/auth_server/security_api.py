@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-from datetime import date
+from time import time
 from socket import getfqdn
 from flask import request, session, send_from_directory, g
 from flask import render_template, redirect, url_for, jsonify, abort
@@ -132,8 +132,8 @@ class SecurityAPI(WebAPI):
             REGISTER_ENDPOINT + "/",
             AUTHORIZATION_ENDPOINT + "/",
             JWK_ENDPOINT + "/",
-            REVOCATION_ENDPOINT,
-            TOKEN_ENDPOINT
+            REVOCATION_ENDPOINT + "/",
+            TOKEN_ENDPOINT + "/"
         ]
         return (200, obj)
 
@@ -319,16 +319,17 @@ class SecurityAPI(WebAPI):
     # route for JSON Web Key
     @route(AUTH_VERSION_ROOT + JWK_ENDPOINT + '/', methods=['GET'], auto_json=True)
     def get_jwk(self):
+        current_time = int(time())  # Current UTC Time
+        kid = 'x-nmos-{}'.format(current_time)
         try:
             with open(PUBKEY_PATH, 'r') as myfile:
                 pub_key = myfile.read()
             obj = jwk.dumps(
-                pub_key, kty='RSA', use="sig", key_ops="verify",
-                alg="RS512", kid=date.today().strftime("%d-%m-%y")
+                pub_key, kty='RSA', use="sig", key_ops="verify", alg="RS512", kid=kid
             )
             return (200, obj)
         except OSError as e:
-            self.logger.writeError("Error: {}\nFile at {} doesn't exist".format(e, PUBKEY_PATH))
+            self.logger.writeError("Error: {}\nFile '{}' can't be read".format(e, PUBKEY_PATH))
             raise
 
     @route(AUTH_VERSION_ROOT + 'logout/', auto_json=False)

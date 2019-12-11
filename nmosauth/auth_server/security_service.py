@@ -99,12 +99,11 @@ class SecurityService:
                 self.logger.writeInfo("mDNS stopped gracefully")
             except Exception as e:
                 self.logger.writeWarning("Could not stop mDNS gracefully: {}".format(e))
-
         self.httpServer.stop()
         self.logger.writeInfo("Stopped Http Server")
 
     def sig_handler(self):
-        self.logger.writeInfo('Pressed ctrl+c')
+        print('Pressed ctrl+c')
         self.stop()
 
     def stop(self):
