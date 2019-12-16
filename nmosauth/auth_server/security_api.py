@@ -74,6 +74,9 @@ class SecurityAPI(WebAPI):
                 user = getAdminUser(username)
                 if not user or not user.check_password(request.authorization.password):
                     abort(401)
+            # FIXME: Temporaily allows dynamically registering clients to register with the default user
+            elif REGISTER_ENDPOINT in request.url:
+                user = getAdminUser(1)
             g.user = user
             if not user:
                 if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
@@ -144,7 +147,7 @@ class SecurityAPI(WebAPI):
 
     @route('/.well-known/oauth-authorization-server/', methods=['GET'])
     def server_metadata(self):
-        hostname = 'https://' + getfqdn()
+        hostname = 'http://' + getfqdn()
         namespace = hostname + AUTH_VERSION_ROOT
         metadata = {
             "issuer": hostname,
@@ -324,10 +327,11 @@ class SecurityAPI(WebAPI):
         try:
             with open(PUBKEY_PATH, 'r') as myfile:
                 pub_key = myfile.read()
-            obj = jwk.dumps(
+            jwk_obj = jwk.dumps(
                 pub_key, kty='RSA', use="sig", key_ops="verify", alg="RS512", kid=kid
             )
-            return (200, obj)
+            jwks = {"keys": [jwk_obj]}
+            return (200, jwks)
         except OSError as e:
             self.logger.writeError("Error: {}\nFile '{}' can't be read".format(e, PUBKEY_PATH))
             raise
