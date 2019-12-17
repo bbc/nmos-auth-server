@@ -127,6 +127,6 @@ For a full list of endpoints please see `auth_server/security_api.py`. A prefix 
 
 * */token* - for requesting a token
 * */signup* - for adding a user
-* */register_client* - creating a client
+* */register-client* - creating a client
 * */jwks* - contains cryptographic information about public keys to authenticate tokens (these can be generated using the `gen_cert.py` script)
 * */fetch_token* - this is a user interface for fetching tokens from the auth server using the password credentials grant. This endpoint is purely for testing purposes, and uses JQuery HTTP Requests found in `auth_server/static/main.js` to fetch tokens.
