@@ -12,14 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Constants for nmos-auth defining filenames and directory locations"""
+"""Constants for nmos-auth defining filenames, locations and endpoints"""
 
 import os
 
+# Filenames and Locations
 NMOSAUTH_DIR = '/var/nmosauth'
 CERT_FILE = 'certificate.pem'
 CERT_PATH = os.path.join(NMOSAUTH_DIR, CERT_FILE)
 PRIVKEY_FILE = 'privkey.pem'
 PRIVKEY_PATH = os.path.join(NMOSAUTH_DIR, PRIVKEY_FILE)
-CERT_ENDPOINT = '/certs'
+PUBKEY_FILE = 'pubkey.pem'
+PUBKEY_PATH = os.path.join(NMOSAUTH_DIR, PUBKEY_FILE)
+
+# Endpoints
+JWK_ENDPOINT = 'jwks'
+TOKEN_ENDPOINT = 'token'
+REGISTER_ENDPOINT = 'register-client'
+AUTHORIZATION_ENDPOINT = 'authorize'
+REVOCATION_ENDPOINT = 'revoke'
+
+# Databse Info
 DATABASE_NAME = 'auth_db'
