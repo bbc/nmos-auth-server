@@ -256,7 +256,7 @@ class SecurityAPI(WebAPI):
             "redirect_uris": self.split_data(client_data.get("redirect_uris")),
             "response_types": self.split_data(client_data.get("response_types")),
             "scope": client_data.get("scope"),
-            "token_endpoint_auth_method": client_data.get("token_endpoint_auth_method")
+            "token_endpoint_auth_method": client_data.get("token_endpoint_auth_method", "client_secret_basic")
         }
         client.set_client_metadata(client_metadata)
 
