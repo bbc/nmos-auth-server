@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from authlib.flask.oauth2 import AuthorizationServer, ResourceProtector
-from authlib.flask.oauth2.sqla import (
+from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
+from authlib.integrations.sqla_oauth2 import (
     create_query_client_func,
     create_save_token_func,
     create_revocation_endpoint,
@@ -77,6 +77,10 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 
     def authenticate_user(self, credential):
         return getResourceOwner(credential.user_id)
+
+    def revoke_old_credential(self, token_object):
+        token_object.revoked = True
+        db.session.commit()
 
 
 query_client = create_query_client_func(db.session, OAuth2Client)
