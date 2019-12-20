@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import json
 from time import time
 from socket import getfqdn
 from flask import request, session, send_from_directory, g
@@ -266,7 +267,7 @@ class SecurityAPI(WebAPI):
             return redirect(url_for('_home'))
         else:
             client_info = client.client_info.copy()
-            client_info.update(client.client_metadata)
+            client_info.update(json.loads(client._client_metadata))
             return jsonify(client_info), 201
 
     @route(AUTH_VERSION_ROOT + REGISTER_ENDPOINT + '/', methods=['GET'], auto_json=False)

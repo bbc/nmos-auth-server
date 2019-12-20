@@ -16,10 +16,10 @@ The core of the implementation uses the [Authlib](https://authlib.org/) Library,
 ### System Requirements
 
 *   Linux (untested on Windows and Mac)
-*   Python 2.7 and 3.x
-*   Python Pip
+*   Python 3.x
+*   Python Pip3
 
-### Python Requirements
+### Python3 Requirements
 
 These should be installed automatically as part of the install process.
 
@@ -42,28 +42,28 @@ To install from pip:
 
 ```bash
 # Install From Pip
-$ sudo pip install nmos-auth --no-binary nmos-auth
+$ sudo pip3 install nmos-auth --no-binary nmos-auth
 ```
 
-For pip installations from source:
+For pip3 installations from source:
 
 ```bash
 # Change to top-level directory
 $ cd nmos-auth-server
 
 # Install via pip locally
-$ sudo pip install . --no-binary nmos-auth
+$ sudo pip3 install . --no-binary nmos-auth
 ```
 
 For basic setuptools installations:
 
 ```bash
 # Install Python setuptools
-$ pip install setuptools
+$ sudo pip3 install setuptools
 
 # Install the package
 $ cd nmos-auth-server
-$ sudo python setup.py install
+$ sudo python3 setup.py install
 ```
 
 ### Testing
@@ -71,7 +71,7 @@ $ sudo python setup.py install
 Testing of the package can be achieved using tox:
 ```bash
 # Install tox
-pip install tox
+sudo pip3 install tox
 
 # Run tests using tox environment for Python3
 cd nmos-auth-server
@@ -105,11 +105,11 @@ For pure Python usage:
 # Execute service file
 $ sudo /usr/bin/nmosauth
 ```
-If installing via a Debian package (e.g. using apt-get), Systemd service files should be placed in system directories. The service can be restarted using:
+If installing via a Debian package (e.g. using apt-get, dpkg, etc), Systemd service files should be placed in system directories. The service can be restarted using:
 
 ```bash
 # Run Service using SystemD
-sudo systemctl restart python-nmos-auth
+sudo systemctl restart python3-nmos-auth
 ```
 
 ### Getting Started
