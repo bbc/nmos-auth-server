@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import json
 from time import time
 from socket import getfqdn
 from flask import request, session, send_from_directory, g
@@ -220,29 +221,53 @@ class SecurityAPI(WebAPI):
     def signup_get(self):
         return render_template('signup.html')
 
+    @staticmethod
+    def split_data(data):
+        if isinstance(data, str):
+            return data.splitlines()
+        elif isinstance(data, list):
+            return data
+
     @route(AUTH_VERSION_ROOT + REGISTER_ENDPOINT, methods=['POST'], auto_json=False)
     @admin_required
     def create_client_post(self):
         user = g.user
-        if "application/json" in request.headers["Content-Type"]:
-            client = OAuth2Client(**request.get_json())
-        elif "application/x-www-form-urlencoded" in request.headers["Content-Type"]:
-            client = OAuth2Client(**request.form.to_dict(flat=True))
-        else:
-            raise InvalidRequestError
-        client.user_id = user.id
-        client.client_id = gen_salt(24)
+        client_id = gen_salt(24)
+        client_id_issued_at = int(time())
+        client = OAuth2Client(
+            client_id=client_id,
+            client_id_issued_at=client_id_issued_at,
+            user_id=user.id,
+        )
         if client.token_endpoint_auth_method == 'none':
             client.client_secret = ''
         else:
             client.client_secret = gen_salt(48)
+
+        if "application/json" in request.headers["Content-Type"]:
+            client_data = request.get_json()
+        elif "application/x-www-form-urlencoded" in request.headers["Content-Type"]:
+            client_data = request.form
+        else:
+            raise InvalidRequestError
+        client_metadata = {
+            "client_name": client_data.get("client_name"),
+            "client_uri": client_data.get("client_uri"),
+            "grant_types": self.split_data(client_data.get("grant_types")),
+            "redirect_uris": self.split_data(client_data.get("redirect_uris")),
+            "response_types": self.split_data(client_data.get("response_types")),
+            "scope": client_data.get("scope"),
+            "token_endpoint_auth_method": client_data.get("token_endpoint_auth_method", "client_secret_basic")
+        }
+        client.set_client_metadata(client_metadata)
+
         db.session.add(client)
         db.session.commit()
         if 'id' in session:
             return redirect(url_for('_home'))
         else:
             client_info = client.client_info.copy()
-            client_info.update(client.client_metadata)
+            client_info.update(json.loads(client._client_metadata))
             return jsonify(client_info), 201
 
     @route(AUTH_VERSION_ROOT + REGISTER_ENDPOINT + '/', methods=['GET'], auto_json=False)

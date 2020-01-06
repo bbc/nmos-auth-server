@@ -29,7 +29,7 @@ GEN_CERT_PATH = os.path.join(NMOSAUTH_DIR, GEN_CERT_FILE)
 
 # Basic metadata
 name = "nmos-auth"
-version = "1.3.4"
+version = "1.4.0"
 description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/nmos-auth-server'
 author = 'Danny Meloy'
@@ -96,7 +96,7 @@ packages_required = [
     "gevent",
     "nmoscommon",
     "werkzeug>=0.13",
-    "authlib>=0.11",
+    "authlib>=0.13",
     "pyopenssl>=16.0",
     "cryptography>=1.5"
 ]

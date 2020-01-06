@@ -154,15 +154,15 @@ class TestNmosAuthServer(unittest.TestCase):
             'client_name': 'R&D Web Router',
             'client_uri': 'http://ipstudio-master.rd.bbc.co.uk/ips-web/#/web-router',
             'scope': 'is-04 is-05',
-            'redirect_uri': 'http://www.example.com',
-            'grant_type': 'password\nauthorization_code',
-            'response_type': 'code',
+            'redirect_uris': ['http://www.example.com'],
+            'grant_types': ['password', 'authorization_code', 'refresh_token'],
+            'response_types': ['code'],
             'token_endpoint_auth_method': 'client_secret_basic'
         }
         user_headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
         with mock.patch("nmosauth.auth_server.security_api.session") as mock_session:
             mock_session.__getitem__.return_value = None
-            with self.client.post(VERSION_ROOT + '/register-client', data=register_data,
+            with self.client.post(VERSION_ROOT + '/register-client', json=register_data,
                                   headers=user_headers, follow_redirects=True) as rv:
                 self.assertEqual(rv.status_code, 201, rv.data)
                 self.client_metadata = json.loads(rv.get_data(as_text=True))
@@ -212,7 +212,7 @@ class TestNmosAuthServer(unittest.TestCase):
             self.assertTrue("error" not in authorize_headers["location"] and "code" in authorize_headers["location"])
 
             redirect_uri, query_string = rv.headers["location"].split('?')
-            self.assertEqual(redirect_uri, register_data["redirect_uri"])
+            self.assertEqual(redirect_uri, register_data["redirect_uris"][0])
 
             parsed_query = parse_qs(query_string)
             auth_code = parsed_query["code"][0]
