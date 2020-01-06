@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.4.0
+- Upgrade to authlib 0.13 and update client registration view function.
+
 ## 1.3.4
 - Change from /certs endpoint to serving JSON Web Keys at /jwks.
   Host server metadata endpoint at `/.well-known/oauth-authorization-server`.
