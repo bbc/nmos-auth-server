@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.4.1
+- Issue new refresh token with each access token refresh.
+
 ## 1.4.0
 - Upgrade to authlib 0.13 and update client registration view function.
 
