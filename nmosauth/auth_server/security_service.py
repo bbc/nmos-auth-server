@@ -60,16 +60,23 @@ class SecurityService:
         if not str(priority).isdigit():
             priority = 0
 
-        if self.config["https_mode"] != "enabled" and self.config["enable_mdns"]:
-            self.mdns.register(DNS_SD_NAME + "_http", DNS_SD_TYPE, DNS_SD_HTTP_PORT,
-                               {"pri": priority,
-                                "api_ver": ",".join(API_VERSIONS),
-                                "api_proto": "http"})
-        if self.config["https_mode"] != "disabled" and self.config["enable_mdns"]:
-            self.mdns.register(DNS_SD_NAME + "_https", DNS_SD_TYPE, DNS_SD_HTTPS_PORT,
-                               {"pri": priority,
-                                "api_ver": ",".join(API_VERSIONS),
-                                "api_proto": "https"})
+        if self.config["enable_mdns"]:
+            if self.config["https_mode"] != "enabled":
+                dns_proto = "https"
+                dns_sd_port = DNS_SD_HTTPS_PORT
+            else:
+                dns_proto = "http"
+                dns_sd_port = DNS_SD_HTTP_PORT
+            self.mdns.register(
+                DNS_SD_NAME + "_" + dns_proto,
+                DNS_SD_TYPE,
+                dns_sd_port,
+                {
+                    "pri": priority,
+                    "api_ver": ",".join(API_VERSIONS),
+                    "api_proto": "https"
+                }
+            )
 
         self.httpServer = HttpServer(
             SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config, 'ProductionConfig', None]
