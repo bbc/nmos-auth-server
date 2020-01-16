@@ -25,7 +25,7 @@ PRIVKEY_PATH = os.path.join(NMOSAUTH_DIR, PRIVKEY_FILE)
 PUBKEY_FILE = 'pubkey.pem'
 PUBKEY_PATH = os.path.join(NMOSAUTH_DIR, PUBKEY_FILE)
 
-# Endpoints
+# Default Endpoints
 JWK_ENDPOINT = 'jwks'
 TOKEN_ENDPOINT = 'token'
 REGISTER_ENDPOINT = 'register-client'

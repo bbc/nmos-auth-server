@@ -31,6 +31,7 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{}/{}.sqlite'.format(NMOSAUTH_DIR, DATABASE_NAME)
     BASIC_AUTH_REALM = "NMOS Auth Server Login Required"
     BASIC_AUTH_FORCE = False
+    PKCE_REQUIRED = True
     OAUTH2_ACCESS_TOKEN_GENERATOR = pkg + 'token_generator.gen_token'
     OAUTH2_REFRESH_TOKEN_GENERATOR = True
     OAUTH2_JWT_EXP = 60

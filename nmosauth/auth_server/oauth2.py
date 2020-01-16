@@ -102,7 +102,7 @@ def config_oauth(app):
     # support all grants
     authorization.register_grant(grants.ImplicitGrant)
     authorization.register_grant(grants.ClientCredentialsGrant)
-    authorization.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=False)])
+    authorization.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=app.config["PKCE_REQUIRED"])])
     authorization.register_grant(PasswordGrant)
     authorization.register_grant(RefreshTokenGrant)
 
