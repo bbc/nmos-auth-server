@@ -74,7 +74,7 @@ class SecurityService:
                 {
                     "pri": priority,
                     "api_ver": ",".join(API_VERSIONS),
-                    "api_proto": "https"
+                    "api_proto": dns_proto
                 }
             )
 
