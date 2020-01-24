@@ -148,7 +148,8 @@ class SecurityAPI(WebAPI):
 
     @route('/.well-known/oauth-authorization-server/', methods=['GET'])
     def server_metadata(self):
-        hostname = 'http://' + getfqdn()
+        protocol = "https" if self._config.get("https_mode") == "enabled" else "http"
+        hostname = protocol + '://' + getfqdn()
         namespace = hostname + AUTH_VERSION_ROOT
         metadata = {
             "issuer": hostname,
