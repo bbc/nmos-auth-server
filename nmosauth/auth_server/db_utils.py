@@ -13,8 +13,9 @@
 # limitations under the License.
 
 from six import string_types
-from .models import db, AdminUser, OAuth2Client, ResourceOwner
 from werkzeug.security import generate_password_hash
+
+from .models import db, AdminUser, OAuth2Client, ResourceOwner
 
 # -------------------- INIT ------------------------- #
 

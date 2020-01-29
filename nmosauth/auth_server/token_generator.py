@@ -13,8 +13,11 @@
 # limitations under the License.
 
 import os
-from authlib.jose import jwt
+import re
 import datetime
+from authlib.jose import jwt
+from socket import getfqdn
+
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
@@ -27,31 +30,32 @@ class TokenGenerator():
     def __init__(self):
         pass
 
-    def get_audience(self, scope_list):
-        audience = []
-        for scope in scope_list:
-            if scope in IS04_SCOPES:
-                audience.extend([
-                    "registration",
-                    "query"
-                ])
-            elif scope in IS05_SCOPES:
-                audience.extend([
-                    "senders",
-                    "receivers"
-                ])
-        return audience
+    def get_audience(self):
+        # Using FQDN of Auth Server
+        # fqdn = getfqdn()
+        # domain = fqdn.partition('.')[2]  # Get domain name
+
+        # Using Regex
+        redirect_uri = client.get_default_redirect_uri()
+        pattern = re.compile(r'(?:https?://)?(?:www\.)?[a-zA-Z0-9-]+((?:\.[a-zA-Z]+)+)(/?.*)')
+        domain = patern.match(redirect_uri).group(1) # Without path or protocol
+
+        # Add wildcard to beginning
+        wildcard_domain = '*.' + domain
+        return wildcard_domain
 
     def populate_nmos_claim(self, user, scope_list):
         nmos_claim = {}
         if user:
             for scope in scope_list:
-                nmos_claim[scope] = {}
+                nmos_claim[scope] = []
                 try:
-                    api_access = getattr(user, scope.replace('-', ''))
-                    nmos_claim[scope][api_access] = {"resources": "*"}
+                    api_access = getattr(user, scope)
+                    nmos_claim[scope] = api_access
+                    if api_access.lower() == "write":
+                        nmos_claim[scope].append("read")
                 except Exception:
-                    pass
+                    print("Could not find attribute '{}' for user: {}".format(scope, user))
         return nmos_claim
 
     def gen_access_token(self, client, grant_type, user, scope):
@@ -61,10 +65,10 @@ class TokenGenerator():
         config = authorization.config
         # Current time set in `iat` and `nbf` claims
         current_time = datetime.datetime.utcnow()
-        # Use username of user or `None` for when client_credentials is used
-        subject = user.username if user is not None else None
+        # Use username of user or client ID for when client_credentials is used
+        subject = user.username if user is not None else client.client_id
         # Populate audience claim
-        audience = self.get_audience(scope_list)
+        audience = self.get_audience()
         # Populate NMOS claim
         x_nmos_claim = self.populate_nmos_claim(user, scope_list)
 
@@ -79,6 +83,8 @@ class TokenGenerator():
             'iss': config['jwt_iss'],
             'sub': subject,
             'aud': audience,
+            'client_id': client.client_id,
+            'scope': scope
             'x-nmos-api': x_nmos_claim
         }
 
