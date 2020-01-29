@@ -28,7 +28,7 @@ PUBKEY_PATH = os.path.join(NMOSAUTH_DIR, PUBKEY_FILE)
 # Default Endpoints
 JWK_ENDPOINT = 'jwks'
 TOKEN_ENDPOINT = 'token'
-REGISTER_ENDPOINT = 'register-client'
+REGISTER_ENDPOINT = 'register'
 AUTHORIZATION_ENDPOINT = 'authorize'
 REVOCATION_ENDPOINT = 'revoke'
 

@@ -90,8 +90,10 @@ class ResourceOwner(db.Model):
 
     username = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(20))
-    is04 = db.Column(db.String(25))
-    is05 = db.Column(db.String(25))
+
+    register = db.Column(db.String(25))
+    query = db.Column(db.String(25))
+    connection = db.Column(db.String(25))
 
     def get_user_id(self):
         return self.id
