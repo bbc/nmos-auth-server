@@ -30,7 +30,7 @@ class TokenGenerator():
     def __init__(self):
         pass
 
-    def get_audience(self):
+    def get_audience(self, client):
         # Using FQDN of Auth Server
         # fqdn = getfqdn()
         # domain = fqdn.partition('.')[2]  # Get domain name
@@ -38,7 +38,7 @@ class TokenGenerator():
         # Using Regex
         redirect_uri = client.get_default_redirect_uri()
         pattern = re.compile(r'(?:https?://)?(?:www\.)?[a-zA-Z0-9-]+((?:\.[a-zA-Z]+)+)(/?.*)')
-        domain = patern.match(redirect_uri).group(1) # Without first subdomain, path or protocol
+        domain = pattern.match(redirect_uri).group(1) # Without first subdomain, path or protocol
 
         # Add wildcard to beginning
         wildcard_domain = '*' + domain
@@ -50,7 +50,7 @@ class TokenGenerator():
             for scope in scope_list:
                 nmos_claim[scope] = []
                 try:
-                    api_access = getattr(user, scope)
+                    api_access = getattr(user, scope + '_access')
                     nmos_claim[scope] = api_access
                     if api_access.lower() == "write":
                         nmos_claim[scope].append("read")
@@ -68,7 +68,7 @@ class TokenGenerator():
         # Use username of user or client ID for when client_credentials is used
         subject = user.username if user is not None else client.client_id
         # Populate audience claim
-        audience = self.get_audience()
+        audience = self.get_audience(client)
         # Populate NMOS claim
         x_nmos_claim = self.populate_nmos_claim(user, scope_list)
 

@@ -47,7 +47,7 @@ def addResourceOwner(user, username, password, register, query, connection):
     if ResourceOwner.query.filter_by(username=username).scalar() is None:
         access = ResourceOwner(
             user_id=user.id, username=username, password=password_hash,
-            register=register, query=query, connection=connection)
+            register_access=register, query_access=query, connection_access=connection)
         add(access)
         return access
 

@@ -335,13 +335,13 @@ class SecurityAPI(WebAPI):
         user = getAdminUser(session['id'])
         username = request.form.get("username")
         password = request.form.get("password")
-        register_rights = request.form.get("register")
-        query_rights = request.form.get("query")
-        connection_rights = request.form.get("connection")
+        register_access = request.form.get("register")
+        query_access = request.form.get("query")
+        connection_access = request.form.get("connection")
         if any(i in [None, ''] for i in (user, username, password)):
             return redirect(url_for('_get_users'))
         else:
-            addResourceOwner(user, username, password, register_rights, query_rights, connection_rights)
+            addResourceOwner(user, username, password, register_access, query_access, connection_access)
         return redirect(url_for('_get_users'))
 
     @route(AUTH_VERSION_ROOT + 'users/<username>', methods=['GET'], auto_json=False)
