@@ -46,7 +46,7 @@ class TokenGenerator():
 
     def populate_nmos_claim(self, user, scope_list):
         nmos_claim = {}
-        if user:
+        if user and scope_list:
             for scope in scope_list:
                 nmos_claim[scope] = []
                 try:
@@ -56,12 +56,11 @@ class TokenGenerator():
                         nmos_claim[scope].append("read")
                 except Exception as e:
                     print(e)
-                    print("Could not find attribute '{}_access' for user: {}".format(scope, user))
         return nmos_claim
 
     def gen_access_token(self, client, grant_type, user, scope):
         # Scope is space-delimited so convert to list
-        scope_list = scope.split(' ')
+        scope_list = scope.split()
         # Get Auth Config (set in ./settings)
         config = authorization.config
         # Current time set in `iat` and `nbf` claims
@@ -92,7 +91,7 @@ class TokenGenerator():
         try:
             key = config['jwt_key']
         except Exception as e:
-            print("Error: " + e)
+            print("Error: {}. Attempting to fetch private key from file".format(e))
             abs_key_path = os.path.join(NMOSAUTH_DIR, PRIVKEY_FILE)
             with open(abs_key_path, 'r') as myfile:
                 key = myfile.read()
