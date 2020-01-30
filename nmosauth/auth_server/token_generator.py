@@ -38,10 +38,10 @@ class TokenGenerator():
         # Using Regex
         redirect_uri = client.get_default_redirect_uri()
         pattern = re.compile(r'(?:https?://)?(?:www\.)?[a-zA-Z0-9-]+((?:\.[a-zA-Z]+)+)(/?.*)')
-        domain = patern.match(redirect_uri).group(1) # Without path or protocol
+        domain = patern.match(redirect_uri).group(1) # Without first subdomain, path or protocol
 
         # Add wildcard to beginning
-        wildcard_domain = '*.' + domain
+        wildcard_domain = '*' + domain
         return wildcard_domain
 
     def populate_nmos_claim(self, user, scope_list):
@@ -84,7 +84,7 @@ class TokenGenerator():
             'sub': subject,
             'aud': audience,
             'client_id': client.client_id,
-            'scope': scope
+            'scope': scope,
             'x-nmos-api': x_nmos_claim
         }
 
