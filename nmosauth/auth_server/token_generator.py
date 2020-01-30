@@ -51,11 +51,12 @@ class TokenGenerator():
                 nmos_claim[scope] = []
                 try:
                     api_access = getattr(user, scope + '_access')
-                    nmos_claim[scope] = api_access
+                    nmos_claim[scope].append(api_access)
                     if api_access.lower() == "write":
                         nmos_claim[scope].append("read")
-                except Exception:
-                    print("Could not find attribute '{}' for user: {}".format(scope, user))
+                except Exception as e:
+                    print(e)
+                    print("Could not find attribute '{}_access' for user: {}".format(scope, user))
         return nmos_claim
 
     def gen_access_token(self, client, grant_type, user, scope):
