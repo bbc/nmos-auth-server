@@ -85,11 +85,11 @@ class TestNmosAuthServer(unittest.TestCase):
             rv = client.post(VERSION_ROOT + '/authorize', headers=headers)
             self.assertEqual(rv.status_code, 302)
             # Register client redirects to login page
-            rv = client.get(VERSION_ROOT + '/register-client/', headers=headers)
+            rv = client.get(VERSION_ROOT + '/register/', headers=headers)
             self.assertEqual(rv.status_code, 302)
             # Posting to Register client returns 401 if not expecting html
             with self.assertRaises(HTTPException) as http_error:
-                rv = client.post(VERSION_ROOT + '/register-client')
+                rv = client.post(VERSION_ROOT + '/register')
                 self.assertEqual(http_error.exception.code, 401)
                 rv = client.post(VERSION_ROOT + '/authorize')
                 self.assertEqual(http_error.exception.code, 401)
@@ -101,14 +101,14 @@ class TestNmosAuthServer(unittest.TestCase):
         headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
         with self.client as client:
             # Get /register_client returns 200 status code
-            rv = client.get(VERSION_ROOT + '/register-client/', headers=headers)
+            rv = client.get(VERSION_ROOT + '/register/', headers=headers)
             self.assertEqual(rv.status_code, 200)
             mockGetAdminUser.assert_called_with(self.testUser.username)
 
             # Get /register_client with incorrect credentials returns Unauthorized
             headers = self.auth_headers("bob", "wrong_password")
             with self.assertRaises(HTTPException) as http_error:
-                client.get(VERSION_ROOT + '/register-client/', headers=headers)
+                client.get(VERSION_ROOT + '/register/', headers=headers)
                 self.assertEqual(http_error.exception.code, 401)
 
     @mock.patch("nmosauth.auth_server.security_api.render_template")
@@ -162,7 +162,7 @@ class TestNmosAuthServer(unittest.TestCase):
         user_headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
         with mock.patch("nmosauth.auth_server.security_api.session") as mock_session:
             mock_session.__getitem__.return_value = None
-            with self.client.post(VERSION_ROOT + '/register-client', json=register_data,
+            with self.client.post(VERSION_ROOT + '/register', json=register_data,
                                   headers=user_headers, follow_redirects=True) as rv:
                 self.assertEqual(rv.status_code, 201, rv.data)
                 self.client_metadata = json.loads(rv.get_data(as_text=True))

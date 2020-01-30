@@ -16,7 +16,6 @@ import os
 import re
 import datetime
 from authlib.jose import jwt
-from socket import getfqdn
 
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
@@ -31,14 +30,10 @@ class TokenGenerator():
         pass
 
     def get_audience(self, client):
-        # Using FQDN of Auth Server
-        # fqdn = getfqdn()
-        # domain = fqdn.partition('.')[2]  # Get domain name
-
         # Using Regex
         redirect_uri = client.get_default_redirect_uri()
         pattern = re.compile(r'(?:https?://)?(?:www\.)?[a-zA-Z0-9-]+((?:\.[a-zA-Z]+)+)(/?.*)')
-        domain = pattern.match(redirect_uri).group(1) # Without first subdomain, path or protocol
+        domain = pattern.match(redirect_uri).group(1)  # Without first subdomain, path or protocol
 
         # Add wildcard to beginning
         wildcard_domain = '*' + domain
