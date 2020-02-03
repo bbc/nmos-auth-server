@@ -43,12 +43,14 @@ class TokenGenerator():
         nmos_claim = {}
         if user and scope_list:
             for scope in scope_list:
-                nmos_claim[scope] = []
+                nmos_claim[scope] = {}
                 try:
                     api_access = getattr(user, scope + '_access')
-                    nmos_claim[scope].append(api_access)
                     if api_access.lower() == "write":
-                        nmos_claim[scope].append("read")
+                        nmos_claim[scope]["write"] = ["*"]
+                        nmos_claim[scope]["read"] = ["*"]
+                    elif api_access.lower() == "read":
+                        nmos_claim[scope]["read"] = ["*"]
                 except Exception as e:
                     print(e)
         return nmos_claim
