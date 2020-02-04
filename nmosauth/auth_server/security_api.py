@@ -76,7 +76,7 @@ class SecurityAPI(WebAPI):
                 if not user or not user.check_password(request.authorization.password):
                     abort(401)
             # FIXME: Temporaily allows dynamically registering clients to register with the default user
-            elif REGISTER_ENDPOINT in request.url:
+            elif REGISTER_ENDPOINT in request.path:
                 user = getAdminUser(1)
             g.user = user
             if not user:
@@ -215,7 +215,7 @@ class SecurityAPI(WebAPI):
             return render_template('signup.html', message="Invalid Username. Please choose another one.")
         # Create Resource Owner account for Admin with full Write privileges
         addResourceOwner(
-            user, username=username, password=password, register="write", query="write", connection="write")
+            user, username=username, password=password, registration="write", query="write", connection="write")
         session['id'] = user.id
         return redirect(url_for('_home'))
 
@@ -335,13 +335,13 @@ class SecurityAPI(WebAPI):
         user = getAdminUser(session['id'])
         username = request.form.get("username")
         password = request.form.get("password")
-        register_access = request.form.get("register")
-        query_access = request.form.get("query")
-        connection_access = request.form.get("connection")
+        registration = request.form.get("registration")
+        query = request.form.get("query")
+        connection = request.form.get("connection")
         if any(i in [None, ''] for i in (user, username, password)):
             return redirect(url_for('_get_users'))
         else:
-            addResourceOwner(user, username, password, register_access, query_access, connection_access)
+            addResourceOwner(user, username, password, registration, query, connection)
         return redirect(url_for('_get_users'))
 
     @route(AUTH_VERSION_ROOT + 'users/<username>', methods=['GET'], auto_json=False)

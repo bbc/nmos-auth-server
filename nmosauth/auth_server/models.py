@@ -91,7 +91,7 @@ class ResourceOwner(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(20))
 
-    register_access = db.Column(db.String(25))
+    registration_access = db.Column(db.String(25))
     query_access = db.Column(db.String(25))
     connection_access = db.Column(db.String(25))
 

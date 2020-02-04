@@ -28,7 +28,7 @@ limitations under the License. -->
     </label>
     <label>
       <span>IS-04 Registration Access Rights:</span>
-      <select name="register" id="register">
+      <select name="registration" id="registration">
         <option value="read">Read</option>
         <option value="write">Write</option>
       </select>
@@ -62,7 +62,7 @@ limitations under the License. -->
   <div class="content">
     <p>Username: {{ owner.username }}</p>
     <p>Password: {{ owner.password }}</p>
-    <p>IS-04 Registration Access Rights: {{ owner.register_access }}</p>
+    <p>IS-04 Registration Access Rights: {{ owner.registration_access }}</p>
     <p>IS-04 Query Access Rights: {{ owner.query_access }}</p>
     <p>IS-05 Connection Management Access Rights: {{ owner.connection_access }}</p>
   </div><br>

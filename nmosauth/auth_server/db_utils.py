@@ -42,12 +42,12 @@ def add(entry):
     db.session.commit()
 
 
-def addResourceOwner(user, username, password, register, query, connection):
+def addResourceOwner(user, username, password, registration, query, connection):
     password_hash = generate_password_hash(password)
     if ResourceOwner.query.filter_by(username=username).scalar() is None:
         access = ResourceOwner(
             user_id=user.id, username=username, password=password_hash,
-            register_access=register, query_access=query, connection_access=connection)
+            registration_access=registration, query_access=query, connection_access=connection)
         add(access)
         return access
 
