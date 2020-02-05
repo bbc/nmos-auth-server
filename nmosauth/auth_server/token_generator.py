@@ -20,9 +20,6 @@ from authlib.jose import jwt
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
-IS04_SCOPES = ["is04", "IS04", "is-04", "IS-04"]
-IS05_SCOPES = ["is05", "IS05", "is-05", "IS-05"]
-
 
 class TokenGenerator():
 
