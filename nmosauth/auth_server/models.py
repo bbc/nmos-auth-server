@@ -93,6 +93,7 @@ class ResourceOwner(db.Model):
 
     registration_access = db.Column(db.String(25))
     query_access = db.Column(db.String(25))
+    node_access = db.Column(db.String(25))
     connection_access = db.Column(db.String(25))
 
     def get_user_id(self):

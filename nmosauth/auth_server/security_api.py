@@ -215,7 +215,8 @@ class SecurityAPI(WebAPI):
             return render_template('signup.html', message="Invalid Username. Please choose another one.")
         # Create Resource Owner account for Admin with full Write privileges
         addResourceOwner(
-            user, username=username, password=password, registration="write", query="write", connection="write")
+            user, username=username, password=password, registration="write",
+            query="write", node="write", connection="write")
         session['id'] = user.id
         return redirect(url_for('_home'))
 
@@ -337,11 +338,14 @@ class SecurityAPI(WebAPI):
         password = request.form.get("password")
         registration = request.form.get("registration")
         query = request.form.get("query")
+        node = request.form.get("node")
         connection = request.form.get("connection")
         if any(i in [None, ''] for i in (user, username, password)):
             return redirect(url_for('_get_users'))
         else:
-            addResourceOwner(user, username, password, registration, query, connection)
+            addResourceOwner(
+                user, username=username, password=password, registration=registration,
+                query=query, node=node, connection=connection)
         return redirect(url_for('_get_users'))
 
     @route(AUTH_VERSION_ROOT + 'users/<username>', methods=['GET'], auto_json=False)

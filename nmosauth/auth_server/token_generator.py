@@ -20,6 +20,8 @@ from authlib.jose import jwt
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
+ALLOWED_SCOPES = ["registration", "node", "query", "connection"]
+
 
 class TokenGenerator():
 
@@ -40,6 +42,8 @@ class TokenGenerator():
         nmos_claim = {}
         if user and scope_list:
             for scope in scope_list:
+                if scope not in ALLOWED_SCOPES:
+                    continue
                 nmos_claim[scope] = {}
                 try:
                     api_access = getattr(user, scope + '_access')
@@ -78,7 +82,7 @@ class TokenGenerator():
             'sub': subject,
             'aud': audience,
             'client_id': client.client_id,
-            'scope': scope,
+            'scope': (' ').join(x_nmos_claim.keys()),
             'x-nmos-api': x_nmos_claim
         }
 

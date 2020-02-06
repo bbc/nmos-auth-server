@@ -41,6 +41,13 @@ limitations under the License. -->
       </select>
     </label>
     <label>
+      <span>IS-04 Node Access Rights:</span>
+      <select name="node" id="node">
+        <option value="read">Read</option>
+        <option value="write">Write</option>
+      </select>
+    </label>
+    <label>
       <span>IS-05 Connection Management Access Rights:</span>
       <select name="connection" id="connection">
         <option value="read">Read</option>
@@ -64,6 +71,7 @@ limitations under the License. -->
     <p>Password: {{ owner.password }}</p>
     <p>IS-04 Registration Access Rights: {{ owner.registration_access }}</p>
     <p>IS-04 Query Access Rights: {{ owner.query_access }}</p>
+    <p>IS-04 Node Access Rights: {{ owner.node_access }}</p>
     <p>IS-05 Connection Management Access Rights: {{ owner.connection_access }}</p>
   </div><br>
 {% endfor %}
