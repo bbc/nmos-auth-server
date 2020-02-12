@@ -13,8 +13,9 @@
 # limitations under the License.
 
 from six import string_types
-from .models import db, AdminUser, OAuth2Client, ResourceOwner
 from werkzeug.security import generate_password_hash
+
+from .models import db, AdminUser, OAuth2Client, ResourceOwner
 
 # -------------------- INIT ------------------------- #
 
@@ -41,11 +42,13 @@ def add(entry):
     db.session.commit()
 
 
-def addResourceOwner(user, username, password, is04_access, is05_access):
+def addResourceOwner(user, username, password, registration, query, node, connection):
     password_hash = generate_password_hash(password)
     if ResourceOwner.query.filter_by(username=username).scalar() is None:
         access = ResourceOwner(
-            user_id=user.id, username=username, password=password_hash, is04=is04_access, is05=is05_access)
+            user_id=user.id, username=username, password=password_hash,
+            registration_access=registration, query_access=query,
+            node_access=node, connection_access=connection)
         add(access)
         return access
 

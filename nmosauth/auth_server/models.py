@@ -14,12 +14,12 @@
 
 import time
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash
 from authlib.integrations.sqla_oauth2 import (
     OAuth2ClientMixin,
     OAuth2AuthorizationCodeMixin,
     OAuth2TokenMixin,
 )
-from werkzeug.security import check_password_hash
 
 
 __all__ = ['db', 'AdminUser', 'OAuth2Client',
@@ -90,8 +90,11 @@ class ResourceOwner(db.Model):
 
     username = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(20))
-    is04 = db.Column(db.String(25))
-    is05 = db.Column(db.String(25))
+
+    registration_access = db.Column(db.String(25))
+    query_access = db.Column(db.String(25))
+    node_access = db.Column(db.String(25))
+    connection_access = db.Column(db.String(25))
 
     def get_user_id(self):
         return self.id

@@ -62,11 +62,11 @@ class SecurityService:
 
         if self.config["enable_mdns"]:
             if self.config["https_mode"] != "enabled":
-                dns_proto = "https"
-                dns_sd_port = DNS_SD_HTTPS_PORT
-            else:
                 dns_proto = "http"
                 dns_sd_port = DNS_SD_HTTP_PORT
+            else:
+                dns_proto = "https"
+                dns_sd_port = DNS_SD_HTTPS_PORT
             self.mdns.register(
                 DNS_SD_NAME + "_" + dns_proto,
                 DNS_SD_TYPE,
@@ -106,7 +106,8 @@ class SecurityService:
                 self.logger.writeInfo("mDNS stopped gracefully")
             except Exception as e:
                 self.logger.writeWarning("Could not stop mDNS gracefully: {}".format(e))
-        self.httpServer.stop()
+        if self.httpServer.failed is None:
+            self.httpServer.stop()
         self.logger.writeInfo("Stopped Http Server")
 
     def sig_handler(self):

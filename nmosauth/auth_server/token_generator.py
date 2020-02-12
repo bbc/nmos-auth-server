@@ -13,10 +13,14 @@
 # limitations under the License.
 
 import os
-from authlib.jose import jwt
+import re
 import datetime
+from authlib.jose import jwt
+
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
+
+ALLOWED_SCOPES = ["registration", "node", "query", "connection"]
 
 
 class TokenGenerator():
@@ -24,51 +28,47 @@ class TokenGenerator():
     def __init__(self):
         pass
 
-    def get_access_rights(self, user, scope):
-        if user is None:
-            return "client_credentials"
-        else:
-            if scope == "is-04":
-                access = user.is04
-            elif scope == "is-05":
-                access = user.is05
-            else:
-                access = None
-            return access
+    def get_audience(self, client):
+        # Using Regex
+        redirect_uri = client.get_default_redirect_uri()
+        pattern = re.compile(r'(?:https?://)?(?:www\.)?[a-zA-Z0-9-]+((?:\.[a-zA-Z]+)+)(/?.*)')
+        domain = pattern.match(redirect_uri).group(1)  # Without first subdomain, path or protocol
 
-    def get_audience(self, scope, access):
-        audience = []
-        if access is not None:
-            if scope == "is-04":
-                audience = [
-                    "registry",
-                    "query"
-                ]
-            elif scope == "is-05":
-                audience = [
-                    "senders",
-                    "receivers"
-                ]
-        return audience
+        # Add wildcard to beginning
+        wildcard_domain = '*' + domain
+        return wildcard_domain
 
-    def get_scope(self, scope):
-
-        if scope in ["is04", "IS04", "is-04", "IS-04"]:
-            new_scope = "is-04"
-        elif scope in ["is05", "IS05", "is-05", "IS-05"]:
-            new_scope = "is-05"
-        else:
-            new_scope = None
-        return new_scope
+    def populate_nmos_claim(self, user, scope_list):
+        nmos_claim = {}
+        if user and scope_list:
+            for scope in scope_list:
+                if scope not in ALLOWED_SCOPES:
+                    continue
+                nmos_claim[scope] = {}
+                try:
+                    api_access = getattr(user, scope + '_access')
+                    if api_access.lower() == "write":
+                        nmos_claim[scope]["write"] = ["*"]
+                        nmos_claim[scope]["read"] = ["*"]
+                    elif api_access.lower() == "read":
+                        nmos_claim[scope]["read"] = ["*"]
+                except Exception as e:
+                    print(e)
+        return nmos_claim
 
     def gen_access_token(self, client, grant_type, user, scope):
-
+        # Scope is space-delimited so convert to list
+        scope_list = scope.split()
+        # Get Auth Config (set in ./settings)
         config = authorization.config
+        # Current time set in `iat` and `nbf` claims
         current_time = datetime.datetime.utcnow()
-        access = self.get_access_rights(user, scope)
-        audience = self.get_audience(scope, access)
-        subject = user.username if user is not None else None
-        new_scope = self.get_scope(scope)
+        # Use username of user or client ID for when client_credentials is used
+        subject = user.username if user is not None else client.client_id
+        # Populate audience claim
+        audience = self.get_audience(client)
+        # Populate NMOS claim
+        x_nmos_claim = self.populate_nmos_claim(user, scope_list)
 
         header = {
             "alg": config["jwt_alg"],
@@ -80,18 +80,16 @@ class TokenGenerator():
             'nbf': current_time,
             'iss': config['jwt_iss'],
             'sub': subject,
-            'scope': new_scope,
             'aud': audience,
-            'x-nmos-api': {
-                'name': new_scope,
-                'access': access
-            }
+            'client_id': client.client_id,
+            'scope': (' ').join(x_nmos_claim.keys()),
+            'x-nmos-api': x_nmos_claim
         }
 
         try:
             key = config['jwt_key']
         except Exception as e:
-            print("Error: " + e)
+            print("Error: {}. Attempting to fetch private key from file".format(e))
             abs_key_path = os.path.join(NMOSAUTH_DIR, PRIVKEY_FILE)
             with open(abs_key_path, 'r') as myfile:
                 key = myfile.read()

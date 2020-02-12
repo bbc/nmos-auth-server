@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.4.2
+- Update Token Generator with current thinking for JWT claims.
+
 ## 1.4.1
 - Issue new refresh token with each access token refresh.
 

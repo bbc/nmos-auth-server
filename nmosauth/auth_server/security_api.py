@@ -76,7 +76,7 @@ class SecurityAPI(WebAPI):
                 if not user or not user.check_password(request.authorization.password):
                     abort(401)
             # FIXME: Temporaily allows dynamically registering clients to register with the default user
-            elif REGISTER_ENDPOINT in request.url:
+            elif REGISTER_ENDPOINT in request.path:
                 user = getAdminUser(1)
             g.user = user
             if not user:
@@ -214,7 +214,9 @@ class SecurityAPI(WebAPI):
         if user is None:
             return render_template('signup.html', message="Invalid Username. Please choose another one.")
         # Create Resource Owner account for Admin with full Write privileges
-        addResourceOwner(user, username=username, password=password, is04_access="write", is05_access="write")
+        addResourceOwner(
+            user, username=username, password=password, registration="write",
+            query="write", node="write", connection="write")
         session['id'] = user.id
         return redirect(url_for('_home'))
 
@@ -240,10 +242,6 @@ class SecurityAPI(WebAPI):
             client_id_issued_at=client_id_issued_at,
             user_id=user.id,
         )
-        if client.token_endpoint_auth_method == 'none':
-            client.client_secret = ''
-        else:
-            client.client_secret = gen_salt(48)
 
         if "application/json" in request.headers["Content-Type"]:
             client_data = request.get_json()
@@ -251,6 +249,13 @@ class SecurityAPI(WebAPI):
             client_data = request.form
         else:
             raise InvalidRequestError
+
+        auth_method = client_data.get("token_endpoint_auth_method", "client_secret_basic")
+        if auth_method == 'none':
+            client.client_secret = ''
+        else:
+            client.client_secret = gen_salt(48)
+
         client_metadata = {
             "client_name": client_data.get("client_name"),
             "client_uri": client_data.get("client_uri"),
@@ -258,7 +263,7 @@ class SecurityAPI(WebAPI):
             "redirect_uris": self.split_data(client_data.get("redirect_uris")),
             "response_types": self.split_data(client_data.get("response_types")),
             "scope": client_data.get("scope"),
-            "token_endpoint_auth_method": client_data.get("token_endpoint_auth_method", "client_secret_basic")
+            "token_endpoint_auth_method": auth_method
         }
         client.set_client_metadata(client_metadata)
 
@@ -331,12 +336,16 @@ class SecurityAPI(WebAPI):
         user = getAdminUser(session['id'])
         username = request.form.get("username")
         password = request.form.get("password")
-        is04 = request.form.get("is04")
-        is05 = request.form.get("is05")
+        registration = request.form.get("registration")
+        query = request.form.get("query")
+        node = request.form.get("node")
+        connection = request.form.get("connection")
         if any(i in [None, ''] for i in (user, username, password)):
             return redirect(url_for('_get_users'))
         else:
-            addResourceOwner(user, username, password, is04, is05)
+            addResourceOwner(
+                user, username=username, password=password, registration=registration,
+                query=query, node=node, connection=connection)
         return redirect(url_for('_get_users'))
 
     @route(AUTH_VERSION_ROOT + 'users/<username>', methods=['GET'], auto_json=False)

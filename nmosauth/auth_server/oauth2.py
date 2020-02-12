@@ -73,6 +73,11 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 
     INCLUDE_NEW_REFRESH_TOKEN = True
 
+    # Allowed client auth methods for token endpoint - allows public clients to refresh tokens
+    TOKEN_ENDPOINT_AUTH_METHODS = [
+        'client_secret_basic', 'client_secret_post', 'none'
+    ]
+
     def authenticate_refresh_token(self, refresh_token):
         token = OAuth2Token.query.filter_by(refresh_token=refresh_token).first()
         if token and not token.revoked and not token.is_refresh_token_expired():

@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
 from flask import jsonify, render_template, request
+from authlib.common.errors import AuthlibBaseError, AuthlibHTTPError
 
 
 def register_handlers(app):
