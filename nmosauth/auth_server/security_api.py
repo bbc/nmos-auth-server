@@ -23,6 +23,7 @@ from jinja2 import FileSystemLoader, ChoiceLoader
 from functools import wraps
 from authlib.jose import jwk
 from authlib.oauth2.rfc6749 import OAuth2Error, InvalidRequestError
+from authlib.oauth2.rfc8414 import AuthorizationServerMetadata
 from nmoscommon.webapi import WebAPI, route
 from nmoscommon.auth.nmos_auth import RequiresAuth
 
@@ -50,6 +51,7 @@ class SecurityAPI(WebAPI):
     def __init__(self, logger, nmosConfig, confClass, extraConfig=None):
         super(SecurityAPI, self).__init__()
         self._config = nmosConfig
+        self.conf_class = confClass
         self.logger = logger
         self.add_templates_folder()
         config_app(self.app, confClass=confClass, config=extraConfig)  # OAuth and DB config
@@ -151,7 +153,7 @@ class SecurityAPI(WebAPI):
         protocol = "https" if self._config.get("https_mode") == "enabled" else "http"
         hostname = protocol + '://' + getfqdn()
         namespace = hostname + AUTH_VERSION_ROOT
-        metadata = {
+        metadata_dict = {
             "issuer": hostname,
             "authorization_endpoint": namespace + AUTHORIZATION_ENDPOINT,
             "token_endpoint": namespace + TOKEN_ENDPOINT,
@@ -163,6 +165,10 @@ class SecurityAPI(WebAPI):
             "scopes_supported": ["is-04", "is-05"],
             "response_types_supported": ["code"],
         }
+        # Validate Metadata
+        metadata = AuthorizationServerMetadata(metadata_dict)
+        if self.conf_class == "ProductionConfig":
+            metadata.validate()
         return (200, metadata)
 
     @route(AUTH_VERSION_ROOT + 'login/', methods=['GET', 'POST'], auto_json=False)

@@ -153,28 +153,30 @@ class TestNmosAuthServer(unittest.TestCase):
         register_data = {
             'client_name': 'R&D Web Router',
             'client_uri': 'http://ipstudio-master.rd.bbc.co.uk/ips-web/#/web-router',
-            'scope': 'is-04 is-05',
+            'scope': 'registration query',
             'redirect_uris': ['http://www.example.com'],
             'grant_types': ['password', 'authorization_code', 'refresh_token'],
             'response_types': ['code'],
             'token_endpoint_auth_method': 'client_secret_basic'
         }
         user_headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
-        with mock.patch("nmosauth.auth_server.security_api.session") as mock_session:
-            mock_session.__getitem__.return_value = None
-            with self.client.post(VERSION_ROOT + '/register', json=register_data,
-                                  headers=user_headers, follow_redirects=True) as rv:
-                self.assertEqual(rv.status_code, 201, rv.data)
-                self.client_metadata = json.loads(rv.get_data(as_text=True))
-                self.assertTrue(b'client_id' in rv.data)
-                self.assertTrue(b'client_secret' in rv.data)
+        with self.client as client:
+            with client.session_transaction() as sess:
+                del sess['id']
+
+            rv = client.post(
+                VERSION_ROOT + '/register', json=register_data, headers=user_headers, follow_redirects=True)
+            self.assertEqual(rv.status_code, 201, rv.data)
+            self.client_metadata = json.loads(rv.get_data(as_text=True))
+            self.assertTrue(b'client_id' in rv.data)
+            self.assertTrue(b'client_secret' in rv.data)
 
         # TEST PASSWORD GRANT
         password_request_data = {
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD,
             "grant_type": "password",
-            "scope": "is-04"
+            "scope": "registration"
         }
         self.assertTrue(self.client_metadata)  # Check client data is available
         client_headers = self.auth_headers(self.client_metadata["client_id"], self.client_metadata["client_secret"])
@@ -194,7 +196,7 @@ class TestNmosAuthServer(unittest.TestCase):
             "response_type": "code",
             "client_id": self.client_metadata["client_id"],
             "redirect_uri": self.client_metadata["redirect_uris"][0],
-            "scope": "is-04",
+            "scope": "registration",
             "state": "xyz"
         }
 
@@ -228,9 +230,10 @@ class TestNmosAuthServer(unittest.TestCase):
         }
 
         with self.client.post(VERSION_ROOT + '/token', data=auth_grant_request_data, headers=client_headers) as rv:
-            self.assertEqual(rv.status_code, 200, rv.data)
+            auth_token_response = json.loads(rv.get_data(as_text=True))
+            self.assertEqual(rv.status_code, 200, auth_token_response)
             self.assertTrue(
-                all(i in password_response for i in (
+                all(i in auth_token_response for i in (
                     "access_token", "refresh_token", "expires_in", "scope", "token_type"
                 ))
             )
