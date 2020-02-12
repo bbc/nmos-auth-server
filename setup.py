@@ -29,7 +29,7 @@ GEN_CERT_PATH = os.path.join(NMOSAUTH_DIR, GEN_CERT_FILE)
 
 # Basic metadata
 name = "nmos-auth"
-version = "1.4.2"
+version = "1.4.3"
 description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/nmos-auth-server'
 author = 'Danny Meloy'
@@ -95,7 +95,7 @@ packages_required = [
     "requests",
     "gevent",
     "nmoscommon",
-    "werkzeug>=0.13",
+    "werkzeug>=0.14.1,<1.0.0",  # Echo pin from nmos-common to avoid Flask overriding it
     "authlib>=0.13",
     "pyopenssl>=16.0",
     "cryptography>=1.5"

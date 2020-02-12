@@ -23,6 +23,7 @@ from jinja2 import FileSystemLoader, ChoiceLoader
 from functools import wraps
 from authlib.jose import jwk
 from authlib.oauth2.rfc6749 import OAuth2Error, InvalidRequestError
+from authlib.oauth2.rfc8414 import AuthorizationServerMetadata
 from nmoscommon.webapi import WebAPI, route
 from nmoscommon.auth.nmos_auth import RequiresAuth
 
@@ -151,7 +152,7 @@ class SecurityAPI(WebAPI):
         protocol = "https" if self._config.get("https_mode") == "enabled" else "http"
         hostname = protocol + '://' + getfqdn()
         namespace = hostname + AUTH_VERSION_ROOT
-        metadata = {
+        metadata_dict = {
             "issuer": hostname,
             "authorization_endpoint": namespace + AUTHORIZATION_ENDPOINT,
             "token_endpoint": namespace + TOKEN_ENDPOINT,
@@ -163,6 +164,9 @@ class SecurityAPI(WebAPI):
             "scopes_supported": ["is-04", "is-05"],
             "response_types_supported": ["code"],
         }
+        # Validate Metadata
+        metadata = AuthorizationServerMetadata(metadata_dict)
+        # metadata.validate()
         return (200, metadata)
 
     @route(AUTH_VERSION_ROOT + 'login/', methods=['GET', 'POST'], auto_json=False)

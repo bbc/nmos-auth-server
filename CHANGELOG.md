@@ -1,5 +1,8 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.4.3
+- Add validation for server metadata and upper pin werkzeug.
+
 ## 1.4.2
 - Update Token Generator with current thinking for JWT claims.
 
