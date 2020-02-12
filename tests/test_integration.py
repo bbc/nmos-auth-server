@@ -160,14 +160,16 @@ class TestNmosAuthServer(unittest.TestCase):
             'token_endpoint_auth_method': 'client_secret_basic'
         }
         user_headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
-        with mock.patch("nmosauth.auth_server.security_api.session") as mock_session:
-            mock_session.__getitem__.return_value = None
-            with self.client.post(VERSION_ROOT + '/register', json=register_data,
-                                  headers=user_headers, follow_redirects=True) as rv:
-                self.assertEqual(rv.status_code, 201, rv.data)
-                self.client_metadata = json.loads(rv.get_data(as_text=True))
-                self.assertTrue(b'client_id' in rv.data)
-                self.assertTrue(b'client_secret' in rv.data)
+        with self.client as client:
+            with client.session_transaction() as sess:
+                del sess['id']
+
+            rv = client.post(
+                VERSION_ROOT + '/register', json=register_data, headers=user_headers, follow_redirects=True)
+            self.assertEqual(rv.status_code, 201, rv.data)
+            self.client_metadata = json.loads(rv.get_data(as_text=True))
+            self.assertTrue(b'client_id' in rv.data)
+            self.assertTrue(b'client_secret' in rv.data)
 
         # TEST PASSWORD GRANT
         password_request_data = {
