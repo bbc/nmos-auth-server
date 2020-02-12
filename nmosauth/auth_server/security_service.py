@@ -42,6 +42,9 @@ DNS_SD_TYPE = '_nmos-auth._tcp'
 
 
 class SecurityService:
+
+    CONF_CLASS = "ProductionConfig"
+
     def __init__(self, logger=None):
         self.logger = Logger("nmosauth", logger)
         self.config = config
@@ -79,7 +82,7 @@ class SecurityService:
             )
 
         self.httpServer = HttpServer(
-            SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config, 'ProductionConfig', None]
+            SecurityAPI, PORT, '0.0.0.0', api_args=[self.logger, self.config, self.CONF_CLASS, None]
         )
         self.httpServer.start()
         while not self.httpServer.started.is_set():

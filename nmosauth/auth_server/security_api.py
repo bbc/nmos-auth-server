@@ -51,6 +51,7 @@ class SecurityAPI(WebAPI):
     def __init__(self, logger, nmosConfig, confClass, extraConfig=None):
         super(SecurityAPI, self).__init__()
         self._config = nmosConfig
+        self.conf_class = confClass
         self.logger = logger
         self.add_templates_folder()
         config_app(self.app, confClass=confClass, config=extraConfig)  # OAuth and DB config
@@ -166,7 +167,8 @@ class SecurityAPI(WebAPI):
         }
         # Validate Metadata
         metadata = AuthorizationServerMetadata(metadata_dict)
-        # metadata.validate()
+        if self.conf_class == "ProductionConfig":
+            metadata.validate()
         return (200, metadata)
 
     @route(AUTH_VERSION_ROOT + 'login/', methods=['GET', 'POST'], auto_json=False)
