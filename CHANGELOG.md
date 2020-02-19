@@ -1,5 +1,9 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.4.4
+- Add fields to metadata endpoint. Add refresh token tests.
+- Change request token page to use client credentials grant.
+
 ## 1.4.3
 - Add validation for server metadata and upper pin werkzeug.
 
