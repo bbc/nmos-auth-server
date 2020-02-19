@@ -20,7 +20,8 @@ from authlib.jose import jwt
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
-ALLOWED_SCOPES = ["registration", "node", "query", "connection"]
+SCOPES_SUPPORTED = ["registration", "node", "query", "connection"]
+GRANT_TYPES_SUPPORTED = ["authorization_code", "refresh_token", "client_credentials"]
 
 
 class TokenGenerator():
@@ -42,7 +43,7 @@ class TokenGenerator():
         nmos_claim = {}
         if user and scope_list:
             for scope in scope_list:
-                if scope not in ALLOWED_SCOPES:
+                if scope not in SCOPES_SUPPORTED:
                     continue
                 nmos_claim[scope] = {}
                 try:

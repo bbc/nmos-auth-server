@@ -32,9 +32,10 @@ from .oauth2 import authorization
 from .app import config_app
 from .db_utils import addAdminUser, addResourceOwner, getAdminUser, getResourceOwner
 from .db_utils import removeClient, removeResourceOwner
+from .token_generator import SCOPES_SUPPORTED, GRANT_TYPES_SUPPORTED
 from .constants import (
     PUBKEY_PATH, JWK_ENDPOINT, TOKEN_ENDPOINT, REGISTER_ENDPOINT,
-    AUTHORIZATION_ENDPOINT, REVOCATION_ENDPOINT
+    AUTHORIZATION_ENDPOINT, REVOCATION_ENDPOINT, WELL_KNOWN_ENDPOINT
 )
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -68,20 +69,20 @@ class SecurityAPI(WebAPI):
     def admin_required(view_func):
         @wraps(view_func)
         def wrapper(*args, **kwargs):
-            user = None
-            if 'id' in session:
-                uid = session['id']
-                user = getAdminUser(uid)
+            admin = None
+            if 'admin' in session:
+                uid = session['admin']
+                admin = getAdminUser(uid)
             elif request.authorization:
                 username = request.authorization.username
-                user = getAdminUser(username)
-                if not user or not user.check_password(request.authorization.password):
+                admin = getAdminUser(username)
+                if not admin or not admin.check_password(request.authorization.password):
                     abort(401)
             # FIXME: Temporaily allows dynamically registering clients to register with the default user
             elif REGISTER_ENDPOINT in request.path:
-                user = getAdminUser(1)
-            g.user = user
-            if not user:
+                admin = getAdminUser(1)
+            g.admin = admin
+            if not admin:
                 if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
                     session["redirect"] = request.url
                     return redirect(url_for('_login'))
@@ -148,7 +149,7 @@ class SecurityAPI(WebAPI):
     def test(self):
         return (200, "Hello World")
 
-    @route('/.well-known/oauth-authorization-server/', methods=['GET'])
+    @route(WELL_KNOWN_ENDPOINT, methods=['GET'])
     def server_metadata(self):
         protocol = "https" if self._config.get("https_mode") == "enabled" else "http"
         hostname = protocol + '://' + getfqdn()
@@ -162,8 +163,10 @@ class SecurityAPI(WebAPI):
             "jwks_uri": namespace + JWK_ENDPOINT,
             "registration_endpoint": namespace + REGISTER_ENDPOINT,
             "revocation_endpoint": namespace + REVOCATION_ENDPOINT,
-            "scopes_supported": ["is-04", "is-05"],
+            "scopes_supported": SCOPES_SUPPORTED,
             "response_types_supported": ["code"],
+            "grant_types_supported": GRANT_TYPES_SUPPORTED,
+            "code_challenge_methods_supported": ["S256"]
         }
         # Validate Metadata
         metadata = AuthorizationServerMetadata(metadata_dict)
@@ -190,7 +193,7 @@ class SecurityAPI(WebAPI):
                 if isinstance(user, ResourceOwner):
                     session["owner"] = user.id
                 else:
-                    session['id'] = user.id
+                    session['admin'] = user.id
                 if "redirect" in session:
                     return redirect(session['redirect'])
                 else:
@@ -203,7 +206,7 @@ class SecurityAPI(WebAPI):
     @route(AUTH_VERSION_ROOT + 'home/', methods=['GET'], auto_json=False)
     @admin_required
     def home(self):
-        user = g.user
+        user = g.admin
         if user:
             clients = OAuth2Client.query.filter_by(user_id=user.id).all()
         else:
@@ -223,7 +226,7 @@ class SecurityAPI(WebAPI):
         addResourceOwner(
             user, username=username, password=password, registration="write",
             query="write", node="write", connection="write")
-        session['id'] = user.id
+        session['admin'] = user.id
         return redirect(url_for('_home'))
 
     @route(AUTH_VERSION_ROOT + 'signup/', methods=['GET'], auto_json=False)
@@ -240,7 +243,7 @@ class SecurityAPI(WebAPI):
     @route(AUTH_VERSION_ROOT + REGISTER_ENDPOINT, methods=['POST'], auto_json=False)
     @admin_required
     def create_client_post(self):
-        user = g.user
+        user = g.admin
         client_id = gen_salt(24)
         client_id_issued_at = int(time())
         client = OAuth2Client(
@@ -275,7 +278,7 @@ class SecurityAPI(WebAPI):
 
         db.session.add(client)
         db.session.commit()
-        if 'id' in session:
+        if 'admin' in session:
             return redirect(url_for('_home'))
         else:
             client_info = client.client_info.copy()
@@ -293,10 +296,10 @@ class SecurityAPI(WebAPI):
         removeClient(client_id)
         return redirect(url_for('_home'))
 
-    @route(AUTH_VERSION_ROOT + 'fetch_token/', auto_json=False)
+    @route(AUTH_VERSION_ROOT + 'request_token/', auto_json=False)
     @admin_required
-    def fetch_token(self):
-        user = g.user
+    def request_token(self):
+        user = g.admin
         # TODO - drop-down select box
         client = OAuth2Client.query.filter_by(user_id=user.id).first()
         return render_template('fetch_token.html', client=client)
@@ -332,14 +335,14 @@ class SecurityAPI(WebAPI):
     @route(AUTH_VERSION_ROOT + 'users', methods=['GET', 'POST'], auto_json=False)
     @admin_required
     def get_users(self):
-        user = getAdminUser(session['id'])
+        user = g.admin
         resource_owners = ResourceOwner.query.filter_by(user_id=user.id).all()
         return render_template('users.html', user=user, owners=resource_owners)
 
     @route(AUTH_VERSION_ROOT + 'add_user', methods=['POST'], auto_json=False)
     @admin_required
     def add_user(self):
-        user = getAdminUser(session['id'])
+        user = g.admin
         username = request.form.get("username")
         password = request.form.get("password")
         registration = request.form.get("registration")
@@ -379,9 +382,9 @@ class SecurityAPI(WebAPI):
 
     @route(AUTH_VERSION_ROOT + 'logout/', auto_json=False)
     def logout(self):
-        try:
-            del session['id']
-            del session['redirect']
-        except Exception as e:
-            self.logger.writeDebug("Error: {}. Couldn't delete session ID or Redirect string".format(str(e)))
+        for key in session.copy():
+            try:
+                del session[key]
+            except Exception as e:
+                self.logger.writeWarning("Error: {}. Couldn't delete '{}' key from session".format(str(e), key))
         return redirect(url_for('_login'))

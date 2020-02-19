@@ -12,46 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-EQUIVALENT TO:
-{
-  "sub": "dannym",
-  "exp": 1582136965,
-  "scope": "is-05",
-  "iss": "http://rd.bbc.co.uk/x-nmos/auth/v1.0/",
-  "iat": 1550579365,
-  "x-nmos-api": {
-    "access": "write",
-    "name": "is-05"
-  },
-  "nbf": 1550579365,
-  "aud": [
-    "IS-05",
-    "Write",
-    "Access"
-  ]
-}
-"""
-
-BEARER_TOKEN = {
-    "access_token": '''
-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkYW5ueW0iLCJleHAi\
-OjE1ODIxMzY5NjUsInNjb3BlIjoiaXMtMDUiLCJpc3MiOiJodHRwczovL29hdXRoL\
-nJkLmJiYy5jby51ayIsImlhdCI6MTU1MDU3OTM2NSwieC1ubW9zLWFwaSI6eyJhY2\
-Nlc3MiOiJ3cml0ZSIsIm5hbWUiOiJpcy0wNSJ9LCJuYmYiOjE1NTA1NzkzNjUsImF\
-1ZCI6WyJJUy0wNSIsIldyaXRlIiwiQWNjZXNzIl19.UQYw_Br8uyYWYUbPSbZO3Bb\
-hU16eOExZ2cZnIvOdp8lr0ZCZbytrKrEQr1ahZ3d49c9UxC0paK4FWYPHSZ3xxANh\
-1AbhyR2ziybDtOM6rJ-5EdljhLaRLTeVpwhghP1QXwQj-vJWsFvqWAj13ij7S2ek8\
-Uj_UHyrJoSjQniYDwZBB2mHoIl5MyX1yCo-h1tqCcdLZZY6RyIvVME6TUR_GzrMep\
-g66DXfjVe7DDmcXH7hfhVMTdSu4N-z-ipV4L63RXjCEZbkY-_o-9houtzv-rSPFTc\
-ILj_HC0Io8enTvnSYKgKOBEIjIZOMOFp68OEmqfjM1cBwV9TrKLO160U6tA\
-''',
-    "expires_in": 864000,
-    "refresh_token": "Le2WDVvPvifiSq0sdsi7vGfmXwLPxkqhpfVsQrH1j9n4NxnU",
-    "scope": "is04",
-    "token_type": "Bearer"
-}
-
 CERT = {
     "default": '''-----BEGIN CERTIFICATE-----
 MIIDYzCCAkugAwIBAgIJAOx6GjodUN5yMA0GCSqGSIb3DQEBCwUAMEgxCzAJBgNV

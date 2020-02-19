@@ -15,7 +15,11 @@ limitations under the License. -->
 {% extends "layout.html" %}
 {% block body %}
 
-<h2>Fetch Token</h2>
+<h2>Request Token</h2>
+
+<p>This page will return an example JSON Web Token using the Client Credentials Grant (provided the given client has been registered with the Client Credentials Grant type.)</p>
+
+<p><i>NOTE: The returned token will not populate the 'scope' and 'x-nmos-api' claims due to the CC Grant not identifying a specific user</i></p>
 
 <form action="" method="post">
   <label>
@@ -28,27 +32,6 @@ limitations under the License. -->
     <span>Client Secret:</span>
     <input type="text" name="client_secret" id="client_secret"
            placeholder="client_secret" value="{{client.client_secret}}">
-    <br>
-  </label>
-  <label>
-    <span>Username:</span>
-    <input type="text" name="username" id="username">
-    <br>
-  </label>
-  <label>
-    <span>Password:</span>
-    <input type="text" name="password" id="password">
-    <br>
-  </label>
-  <label>
-    <span>Scope:</span>
-    <select name="scope" id="scope">
-        <option value="registration">registration</option>
-        <option value="query">query</option>
-        <option value="node">node</option>
-        <option value="connection">connection</option>
-
-    </select>
     <br>
   </label>
 </form>

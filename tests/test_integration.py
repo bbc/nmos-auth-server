@@ -27,6 +27,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from nmoscommon.logger import Logger
 from nmosauth.auth_server.db_utils import drop_all
 from nmosauth.auth_server.models import AdminUser
+from nmosauth.auth_server.token_generator import GRANT_TYPES_SUPPORTED
 from nmosauth.auth_server.security_api import SecurityAPI
 from nmos_auth_data import TEST_PRIV_KEY
 
@@ -48,7 +49,9 @@ class TestNmosAuthServer(unittest.TestCase):
 
         self.user_id = 0
         self.testUser = self.createUser(TEST_USERNAME, TEST_PASSWORD)
-        self.client_metadata = None
+
+        # Headers
+        self.user_headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
 
         # Boilerplate for mocking out Basic Auth user for the whole class
         patcher = mock.patch("nmosauth.auth_server.basic_auth.AdminUser")
@@ -81,18 +84,28 @@ class TestNmosAuthServer(unittest.TestCase):
             # Correctly go to Home Page
             rv = client.get(VERSION_ROOT + '/', follow_redirects=True)
             self.assertEqual(rv.status_code, 200)
-            # Authorize endpoint redirects to login
-            rv = client.post(VERSION_ROOT + '/authorize', headers=headers)
+            # Authorize endpoint GET redirects to login
+            rv = client.get(VERSION_ROOT + '/authorize/', headers=headers)
             self.assertEqual(rv.status_code, 302)
             # Register client redirects to login page
             rv = client.get(VERSION_ROOT + '/register/', headers=headers)
             self.assertEqual(rv.status_code, 302)
-            # Posting to Register client returns 401 if not expecting html
-            with self.assertRaises(HTTPException) as http_error:
-                rv = client.post(VERSION_ROOT + '/register')
-                self.assertEqual(http_error.exception.code, 401)
-                rv = client.post(VERSION_ROOT + '/authorize')
-                self.assertEqual(http_error.exception.code, 401)
+            # Token endpoint doesnt support method
+            rv = client.get(VERSION_ROOT + '/token', headers=headers)
+            self.assertEqual(rv.status_code, 405)
+
+    def testPostInitialRoutes(self):
+        headers = {"Accept": "text/html"}
+
+        # Authorize endpoint POST redirects to login
+        rv = self.client.post(VERSION_ROOT + '/authorize', headers=headers)
+        self.assertEqual(rv.status_code, 302)
+        # Posting to Register client returns 401 if not expecting html
+        with self.assertRaises(HTTPException) as http_error:
+            rv = self.client.post(VERSION_ROOT + '/register')
+            self.assertEqual(http_error.exception.code, 401)
+            rv = self.client.post(VERSION_ROOT + '/authorize')
+            self.assertEqual(http_error.exception.code, 401)
 
     @mock.patch("nmosauth.auth_server.security_api.getAdminUser")
     def testBasicAuthRoutes(self, mockGetAdminUser):
@@ -134,14 +147,13 @@ class TestNmosAuthServer(unittest.TestCase):
             mockTemplate.assert_called_with(
                 'login.html', message='That username is not recognised. Please signup.')
 
-    def testRegisteringClientAndTokenEndpoint(self):
+    def test_register_client(self):
+        """Register a client with the Auth Server and populate client credentials"""
 
         # TEST SIGNING UP ADMIN USER
         signup_data = {
             'username': TEST_USERNAME,
             'password': TEST_PASSWORD,
-            'is04': 'read',
-            'is05': 'write'
         }
         with self.client.post(VERSION_ROOT + '/signup', data=signup_data) as rv:
             self.assertEqual(rv.status_code, 302)
@@ -150,7 +162,7 @@ class TestNmosAuthServer(unittest.TestCase):
                 self.assertTrue(check_password_hash(AdminUser.query.get(1).password, TEST_PASSWORD))
 
         # TEST REGISTERING CLIENT
-        register_data = {
+        self.register_data = {
             'client_name': 'R&D Web Router',
             'client_uri': 'http://ipstudio-master.rd.bbc.co.uk/ips-web/#/web-router',
             'scope': 'registration query',
@@ -159,81 +171,127 @@ class TestNmosAuthServer(unittest.TestCase):
             'response_types': ['code'],
             'token_endpoint_auth_method': 'client_secret_basic'
         }
-        user_headers = self.auth_headers(TEST_USERNAME, TEST_PASSWORD)
         with self.client as client:
             with client.session_transaction() as sess:
-                del sess['id']
+                del sess['admin']
 
             rv = client.post(
-                VERSION_ROOT + '/register', json=register_data, headers=user_headers, follow_redirects=True)
+                VERSION_ROOT + '/register', json=self.register_data, headers=self.user_headers, follow_redirects=True)
             self.assertEqual(rv.status_code, 201, rv.data)
             self.client_metadata = json.loads(rv.get_data(as_text=True))
             self.assertTrue(b'client_id' in rv.data)
             self.assertTrue(b'client_secret' in rv.data)
 
-        # TEST PASSWORD GRANT
-        password_request_data = {
-            "username": TEST_USERNAME,
-            "password": TEST_PASSWORD,
-            "grant_type": "password",
-            "scope": "registration"
-        }
-        self.assertTrue(self.client_metadata)  # Check client data is available
-        client_headers = self.auth_headers(self.client_metadata["client_id"], self.client_metadata["client_secret"])
+    def test_password_grant(self):
+        """Test the Password Grant Flow"""
 
-        with self.client.post(VERSION_ROOT + '/token', data=password_request_data, headers=client_headers) as rv:
-            password_response = json.loads(rv.get_data(as_text=True))
-            self.assertEqual(rv.status_code, 200, rv.data)
-            self.assertTrue(
-                all(i in password_response for i in (
-                    "access_token", "refresh_token", "expires_in", "scope", "token_type"
-                ))
-            )
-            self.assertEqual(password_response["token_type"].lower(), "bearer")
+        # Register Client and get credentials
+        self.test_register_client()
 
-        # TEST AUTH CODE GRANT - AUTHORIZE ENDPOINT
-        auth_code_request_params = {
-            "response_type": "code",
-            "client_id": self.client_metadata["client_id"],
-            "redirect_uri": self.client_metadata["redirect_uris"][0],
-            "scope": "registration",
-            "state": "xyz"
+        if "password" in GRANT_TYPES_SUPPORTED:
+            password_request_data = {
+                "username": TEST_USERNAME,
+                "password": TEST_PASSWORD,
+                "grant_type": "password",
+                "scope": "registration"
+            }
+            self.assertTrue(self.client_metadata)  # Check client data is available
+
+            client_headers = self.auth_headers(
+                self.client_metadata["client_id"], self.client_metadata["client_secret"])
+            with self.client.post(
+                    VERSION_ROOT + '/token', data=password_request_data, headers=client_headers) as rv:
+                self.password_response = json.loads(rv.get_data(as_text=True))
+                self.assertEqual(rv.status_code, 200, rv.data)
+                self.assertTrue(
+                    all(i in self.password_response for i in (
+                        "access_token", "refresh_token", "expires_in", "scope", "token_type"
+                    ))
+                )
+                self.assertEqual(self.password_response["token_type"].lower(), "bearer")
+
+    @mock.patch("nmosauth.auth_server.security_api.getResourceOwner")
+    def test_authorization_code_grant(self, mockGetResourceOwner):
+        """Test the Authorization Code Grant Flow"""
+
+        mockGetResourceOwner.return_value = self.testUser
+
+        self.test_register_client()
+
+        if "authorization_code" in GRANT_TYPES_SUPPORTED:
+            auth_code_request_params = {
+                "response_type": "code",
+                "client_id": self.client_metadata["client_id"],
+                "redirect_uri": self.client_metadata["redirect_uris"][0],
+                "scope": "registration",
+                "state": "xyz"
+            }
+
+            auth_code_request_data = {
+                "confirm": "true"
+            }
+
+            with self.client.post(
+                VERSION_ROOT + '/authorize', data=auth_code_request_data,
+                headers=self.user_headers, query_string=auth_code_request_params
+            ) as rv:
+                authorize_headers = rv.headers
+                self.assertEqual(rv.status_code, 302, rv.data)
+                self.assertTrue("location" in authorize_headers)
+                self.assertTrue(
+                    "error" not in authorize_headers["location"] and "code" in authorize_headers["location"])
+
+                redirect_uri, query_string = rv.headers["location"].split('?')
+                self.assertEqual(redirect_uri, self.register_data["redirect_uris"][0])
+
+                parsed_query = parse_qs(query_string)
+                auth_code = parsed_query["code"][0]
+                self.assertTrue(isinstance(auth_code, string_types))
+                state = parsed_query["state"][0]
+                self.assertTrue(state, auth_code_request_params["state"])
+
+            # TEST AUTH CODE GRANT - TOKEN ENDPOINT
+            auth_grant_request_data = {
+                "grant_type": "authorization_code",
+                "redirect_uri": self.client_metadata["redirect_uris"][0],
+                "code": auth_code
+            }
+
+            client_headers = self.auth_headers(
+                self.client_metadata["client_id"], self.client_metadata["client_secret"])
+            with self.client.post(
+                    VERSION_ROOT + '/token', data=auth_grant_request_data, headers=client_headers) as rv:
+                self.auth_token_response = json.loads(rv.get_data(as_text=True))
+                self.assertEqual(rv.status_code, 200, self.auth_token_response)
+                self.assertTrue(
+                    all(i in self.auth_token_response for i in (
+                        "access_token", "refresh_token", "expires_in", "scope", "token_type"
+                    ))
+                )
+
+    def test_refresh_grant(self):
+        """Test the Refresh Token Grant Flow"""
+
+        # Register Client and get credentials
+        self.test_authorization_code_grant()
+
+        refresh_token = self.auth_token_response.get("refresh_token")
+        self.assertTrue(refresh_token)
+
+        refresh_token_request_data = {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token
         }
 
-        auth_code_request_data = {
-            "confirm": "true"
-        }
+        client_headers = self.auth_headers(
+            self.client_metadata["client_id"], self.client_metadata["client_secret"])
 
         with self.client.post(
-            VERSION_ROOT + '/authorize', data=auth_code_request_data,
-            headers=user_headers, query_string=auth_code_request_params
-        ) as rv:
-            authorize_headers = rv.headers
-            self.assertEqual(rv.status_code, 302, rv.data)
-            self.assertTrue("location" in authorize_headers)
-            self.assertTrue("error" not in authorize_headers["location"] and "code" in authorize_headers["location"])
-
-            redirect_uri, query_string = rv.headers["location"].split('?')
-            self.assertEqual(redirect_uri, register_data["redirect_uris"][0])
-
-            parsed_query = parse_qs(query_string)
-            auth_code = parsed_query["code"][0]
-            self.assertTrue(isinstance(auth_code, string_types))
-            state = parsed_query["state"][0]
-            self.assertTrue(state, auth_code_request_params["state"])
-
-        # TEST AUTH CODE GRANT - TOKEN ENDPOINT
-        auth_grant_request_data = {
-            "grant_type": "authorization_code",
-            "redirect_uri": self.client_metadata["redirect_uris"][0],
-            "code": auth_code
-        }
-
-        with self.client.post(VERSION_ROOT + '/token', data=auth_grant_request_data, headers=client_headers) as rv:
-            auth_token_response = json.loads(rv.get_data(as_text=True))
-            self.assertEqual(rv.status_code, 200, auth_token_response)
+                VERSION_ROOT + '/token', data=refresh_token_request_data, headers=client_headers) as rv:
+            self.refresh_token_response = json.loads(rv.get_data(as_text=True))
+            self.assertEqual(rv.status_code, 200, self.refresh_token_response)
             self.assertTrue(
-                all(i in auth_token_response for i in (
+                all(i in self.refresh_token_response for i in (
                     "access_token", "refresh_token", "expires_in", "scope", "token_type"
                 ))
             )

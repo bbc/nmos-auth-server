@@ -31,6 +31,7 @@ TOKEN_ENDPOINT = 'token'
 REGISTER_ENDPOINT = 'register'
 AUTHORIZATION_ENDPOINT = 'authorize'
 REVOCATION_ENDPOINT = 'revoke'
+WELL_KNOWN_ENDPOINT = '/.well-known/oauth-authorization-server/'
 
 # Databse Info
 DATABASE_NAME = 'auth_db'
