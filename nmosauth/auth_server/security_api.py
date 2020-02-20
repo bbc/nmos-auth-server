@@ -225,7 +225,8 @@ class SecurityAPI(WebAPI):
         # Create Resource Owner account for Admin with full Write privileges
         addResourceOwner(
             user, username=username, password=password, registration="write",
-            query="write", node="write", connection="write")
+            query="write", node="write", connection="write", netctrl="write",
+            events="write", channelmapping="write")
         session['admin'] = user.id
         return redirect(url_for('_home'))
 
@@ -349,12 +350,17 @@ class SecurityAPI(WebAPI):
         query = request.form.get("query")
         node = request.form.get("node")
         connection = request.form.get("connection")
+        netctrl = request.form.get("netctrl")
+        events = request.form.get("events")
+        channelmapping = request.form.get("channelmapping")
+
         if any(i in [None, ''] for i in (user, username, password)):
             return redirect(url_for('_get_users'))
         else:
             addResourceOwner(
                 user, username=username, password=password, registration=registration,
-                query=query, node=node, connection=connection)
+                query=query, node=node, connection=connection, netctrl=netctrl,
+                events=events, channelmapping=channelmapping)
         return redirect(url_for('_get_users'))
 
     @route(AUTH_VERSION_ROOT + 'users/<username>', methods=['GET'], auto_json=False)

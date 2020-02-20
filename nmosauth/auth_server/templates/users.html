@@ -55,6 +55,30 @@ limitations under the License. -->
       </select>
       <br>
     </label>
+    <label>
+      <span>IS-06 Network Control Access Rights:</span>
+      <select name="netctrl" id="netctrl">
+        <option value="read">Read</option>
+        <option value="write">Write</option>
+      </select>
+      <br>
+    </label>
+    <label>
+      <span>IS-07 Event and Tally Access Rights:</span>
+      <select name="events" id="events">
+        <option value="read">Read</option>
+        <option value="write">Write</option>
+      </select>
+      <br>
+    </label>
+    <label>
+      <span>IS-08 Audio Channel Mapping Access Rights:</span>
+      <select name="channelmapping" id="channelmapping">
+        <option value="read">Read</option>
+        <option value="write">Write</option>
+      </select>
+      <br>
+    </label>
     <button type="submit">Add User</button>
   </form>
 </div>
@@ -73,6 +97,9 @@ limitations under the License. -->
     <p>IS-04 Query Access Rights: {{ owner.query_access }}</p>
     <p>IS-04 Node Access Rights: {{ owner.node_access }}</p>
     <p>IS-05 Connection Management Access Rights: {{ owner.connection_access }}</p>
+    <p>IS-06 Network Control Access Rights: {{ owner.netctrl_access }}</p>
+    <p>IS-07 Event and Tally Access Rights: {{ owner.events_access }}</p>
+    <p>IS-08 Audio Channel Mapping Access Rights: {{ owner.channelmapping_access }}</p>    
   </div><br>
 {% endfor %}
 

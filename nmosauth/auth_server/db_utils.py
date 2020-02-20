@@ -42,13 +42,15 @@ def add(entry):
     db.session.commit()
 
 
-def addResourceOwner(user, username, password, registration, query, node, connection):
+def addResourceOwner(
+        user, username, password, registration, query, node, connection, netctrl, events, channelmapping):
     password_hash = generate_password_hash(password)
     if ResourceOwner.query.filter_by(username=username).scalar() is None:
         access = ResourceOwner(
             user_id=user.id, username=username, password=password_hash,
             registration_access=registration, query_access=query,
-            node_access=node, connection_access=connection)
+            node_access=node, connection_access=connection, netctrl_access=netctrl,
+            events_access=events, channelmapping_access=channelmapping)
         add(access)
         return access
 

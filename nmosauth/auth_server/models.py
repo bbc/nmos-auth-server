@@ -91,10 +91,14 @@ class ResourceOwner(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(20))
 
+    # Permissions of User for each NMOs API
     registration_access = db.Column(db.String(25))
     query_access = db.Column(db.String(25))
     node_access = db.Column(db.String(25))
     connection_access = db.Column(db.String(25))
+    netctrl_access = db.Column(db.String(25))
+    events_access = db.Column(db.String(25))
+    channelmapping_access = db.Column(db.String(25))
 
     def get_user_id(self):
         return self.id

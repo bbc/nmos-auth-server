@@ -20,7 +20,7 @@ from authlib.jose import jwt
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
 
-SCOPES_SUPPORTED = ["registration", "node", "query", "connection"]
+SCOPES_SUPPORTED = ["registration", "node", "query", "connection", "netctrl", "events", "channelmapping"]
 GRANT_TYPES_SUPPORTED = ["authorization_code", "refresh_token", "client_credentials"]
 
 
