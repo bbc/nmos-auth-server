@@ -62,6 +62,18 @@ def addAdminUser(username, password):
         add(user)
         return user
 
+
+def addOAuthClient(client_info, client_metadata, user):
+    if OAuth2Client.query.filter_by(client_id=client_info['client_id']).scalar() is None:
+        client = OAuth2Client(
+            user_id=user.id,
+            client_id=client_info['client_id'],
+            client_secret=client_info['client_secret'],
+        )
+        client.set_client_metadata(client_metadata)
+        add(client)
+        return client
+
 # -------------------- READ ------------------------- #
 # from nmosauth.auth_server.db_utils import *
 

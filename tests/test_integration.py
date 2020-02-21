@@ -27,7 +27,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from nmoscommon.logger import Logger
 from nmosauth.auth_server.db_utils import drop_all
 from nmosauth.auth_server.models import AdminUser
-from nmosauth.auth_server.token_generator import GRANT_TYPES_SUPPORTED
+from nmosauth.auth_server.metadata import GRANT_TYPES_SUPPORTED, SCOPES_SUPPORTED, RESPONSE_TYPES_SUPPORTED
 from nmosauth.auth_server.security_api import SecurityAPI
 from nmos_auth_data import TEST_PRIV_KEY
 
@@ -165,10 +165,10 @@ class TestNmosAuthServer(unittest.TestCase):
         self.register_data = {
             'client_name': 'R&D Web Router',
             'client_uri': 'http://ipstudio-master.rd.bbc.co.uk/ips-web/#/web-router',
-            'scope': 'registration query',
+            'scope': ' '.join(SCOPES_SUPPORTED),
             'redirect_uris': ['http://www.example.com'],
-            'grant_types': ['password', 'authorization_code', 'refresh_token'],
-            'response_types': ['code'],
+            'grant_types': GRANT_TYPES_SUPPORTED,
+            'response_types': RESPONSE_TYPES_SUPPORTED,
             'token_endpoint_auth_method': 'client_secret_basic'
         }
         with self.client as client:

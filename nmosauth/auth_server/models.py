@@ -21,7 +21,6 @@ from authlib.integrations.sqla_oauth2 import (
     OAuth2TokenMixin,
 )
 
-
 __all__ = ['db', 'AdminUser', 'OAuth2Client',
            'OAuth2AuthorizationCode', 'OAuth2Token', 'ResourceOwner']
 

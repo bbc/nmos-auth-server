@@ -13,39 +13,28 @@
 # limitations under the License.
 
 import os
-import json
 from time import time
-from socket import getfqdn
 from flask import request, session, send_from_directory, g
-from flask import render_template, redirect, url_for, jsonify, abort
-from werkzeug.security import gen_salt
+from flask import render_template, redirect, url_for, abort
 from jinja2 import FileSystemLoader, ChoiceLoader
 from functools import wraps
 from authlib.jose import jwk
-from authlib.oauth2.rfc6749 import OAuth2Error, InvalidRequestError
-from authlib.oauth2.rfc8414 import AuthorizationServerMetadata
+from authlib.oauth2.rfc6749 import OAuth2Error
 from nmoscommon.webapi import WebAPI, route
 from nmoscommon.auth.nmos_auth import RequiresAuth
 
-from .models import db, OAuth2Client, ResourceOwner
+from .models import OAuth2Client, ResourceOwner
 from .oauth2 import authorization
 from .app import config_app
 from .db_utils import addAdminUser, addResourceOwner, getAdminUser, getResourceOwner
 from .db_utils import removeClient, removeResourceOwner
-from .token_generator import SCOPES_SUPPORTED, GRANT_TYPES_SUPPORTED
 from .constants import (
     PUBKEY_PATH, JWK_ENDPOINT, TOKEN_ENDPOINT, REGISTER_ENDPOINT,
-    AUTHORIZATION_ENDPOINT, REVOCATION_ENDPOINT, WELL_KNOWN_ENDPOINT
+    AUTHORIZATION_ENDPOINT, REVOCATION_ENDPOINT, WELL_KNOWN_ENDPOINT,
+    APINAME, APINAMESPACE, APIVERSION, AUTH_API_ROOT, AUTH_VERSION_ROOT
 )
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-APINAMESPACE = "x-nmos"
-APINAME = "auth"
-APIVERSION = "v1.0"
-
-AUTH_API_ROOT = '/{}/{}'.format(APINAMESPACE, APINAME)
-AUTH_VERSION_ROOT = '{}/{}/'.format(AUTH_API_ROOT, APIVERSION)
 
 
 class SecurityAPI(WebAPI):
@@ -151,25 +140,7 @@ class SecurityAPI(WebAPI):
 
     @route(WELL_KNOWN_ENDPOINT, methods=['GET'])
     def server_metadata(self):
-        protocol = "https" if self._config.get("https_mode") == "enabled" else "http"
-        hostname = protocol + '://' + getfqdn()
-        namespace = hostname + AUTH_VERSION_ROOT
-        metadata_dict = {
-            "issuer": hostname,
-            "authorization_endpoint": namespace + AUTHORIZATION_ENDPOINT,
-            "token_endpoint": namespace + TOKEN_ENDPOINT,
-            "token_endpoint_auth_methods_supported": ["client_secret_basic"],
-            "token_endpoint_auth_signing_alg_values_supported": [self.app.config["OAUTH2_JWT_ALG"]],
-            "jwks_uri": namespace + JWK_ENDPOINT,
-            "registration_endpoint": namespace + REGISTER_ENDPOINT,
-            "revocation_endpoint": namespace + REVOCATION_ENDPOINT,
-            "scopes_supported": SCOPES_SUPPORTED,
-            "response_types_supported": ["code"],
-            "grant_types_supported": GRANT_TYPES_SUPPORTED,
-            "code_challenge_methods_supported": ["S256"]
-        }
-        # Validate Metadata
-        metadata = AuthorizationServerMetadata(metadata_dict)
+        metadata = authorization.metadata
         if self.conf_class == "ProductionConfig":
             metadata.validate()
         return (200, metadata)
@@ -234,57 +205,14 @@ class SecurityAPI(WebAPI):
     def signup_get(self):
         return render_template('signup.html')
 
-    @staticmethod
-    def split_data(data):
-        if isinstance(data, str):
-            return data.splitlines()
-        elif isinstance(data, list):
-            return data
-
     @route(AUTH_VERSION_ROOT + REGISTER_ENDPOINT, methods=['POST'], auto_json=False)
     @admin_required
     def create_client_post(self):
-        user = g.admin
-        client_id = gen_salt(24)
-        client_id_issued_at = int(time())
-        client = OAuth2Client(
-            client_id=client_id,
-            client_id_issued_at=client_id_issued_at,
-            user_id=user.id,
-        )
-
-        if "application/json" in request.headers["Content-Type"]:
-            client_data = request.get_json()
-        elif "application/x-www-form-urlencoded" in request.headers["Content-Type"]:
-            client_data = request.form
-        else:
-            raise InvalidRequestError
-
-        auth_method = client_data.get("token_endpoint_auth_method", "client_secret_basic")
-        if auth_method == 'none':
-            client.client_secret = ''
-        else:
-            client.client_secret = gen_salt(48)
-
-        client_metadata = {
-            "client_name": client_data.get("client_name"),
-            "client_uri": client_data.get("client_uri"),
-            "grant_types": self.split_data(client_data.get("grant_types")),
-            "redirect_uris": self.split_data(client_data.get("redirect_uris")),
-            "response_types": self.split_data(client_data.get("response_types")),
-            "scope": client_data.get("scope"),
-            "token_endpoint_auth_method": auth_method
-        }
-        client.set_client_metadata(client_metadata)
-
-        db.session.add(client)
-        db.session.commit()
+        resp = authorization.create_endpoint_response('client_registration', request)
         if 'admin' in session:
             return redirect(url_for('_home'))
         else:
-            client_info = client.client_info.copy()
-            client_info.update(json.loads(client._client_metadata))
-            return jsonify(client_info), 201
+            return resp
 
     @route(AUTH_VERSION_ROOT + REGISTER_ENDPOINT + '/', methods=['GET'], auto_json=False)
     @admin_required
