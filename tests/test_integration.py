@@ -30,7 +30,7 @@ from nmosauth.auth_server.models import AdminUser
 from nmosauth.auth_server.metadata import GRANT_TYPES_SUPPORTED, SCOPES_SUPPORTED, RESPONSE_TYPES_SUPPORTED
 from nmosauth.auth_server.security_api import SecurityAPI
 from nmosauth.auth_server.constants import WELL_KNOWN_ENDPOINT, JWK_ENDPOINT
-from nmos_auth_data import TEST_PRIV_KEY
+from nmos_auth_data import TEST_PRIV_KEY, PUB_KEY
 
 environ["AUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -100,13 +100,14 @@ class TestNmosAuthServer(unittest.TestCase):
                 "registration_endpoint",
                 "code_challenge_methods_supported"
             ]))
-            # Correctly find JWKS Endpoint and check keys are present
-            rv = client.get(VERSION_ROOT + '/' + JWK_ENDPOINT, follow_redirects=True)
-            self.assertEqual(rv.status_code, 200)
-            jwks = json.loads(rv.get_data(as_text=True))
-            self.assertTrue("keys" in jwks)
-            for key in jwks["keys"]:
-                self.assertTrue(all(x in key for x in ["kid", "kty", "alg", "n", "e"]))
+            # # Correctly find JWKS Endpoint and check keys are present
+            with mock.patch("nmosauth.auth_server.security_api.open", mock.mock_open(read_data=PUB_KEY)):
+                rv = client.get(VERSION_ROOT + '/' + JWK_ENDPOINT, follow_redirects=True)
+                self.assertEqual(rv.status_code, 200)
+                jwks = json.loads(rv.get_data(as_text=True))
+                self.assertTrue("keys" in jwks)
+                for key in jwks["keys"]:
+                    self.assertTrue(all(x in key for x in ["kid", "kty", "alg", "n", "e"]))
             # Authorize endpoint GET redirects to login
             rv = client.get(VERSION_ROOT + '/authorize/', headers=headers)
             self.assertEqual(rv.status_code, 302)
