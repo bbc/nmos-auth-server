@@ -25,12 +25,20 @@ PRIVKEY_PATH = os.path.join(NMOSAUTH_DIR, PRIVKEY_FILE)
 PUBKEY_FILE = 'pubkey.pem'
 PUBKEY_PATH = os.path.join(NMOSAUTH_DIR, PUBKEY_FILE)
 
+# API Namespace
+APINAMESPACE = "x-nmos"
+APINAME = "auth"
+APIVERSION = "v1.0"
+AUTH_API_ROOT = '/{}/{}'.format(APINAMESPACE, APINAME)
+AUTH_VERSION_ROOT = '{}/{}/'.format(AUTH_API_ROOT, APIVERSION)
+
 # Default Endpoints
 JWK_ENDPOINT = 'jwks'
 TOKEN_ENDPOINT = 'token'
 REGISTER_ENDPOINT = 'register'
 AUTHORIZATION_ENDPOINT = 'authorize'
 REVOCATION_ENDPOINT = 'revoke'
+WELL_KNOWN_ENDPOINT = '/.well-known/oauth-authorization-server/'
 
 # Databse Info
 DATABASE_NAME = 'auth_db'

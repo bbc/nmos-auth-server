@@ -15,12 +15,13 @@
 # limitations under the License.
 
 from __future__ import print_function
+
 import os
-from setuptools import setup
 import subprocess
+
+from setuptools import setup
 from setuptools.command.develop import develop
 from setuptools.command.install import install
-
 from nmosauth.auth_server.constants import NMOSAUTH_DIR
 
 GEN_CERT_FILE = 'gen_cert.py'
@@ -29,7 +30,7 @@ GEN_CERT_PATH = os.path.join(NMOSAUTH_DIR, GEN_CERT_FILE)
 
 # Basic metadata
 name = "nmos-auth"
-version = "1.4.3"
+version = "1.4.4"
 description = "OAuth2 Server Implementation"
 url = 'https://github.com/bbc/nmos-auth-server'
 author = 'Danny Meloy'

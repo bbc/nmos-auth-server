@@ -30,8 +30,8 @@ def config_app(app, confClass='BaseConfig', config=None):
     app.config.from_object(settings + '.' + confClass)
 
     # load environment configuration
-    if 'WEBSITE_CONF' in os.environ:
-        app.config.from_envvar('WEBSITE_CONF')
+    if 'AUTH_SERVER_CONF' in os.environ:
+        app.config.from_envvar('AUTH_SERVER_CONF')
 
     # load app specified configuration
     if config is not None:

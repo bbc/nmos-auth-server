@@ -43,7 +43,7 @@ DNS_SD_TYPE = '_nmos-auth._tcp'
 
 class SecurityService:
 
-    CONF_CLASS = "ProductionConfig"
+    CONF_CLASS = "BaseConfig"
 
     def __init__(self, logger=None):
         self.logger = Logger("nmosauth", logger)

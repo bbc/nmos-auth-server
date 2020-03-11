@@ -21,7 +21,6 @@ from authlib.integrations.sqla_oauth2 import (
     OAuth2TokenMixin,
 )
 
-
 __all__ = ['db', 'AdminUser', 'OAuth2Client',
            'OAuth2AuthorizationCode', 'OAuth2Token', 'ResourceOwner']
 
@@ -73,7 +72,7 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     user_id = db.Column(
         db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
     admin_user = db.relationship('AdminUser')
-    access_token = db.Column(db.String(255), nullable=False)
+    access_token = db.Column(db.String(1000), nullable=False)
 
     def is_refresh_token_expired(self):
         expires_at = self.issued_at + self.expires_in * 1440
@@ -91,10 +90,14 @@ class ResourceOwner(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(20))
 
+    # Permissions of User for each NMOS API
     registration_access = db.Column(db.String(25))
     query_access = db.Column(db.String(25))
     node_access = db.Column(db.String(25))
     connection_access = db.Column(db.String(25))
+    netctrl_access = db.Column(db.String(25))
+    events_access = db.Column(db.String(25))
+    channelmapping_access = db.Column(db.String(25))
 
     def get_user_id(self):
         return self.id

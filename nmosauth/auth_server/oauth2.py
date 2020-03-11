@@ -26,6 +26,8 @@ from werkzeug.security import gen_salt
 
 from .models import db, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 from .db_utils import getResourceOwner
+from .metadata import create_metadata
+from .client_registration import ClientRegistrationEndpoint
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
@@ -103,18 +105,22 @@ require_oauth = ResourceProtector()
 
 def config_oauth(app):
     authorization.init_app(app)
+    authorization.metadata = create_metadata(app)
 
-    # support all grants
-    authorization.register_grant(grants.ImplicitGrant)
+    # Comment out unsupported grants
+    # authorization.register_grant(grants.ImplicitGrant)
+    # authorization.register_grant(PasswordGrant)
     authorization.register_grant(grants.ClientCredentialsGrant)
     authorization.register_grant(AuthorizationCodeGrant, [CodeChallenge(required=app.config["PKCE_REQUIRED"])])
-    authorization.register_grant(PasswordGrant)
     authorization.register_grant(RefreshTokenGrant)
 
-    # support revocation
+    # Create Client Registration Endpoint
+    authorization.register_endpoint(ClientRegistrationEndpoint)
+
+    # Create Revocation Endpoint
     revocation_cls = create_revocation_endpoint(db.session, OAuth2Token)
     authorization.register_endpoint(revocation_cls)
 
-    # protect resource
+    # Create Protected Resource Endpoint
     bearer_cls = create_bearer_token_validator(db.session, OAuth2Token)
     require_oauth.register_token_validator(bearer_cls())

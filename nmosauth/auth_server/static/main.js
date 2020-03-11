@@ -22,25 +22,15 @@ $(function getToken() {
   var port = window.location.port;
   var host = window.location.hostname;
   $("#token").click(function(){
-    username = document.getElementById("username").value
-    password = document.getElementById("password").value
-    scope = document.getElementById("scope").value
+    var client_id = document.getElementById("client_id").value;
+    var client_secret = document.getElementById("client_secret").value;
     var requestPayload = {
-      'grant_type': 'password',
-      'username': username.trim(),
-      'password': password,
-      'scope': scope.trim()
+      'grant_type': 'client_credentials'
     };
-    if (username == "" || password == "" || scope == "") {
+    if (client_id == "" || client_secret == "") {
       alert('Error: Please complete all fields');
       return false;
     }
-    if (requestPayload.scope.split(" ").length > 1) {
-      alert('Error: Please only enter a single scope');
-      return false;
-    }
-    var client_id = document.getElementById("client_id").value;
-    var client_secret = document.getElementById("client_secret").value;
     $.ajax({
       url: '//' + host + ':' + port + '/x-nmos/auth/v1.0/token',
       type: 'POST',
@@ -88,11 +78,11 @@ var collapsibles = document.getElementsByClassName("collapsible");
 Object.values(collapsibles).forEach(function(collapsible) {
   collapsible.addEventListener("click", function() {
     collapsible.classList.toggle("active");
-    var content = collapsible.nextElementSibling
+    var content = collapsible.nextElementSibling;
     if (content.style.maxHeight) {
-      content.style.maxHeight = null
+      content.style.maxHeight = null;
     } else {
       content.style.maxHeight = content.scrollHeight + "px";
     }
-  })
-})
+  });
+});
