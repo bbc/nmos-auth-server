@@ -72,7 +72,7 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     user_id = db.Column(
         db.Integer, db.ForeignKey('admin_user.id', ondelete='CASCADE'))
     admin_user = db.relationship('AdminUser')
-    access_token = db.Column(db.String(255), nullable=False)
+    access_token = db.Column(db.String(1000), nullable=False)
 
     def is_refresh_token_expired(self):
         expires_at = self.issued_at + self.expires_in * 1440
@@ -90,7 +90,7 @@ class ResourceOwner(db.Model):
     username = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(20))
 
-    # Permissions of User for each NMOs API
+    # Permissions of User for each NMOS API
     registration_access = db.Column(db.String(25))
     query_access = db.Column(db.String(25))
     node_access = db.Column(db.String(25))

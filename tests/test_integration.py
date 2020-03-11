@@ -29,6 +29,7 @@ from nmosauth.auth_server.db_utils import drop_all
 from nmosauth.auth_server.models import AdminUser
 from nmosauth.auth_server.metadata import GRANT_TYPES_SUPPORTED, SCOPES_SUPPORTED, RESPONSE_TYPES_SUPPORTED
 from nmosauth.auth_server.security_api import SecurityAPI
+from nmosauth.auth_server.constants import WELL_KNOWN_ENDPOINT, JWK_ENDPOINT
 from nmos_auth_data import TEST_PRIV_KEY
 
 environ["AUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -84,6 +85,28 @@ class TestNmosAuthServer(unittest.TestCase):
             # Correctly go to Home Page
             rv = client.get(VERSION_ROOT + '/', follow_redirects=True)
             self.assertEqual(rv.status_code, 200)
+            # Correctly find Metadata Endpoint and check keys are present
+            rv = client.get(WELL_KNOWN_ENDPOINT, follow_redirects=True)
+            self.assertEqual(rv.status_code, 200)
+            metadata = json.loads(rv.get_data(as_text=True))
+            self.assertTrue(all(x in metadata for x in [
+                "issuer",
+                "response_types_supported",
+                "jwks_uri",
+                "authorization_endpoint",
+                "token_endpoint",
+                "grant_types_supported",
+                "token_endpoint_auth_methods_supported",
+                "registration_endpoint",
+                "code_challenge_methods_supported"
+            ]))
+            # Correctly find JWKS Endpoint and check keys are present
+            rv = client.get(VERSION_ROOT + '/' + JWK_ENDPOINT, follow_redirects=True)
+            self.assertEqual(rv.status_code, 200)
+            jwks = json.loads(rv.get_data(as_text=True))
+            self.assertTrue("keys" in jwks)
+            for key in jwks["keys"]:
+                self.assertTrue(all(x in key for x in ["kid", "kty", "alg", "n", "e"]))
             # Authorize endpoint GET redirects to login
             rv = client.get(VERSION_ROOT + '/authorize/', headers=headers)
             self.assertEqual(rv.status_code, 302)
