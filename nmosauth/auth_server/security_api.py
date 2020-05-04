@@ -237,8 +237,12 @@ class SecurityAPI(WebAPI):
     @owner_required
     def authorization_post(self):
         owner = g.owner
-        if "confirm" in request.form.keys() and request.form['confirm'] == "true":
-            grant_user = owner
+        if request.form:
+            if "confirm" in request.form.keys() and request.form['confirm'] in ["true", "True", True]:
+                grant_user = owner
+        elif request.is_json:
+            if "confirm" in request.json and request.json['confirm'] in ["true", "True", True]:
+                grant_user = owner
         else:
             grant_user = None
         return authorization.create_authorization_response(grant_user=grant_user)

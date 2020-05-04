@@ -46,4 +46,4 @@ def register_handlers(app):
         if "Accept" in request.headers and "text/html" in request.headers.get("Accept"):
             return render_template('error.html', code=code, message=message), code
         else:
-            raise e
+            return jsonify(error=str(e)), code
