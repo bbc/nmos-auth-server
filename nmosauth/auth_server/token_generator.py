@@ -27,7 +27,8 @@ class TokenGenerator():
     def __init__(self):
         pass
 
-    def get_audience(self, client):
+    @staticmethod
+    def get_audience(client):
         # Using Regex
         redirect_uri = client.get_default_redirect_uri()
         pattern = re.compile(r'(?:https?://)?(?:www\.)?[a-zA-Z0-9-]+((?:\.[a-zA-Z]+)+)(/?.*)')
@@ -37,20 +38,22 @@ class TokenGenerator():
         wildcard_domain = '*' + domain
         return wildcard_domain
 
-    def populate_nmos_claim(self, user, scope_list):
+    @staticmethod
+    def populate_nmos_claim(user, scope_list):
         nmos_claim = {}
         if user and scope_list:
             for scope in scope_list:
                 if scope not in SCOPES_SUPPORTED:
                     continue
-                nmos_claim[scope] = {}
+                xnmos_scope = 'x-nmos-{}'.format(scope)
+                nmos_claim[xnmos_scope] = {}
                 try:
                     api_access = getattr(user, scope + '_access')
                     if api_access.lower() == "write":
-                        nmos_claim[scope]["write"] = ["*"]
-                        nmos_claim[scope]["read"] = ["*"]
+                        nmos_claim[xnmos_scope]["write"] = ["*"]
+                        nmos_claim[xnmos_scope]["read"] = ["*"]
                     elif api_access.lower() == "read":
-                        nmos_claim[scope]["read"] = ["*"]
+                        nmos_claim[xnmos_scope]["read"] = ["*"]
                 except Exception as e:
                     print(e)
         return nmos_claim
@@ -81,9 +84,10 @@ class TokenGenerator():
             'sub': subject,
             'aud': audience,
             'client_id': client.client_id,
-            'scope': (' ').join(x_nmos_claim.keys()),
-            'x-nmos-api': x_nmos_claim
+            'scope': (' ').join(x_nmos_claim.keys())
         }
+        #  Update payload with x-nmos-* claims
+        payload.update(x_nmos_claim)
 
         try:
             key = config['jwt_key']

@@ -21,7 +21,6 @@ from os import environ
 from base64 import b64encode
 from six.moves.urllib.parse import parse_qs
 from six import string_types
-from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from nmoscommon.logger import Logger
@@ -125,11 +124,14 @@ class TestNmosAuthServer(unittest.TestCase):
         rv = self.client.post(VERSION_ROOT + '/authorize', headers=headers)
         self.assertEqual(rv.status_code, 302)
         # Posting to Register client returns 401 if not expecting html
-        with self.assertRaises(HTTPException) as http_error:
-            rv = self.client.post(VERSION_ROOT + '/register')
-            self.assertEqual(http_error.exception.code, 401)
-            rv = self.client.post(VERSION_ROOT + '/authorize')
-            self.assertEqual(http_error.exception.code, 401)
+        rv = self.client.post(VERSION_ROOT + '/register')
+        self.assertTrue("error" in rv.get_json(), msg=rv.data)
+        self.assertEqual(rv.status_code, 401)
+
+        rv = self.client.post(VERSION_ROOT + '/authorize')
+        self.assertEqual(rv.status_code, 401)
+        self.assertTrue("error" in rv.get_json(), msg=rv.data)
+        self.assertEqual(rv.status_code, 401)
 
     @mock.patch("nmosauth.auth_server.security_api.getAdminUser")
     def testBasicAuthRoutes(self, mockGetAdminUser):
@@ -144,9 +146,10 @@ class TestNmosAuthServer(unittest.TestCase):
 
             # Get /register_client with incorrect credentials returns Unauthorized
             headers = self.auth_headers("bob", "wrong_password")
-            with self.assertRaises(HTTPException) as http_error:
-                client.get(VERSION_ROOT + '/register/', headers=headers)
-                self.assertEqual(http_error.exception.code, 401)
+            # with self.assertRaises(HTTPException) as http_error:
+            rv = client.get(VERSION_ROOT + '/register/', headers=headers)
+            self.assertTrue("error" in rv.get_json(), msg=rv.data)
+            self.assertEqual(rv.status_code, 401)
 
     @mock.patch("nmosauth.auth_server.security_api.render_template")
     @mock.patch("nmosauth.auth_server.security_api.getAdminUser")

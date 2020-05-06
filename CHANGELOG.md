@@ -1,5 +1,9 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.4.5
+- Update JWT contents to contain flat `x-nmos-*` claim structure
+- Support JSON body at `/authorize` endpoint
+
 ## 1.4.4
 - Add fields to metadata endpoint. Add refresh token tests.
 - Change request token page to use client credentials grant.
