@@ -19,7 +19,7 @@ limitations under the License. -->
 
 <p>This page will return an example JSON Web Token using the Client Credentials Grant (provided the given client has been registered with the Client Credentials Grant type.)</p>
 
-<p><i>NOTE: The returned token will not populate the 'scope' and 'x-nmos-api' claims due to the CC Grant not identifying a specific user</i></p>
+<p><i>NOTE: The returned token will be populated with the registration 'scope' and 'x-nmos-registration' claim</i></p>
 
 <form action="" method="post">
   <label>

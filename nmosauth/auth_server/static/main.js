@@ -25,7 +25,8 @@ $(function getToken() {
     var client_id = document.getElementById("client_id").value;
     var client_secret = document.getElementById("client_secret").value;
     var requestPayload = {
-      'grant_type': 'client_credentials'
+      'grant_type': 'client_credentials',
+      'scope': 'registration'
     };
     if (client_id == "" || client_secret == "") {
       alert('Error: Please complete all fields');
