@@ -97,7 +97,7 @@ packages_required = [
     "gevent",
     "nmoscommon",
     "werkzeug>=0.14.1,<1.0.0",  # Echo pin from nmos-common to avoid Flask overriding it
-    "authlib>=0.13,<0.15",
+    "authlib>=0.13,<0.15",  # 0.15 requires an update to client_registration.py parsing incoming token for user
     "pyopenssl>=16.0",
     "cryptography>=1.5"
 ]
