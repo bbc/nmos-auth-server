@@ -22,6 +22,7 @@ from .constants import (
 )
 
 SCOPES_SUPPORTED = ["registration", "node", "query", "connection", "netctrl", "events", "channelmapping"]
+CLIENT_CREDS_SCOPES_SUPPORTED = ["registration", "events"]
 GRANT_TYPES_SUPPORTED = ["authorization_code", "refresh_token", "client_credentials"]
 RESPONSE_TYPES_SUPPORTED = ["code"]
 TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED = ["client_secret_basic"]

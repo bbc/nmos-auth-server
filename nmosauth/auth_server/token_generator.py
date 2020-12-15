@@ -19,7 +19,7 @@ from authlib.jose import jwt
 
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
-from .metadata import SCOPES_SUPPORTED
+from .metadata import SCOPES_SUPPORTED, CLIENT_CREDS_SCOPES_SUPPORTED
 
 
 class TokenGenerator():
@@ -42,11 +42,15 @@ class TokenGenerator():
     def populate_nmos_claim(user, scope_list, grant_type):
         nmos_claim = {}
         if grant_type == "client_credentials":
-            if "registration" in scope_list:
-                nmos_claim["x-nmos-registration"] = {
+            for scope in scope_list:
+                if scope not in CLIENT_CREDS_SCOPES_SUPPORTED:
+                    continue
+                xnmos_scope = 'x-nmos-{}'.format(scope)
+                nmos_claim[xnmos_scope] = {
                     "read": ["*"],
                     "write": ["*"]
                 }
+        # user not present when using client_credentials grant_type
         if user and scope_list:
             for scope in scope_list:
                 if scope not in SCOPES_SUPPORTED:
