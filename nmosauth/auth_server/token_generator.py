@@ -19,7 +19,7 @@ from authlib.jose import jwt
 
 from .oauth2 import authorization
 from .constants import NMOSAUTH_DIR, PRIVKEY_FILE
-from .metadata import SCOPES_SUPPORTED
+from .metadata import SCOPES_SUPPORTED, CLIENT_CREDS_SCOPES_SUPPORTED
 
 
 class TokenGenerator():
@@ -39,8 +39,18 @@ class TokenGenerator():
         return wildcard_domain
 
     @staticmethod
-    def populate_nmos_claim(user, scope_list):
+    def populate_nmos_claim(user, scope_list, grant_type):
         nmos_claim = {}
+        if grant_type == "client_credentials":
+            for scope in scope_list:
+                if scope not in CLIENT_CREDS_SCOPES_SUPPORTED:
+                    continue
+                xnmos_scope = 'x-nmos-{}'.format(scope)
+                nmos_claim[xnmos_scope] = {
+                    "read": ["*"],
+                    "write": ["*"]
+                }
+        # user not present when using client_credentials grant_type
         if user and scope_list:
             for scope in scope_list:
                 if scope not in SCOPES_SUPPORTED:
@@ -60,7 +70,7 @@ class TokenGenerator():
 
     def gen_access_token(self, client, grant_type, user, scope):
         # Scope is space-delimited so convert to list
-        scope_list = scope.split()
+        scope_list = scope.split() if scope else []
         # Get Auth Config (set in ./settings)
         config = authorization.config
         # Current time set in `iat` and `nbf` claims
@@ -70,7 +80,8 @@ class TokenGenerator():
         # Populate audience claim
         audience = self.get_audience(client)
         # Populate NMOS claim
-        x_nmos_claim = self.populate_nmos_claim(user, scope_list)
+        x_nmos_claim = self.populate_nmos_claim(user, scope_list, grant_type)
+        scope = [claim_name.lstrip("x-nmos-") for claim_name in x_nmos_claim.keys()]
 
         header = {
             "alg": config["jwt_alg"],
@@ -84,7 +95,7 @@ class TokenGenerator():
             'sub': subject,
             'aud': audience,
             'client_id': client.client_id,
-            'scope': (' ').join(x_nmos_claim.keys())
+            'scope': (' ').join(scope)
         }
         #  Update payload with x-nmos-* claims
         payload.update(x_nmos_claim)

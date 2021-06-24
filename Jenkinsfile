@@ -135,46 +135,9 @@ pipeline {
                 }
             }
         }
-        stage ("Build Packages") {
+        stage ("Build Package") {
             parallel{
-                stage ("Build wheels") {
-                    stages {
-                        stage ("Build py2.7 wheel") {
-                            steps {
-                                script {
-                                    env.py27wheel_result = "FAILURE"
-                                }
-                                bbcGithubNotify(context: "wheelBuild/py2.7", status: "PENDING")
-                                bbcMakeWheel("py27")
-                                script {
-                                    env.py27wheel_result = "SUCCESS" // This will only run if the steps above succeeded
-                                }
-                            }
-                            post {
-                                always {
-                                    bbcGithubNotify(context: "wheelBuild/py2.7", status: env.py27wheel_result)
-                                }
-                            }
-                        }
-                        stage ("Build py3 wheel") {
-                            steps {
-                                script {
-                                    env.py3wheel_result = "FAILURE"
-                                }
-                                bbcGithubNotify(context: "wheelBuild/py3", status: "PENDING")
-                                bbcMakeWheel("py3")
-                                script {
-                                    env.py3wheel_result = "SUCCESS" // This will only run if the steps above succeeded
-                                }
-                            }
-                            post {
-                                always {
-                                    bbcGithubNotify(context: "wheelBuild/py3", status: env.py3wheel_result)
-                                }
-                            }
-                        }
-                    }
-                }
+                // Python 3 Builds are omitted as nmos-common is not yet Python 3 capable
                 stage ("Build Deb with pbuilder") {
                     steps {
                         script {

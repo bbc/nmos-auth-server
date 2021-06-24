@@ -1,5 +1,9 @@
 # NMOS Authorization API Implementation Changelog
 
+## 1.5.0
+- Add support for JWT client authentication
+- Support registration scope for client_credentials grant
+
 ## 1.4.5
 - Update JWT contents to contain flat `x-nmos-*` claim structure
 - Support JSON body at `/authorize` endpoint

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from socket import getfqdn
 from authlib.integrations.flask_oauth2 import AuthorizationServer, ResourceProtector
 from authlib.integrations.sqla_oauth2 import (
     create_query_client_func,
@@ -21,6 +22,7 @@ from authlib.integrations.sqla_oauth2 import (
 )
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc6749.errors import InvalidRequestError
+from authlib.oauth2.rfc7523 import JWTBearerClientAssertion
 from authlib.oauth2.rfc7636 import CodeChallenge
 from werkzeug.security import gen_salt
 
@@ -28,6 +30,21 @@ from .models import db, OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 from .db_utils import getResourceOwner
 from .metadata import create_metadata
 from .client_registration import ClientRegistrationEndpoint
+from .constants import AUTH_VERSION_ROOT, TOKEN_ENDPOINT
+
+
+class JWTClientAuth(JWTBearerClientAssertion):
+    def validate_jti(self, claims, jti):
+        # validate_jti is required by OpenID Connect
+        # but it is optional by RFC7523
+        # use cache to validate jti value
+        return True
+
+    def resolve_client_public_key(self, client, headers):
+        if headers['alg'] == 'HS256':
+            return client.client_secret
+        if headers['alg'] == 'RS256':
+            return client.public_key
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
@@ -93,6 +110,15 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
         db.session.commit()
 
 
+class ClientCredentialsGrant(grants.ClientCredentialsGrant):
+    # Allowed client auth methods for token endpoint - allows use of JWT assertion for authentication
+    TOKEN_ENDPOINT_AUTH_METHODS = [
+        'client_secret_basic',
+        'client_secret_post',
+        JWTClientAuth.CLIENT_AUTH_METHOD
+    ]
+
+
 query_client = create_query_client_func(db.session, OAuth2Client)
 save_token = create_save_token_func(db.session, OAuth2Token)
 
@@ -106,6 +132,12 @@ require_oauth = ResourceProtector()
 def config_oauth(app):
     authorization.init_app(app)
     authorization.metadata = create_metadata(app)
+
+    # Register client authentication method for "client_secret_jwt " and "private_key_jwt"
+    authorization.register_client_auth_method(
+        JWTClientAuth.CLIENT_AUTH_METHOD,
+        JWTClientAuth('https://{}{}{}'.format(getfqdn(), AUTH_VERSION_ROOT, TOKEN_ENDPOINT))
+    )
 
     # Comment out unsupported grants
     # authorization.register_grant(grants.ImplicitGrant)
