@@ -3,7 +3,6 @@
 /*
  Runs the following steps in parallel and reports results to GitHub:
  - Lint using flake8
- - Run Python 2.7 unit tests in tox
  - Run Python 3 unit tests in tox
  - Build Debian packages for supported Ubuntu versions
 
@@ -40,24 +39,6 @@ pipeline {
         }
         stage ("Tests") {
             parallel {
-                stage ("Py2.7 Linting Check") {
-                    steps {
-                        script {
-                            env.lint27_result = "FAILURE"
-                        }
-                        bbcGithubNotify(context: "lint/flake8_27", status: "PENDING")
-                        // Run the linter
-                        sh 'python2.7 -m flake8'
-                        script {
-                            env.lint27_result = "SUCCESS" // This will only run if the sh above succeeded
-                        }
-                    }
-                    post {
-                        always {
-                            bbcGithubNotify(context: "lint/flake8_27", status: env.lint27_result)
-                        }
-                    }
-                }
                 stage ("Py3 Linting Check") {
                     steps {
                         script {
@@ -73,24 +54,6 @@ pipeline {
                     post {
                         always {
                             bbcGithubNotify(context: "lint/flake8_3", status: env.lint3_result)
-                        }
-                    }
-                }
-                stage ("Python 2.7 Unit Tests") {
-                    steps {
-                        script {
-                            env.py27_result = "FAILURE"
-                        }
-                        bbcGithubNotify(context: "tests/py27", status: "PENDING")
-                        // Use a workdirectory in /tmp to avoid shebang length limitation
-                        sh 'tox -e py27 --recreate --workdir /tmp/$(basename ${WORKSPACE})/tox-py27'
-                        script {
-                            env.py27_result = "SUCCESS" // This will only run if the sh above succeeded
-                        }
-                    }
-                    post {
-                        always {
-                            bbcGithubNotify(context: "tests/py27", status: env.py27_result)
                         }
                     }
                 }
@@ -137,7 +100,6 @@ pipeline {
         }
         stage ("Build Package") {
             parallel{
-                // Python 3 Builds are omitted as nmos-common is not yet Python 3 capable
                 stage ("Build Deb with pbuilder") {
                     steps {
                         script {
@@ -191,7 +153,6 @@ pipeline {
                         }
                         bbcGithubNotify(context: "pypi/upload", status: "PENDING")
                         sh 'rm -rf dist/*'
-                        bbcMakeGlobalWheel("py27")
                         bbcMakeGlobalWheel("py3")
                         bbcTwineUpload(toxenv: "py3", pypi: true)
                         script {
